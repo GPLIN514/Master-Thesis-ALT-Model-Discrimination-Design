@@ -1,0 +1,209 @@
+%\chapter{Optimal Design Criteria \label{CH: method}}
+\chapter{Methodology \label{CH: method}}
+
+\hspace*{8mm} This study focuses on approximation designs, which are widely recognized for their practicality in experimental design. Approximation designs are probability measures defined over the design space $\mathcal{X}$, used to allocate limited observations across specific design points. Let the response variable $y$ follow a conditional probability distribution $f(y \mid x, \theta, \sigma^2)$, where $x$ represents a design point (support point) from the design space, such that $x \in \mathcal{X}$, $\theta$ denotes all unknown parameters, and $\sigma^2$ is the variance of the errors, treated as a nuisance parameter.
+
+\hspace*{8mm} When the design points are $x_1, x_2, \dots, x_n \in \mathcal{X}$, an approximation design $\xi$ can be expressed as:
+$$
+\xi = \left\{\begin{array}{cccc}
+x_1 & x_2 & \dots & x_n \\
+w_1 & w_2 & \dots & w_n
+\end{array}\right\}.
+$$
+\hspace*{8mm} Here, $w_i$ represents the weight assigned to the design point $x_i$, satisfying $0 < w_i < 1$ and $\sum_{i=1}^n w_i = 1$, where $i = 1, 2, \dots, n$. If the total sample size is $N$, the number of observations allocated to the design point $x_i$ is approximately $N \cdot w_i$, typically rounded to the nearest integer in practice. The objective of approximation designs is often based on convex or concave functions, allowing optimization algorithms to efficiently identify the best designs, which is denoted as $\xi^*$. Additionally, to confirm whether the obtained design is optimal, this study will employ the Equivalence Theorem as a verification tool.
+
+\section{KL-optimal Criterion}
+
+\hspace*{8mm} When the two models have different variances or the error terms do not follow a Normal distribution, \cite{lopez2007optimal} proposed the KL-optimal design to address such cases. This design measures the information loss between models using Kullback-Leibler divergence (KL divergence), which is also referred to as relative entropy, information divergence, or information gain. As the name suggests, it is closely related to entropy. The following sections will introduce different related metrics in sequence.
+
+\hspace*{8mm} \cite{shannon1948mathematical} proposed information entropy as a measure of the uncertainty or information content in a probability distribution. Information content, $I(x)$, can be viewed as a surprise index: when the probability $P(x)$ of an event occurring is low, the occurrence of the event surprises us (high information content); conversely, when $P(x)$ is high, the occurrence of the event is expected, resulting in lower information content.
+
+For example:
+
+\begin{itemize}
+\item A sunny day in the desert tomorrow → This is expected, as the probability is high (close to 1), so the information content is low.
+\item Rain in the desert tomorrow → This is a rare event, with a low probability (close to 0), so the information content is high.
+\end{itemize}
+
+\hspace*{8mm} Therefore, when $P(x)$ approaches 0, indicating the event is highly unlikely to occur and the surprise level is high, the information content value must be large; when $P(x)$ approaches 1, the information content value must be small.
+
+The definition of information content is:
+\begin{equation}\label{eq:information content}
+I(x)=-\log P(x).
+\end{equation}
+
+\hspace*{8mm} Entropy represents the average information content, as events usually do not occur in isolation and require comprehensive consideration. Assuming we consider the first model (true model) $f_{tr}(y \mid x, \sigma^2_1)$, its information entropy is defined as:
+\begin{equation}\label{eq:information entropy}
+H(f_{tr}) = -\int f_{tr}(y \mid x, \sigma^2_1) \log \left\{f_{tr}(y \mid x, \sigma^2_1)\right\} dy.
+\end{equation}
+
+\hspace*{8mm} A higher value of $H(f_{tr})$ indicates greater variability in the distribution, meaning that more information is obtained when an event occurs. Intuitively, information entropy can be interpreted as the amount of information gained after an event takes place. Since probability values range between $0$ and $1$, taking the logarithm results in negative values. Therefore, a negative sign is introduced in the formula to ensure that $H(f_{tr})$ remains non-negative. A larger entropy value suggests greater variability in the probability distribution and a higher amount of information provided by the occurrence of an event, whereas a smaller entropy value indicates less information.
+
+\hspace*{8mm} Cross entropy measures the difference between the observed predicted probability distribution and the true probability distribution. Intuitively, it quantifies the additional information loss incurred when using one model to describe the true distribution. Consider the first model (true model) $f_{tr}(y \mid x, \sigma^2_1)$ and the second model (rival model) $f_r(y \mid x, \theta_2,\sigma^2_2)$. The cross entropy is defined as:
+\begin{equation}\label{eq:cross entropy}
+H(f_{tr},f_r) = -\int f_{tr}(y \mid x, \sigma^2_1) \log \left\{f_r(y \mid x, \theta_2,\sigma^2_2)\right\} dx.
+\end{equation}
+
+\hspace*{8mm} Cross entropy measures the average information loss when we approximate the true distribution $f_{tr}(y \mid x, \sigma^2_1)$ with a rival model $f_r(y \mid x, \theta_2,\sigma^2_2)$. A larger cross entropy value indicates a greater discrepancy between the two distributions, implying higher uncertainty and requiring more information to describe $f_{tr}(y \mid x, \sigma^2_1)$. Conversely, if the two distributions are similar, the cross entropy value will be lower, indicating that the rival model describes the true distribution more accurately. It is important to note that the minimum value of cross entropy is usually not zero; when the two models are identical, the cross entropy $H(f_{tr},f_r)$ equals the entropy $H(f_{tr})$.
+
+\hspace*{8mm} Kullback-Leibler (KL) divergence is used to measure the similarity between two probability distributions. Essentially, it can be derived from information entropy and cross entropy. Since cross entropy always has a minimum value equal to entropy, their difference remains non-negative, allowing KL divergence to quantify the additional information loss when approximating the true model  $f_{tr}(y \mid x, \sigma^2_1)$  using an rival model  $f_r(y \mid x, \theta_2, \sigma^2_2)$. This property ensures that the minimum of KL divergence is constrained at zero, providing an interpretable measure of how much extra information is lost due to model approximation. The derivation process of KL divergence is as follows:  
+\begin{align}
+KL\ Divergence &= Cross\ Entropy - Information\ Entropy \notag \\
+D_{KL}(f_{tr},f_r,x,\theta_2) &= \eqref{eq:cross entropy} - \eqref{eq:information entropy} \notag \\
+&= H(f_{tr}, f_r) - H(f_{tr}) \notag \\
+&= \int f_{tr}(y \mid x, \sigma^2_1) \log \left\{ \frac{f_{tr}(y \mid x, \sigma^2_1)}{f_r(y \mid x, \theta_2, \sigma^2_2)} \right\} dy. \label{eq:KL-optimal-1}
+\end{align}
+
+\hspace*{8mm} The KL divergence value reflects the difference between the two probability distributions:
+\begin{itemize}
+\item If the two models have similar probability distributions, $D_{KL}(f_{tr},f_r,x,\theta_2)$ will be small.
+\item If the two models are identical, then $D_{KL}(f_{tr},f_r,x,\theta_2) = 0$, indicating no information loss.
+\end{itemize}
+
+\hspace*{8mm} Since KL divergence is asymmetric (i.e., $D_{KL}(f_{tr},f_r,x,\theta_2) \neq D_{KL}(f_r,f_{tr},x,\theta_2)$), it does not satisfy the properties of a true distance metric. However, it remains a widely used measure in probability distribution comparisons.
+
+\hspace*{8mm} The KL-optimal design criterion, proposed by \cite{lopez2007optimal}, is formulated using Equation \eqref{eq:KL-optimal-1}, with its objective function defined in Equation \eqref{eq:KL-optimal-2}:
+\begin{equation}\label{eq:KL-optimal-2}
+KL_{2,tr}(\xi)=\min_{\substack{\theta_2\in \Theta_2}}\int_{X}D_{KL}(f_{tr},f_r,x,\theta_2) \xi(dx).
+\end{equation}
+
+\hspace*{8mm} Unlike T-optimal designs, the KL-optimality criterion does not rely solely on model error differences to measure discrimination power. Instead, it utilizes the Kullback-Leibler (KL) divergence to evaluate the informational disparity between the probability distributions of the two models. This design approach is particularly advantageous when the models have different variances or when the error distributions deviate from normality, allowing for greater flexibility in experimental design.
+
+\hspace*{8mm} The objective of KL-optimal design is to select a design distribution $\xi$ that maximizes the ability to discriminate between models, even under the least favorable estimation of $\theta_2$. To achieve this, we reformulate the objective function, as shown in Equation \eqref{eq:KL-optimal-3}:
+\begin{equation}\label{eq:KL-optimal-3}
+\max_{\xi\in \Xi} KL_{2,tr}(\xi)=\max_{\xi\in \Xi} \min_{\substack{\theta_2\in \Theta_2}}\int_{X}D_{KL}(f_{tr},f_r,x,\theta_2) \xi(dx).
+\end{equation}
+
+\hspace*{8mm} This formulation follows a similar rationale to T-optimal designs, where the optimality criterion seeks to maximize the minimum discrepancy. However, KL-optimal designs achieve model identifiability by maximizing the KL divergence, ensuring stronger discrimination between competing models.
+
+\begin{theorem}
+To verify whether the selected design $\xi_{KL}^\ast$ is optimal, we apply the Equivalence Theorem \citep{atkinson1975design,atkinson1975optimal}, as expressed in Equation \eqref{eq:KL-optimal-4}:
+\begin{equation}\label{eq:KL-optimal-4}
+\psi_{KL}(x,\xi_{KL}^\ast)=D_{KL}(f_{tr},f_r,x,\hat{\theta}_2(\xi_{KL}^\ast))-KL_{2,tr}(\xi_{KL}^\ast)\leq 0.
+\end{equation}
+
+where:
+\begin{itemize}
+\item The first term, $D_{KL}(f_{tr}, f_r, x, \hat{\theta}_2(\xi^*_{KL}))$, represents the minimum KL divergence computed at each design point $x$ over all possible values of $\theta_2 \in \Theta_2$ in the design space $\mathcal{X}$.
+
+\item The second term, $KL_{2,tr}(\xi^*_{KL})$ represents the global minimum KL divergence obtained for the entire design $\xi^*_{KL}$ , which is determined as the global optimal criterion through the max-min optimization process.
+
+\end{itemize}
+\end{theorem}
+
+\hspace*{8mm} If the inequality $\psi_{KL}(x, \xi^*_{KL}) \leq 0$ holds for all $x \in \mathcal{X}$, then $\xi^*_{KL}$ is confirmed as the KL-optimal design. This ensures that at any design point, the maximum local KL divergence does not exceed the global minimum KL divergence, guaranteeing that the selected design can effectively discriminate between the models.
+
+\section{Model Discrimination Criteria for Type I Censored Data}
+
+\hspace*{8mm} In the context of reliability and survival analysis, where Type I censored data is common, the original mathematical formulations often fail to accommodate this constraint. Park \& Shin (2013) refined the computation of KL divergence and proposed two alternative formulations tailored to Type I censored data. They conducted comparative analyses to evaluate the performance of these formulations under different scenarios, demonstrating that they preserved the non-negativity, monotonicity, and other core properties of KL divergence. Building on this, \cite{pakgohar2019lin} introduced additional divergence measures, including Kullback-Leibler (KL) divergence, Lin-Wong (LW) divergence, Bhattacharyya distance (B), and the Chi-squared ($\chi^2$) measure. They systematically compared these measures with KL divergence in the context of Type I censored data and demonstrated their consistency and reliability in practical applications. Among these measures, KL divergence, closely tied to Shannon entropy, serves as a fundamental tool in information theory to quantify the relative information loss between two distributions. Its core concept lies in assessing the additional information required to describe one distribution relative to another, making it essential for model discrimination and information theory. However, KL divergence is sensitive to skewed data and may yield infinite values in extreme cases, posing limitations in certain applications. To address these issues, the LW divergence was developed. This measure refines the application of logarithmic functions, incorporating the differences between distributions and survival functions in Type I censored data. It is characterized by its finiteness and non-negativity, effectively avoiding the potential issue of infinite values in KL divergence while providing greater robustness. The Bhattacharyya distance, on the other hand, focuses on the overlap between distributions, making it suitable for measuring similarity but less sensitive to subtle changes in distributions compared to KL divergence and LW divergence. Lastly, the $\chi^2$ measure evaluates distributional differences through a ratio-based approach, proving effective for large sample sizes but may underestimate differences when the distributions are very similar. This study will adopt the more effective KL divergence formulation proposed by \cite{park2014kullback}, along with the three measures introduced by \cite{pakgohar2019lin}, for use in experimental designs aimed at model discrimination.
+
+\hspace*{8mm} In the results presented in the next section, $\text{Div}$ denotes the divergence criterion. We consider four different divergence measures, assuming that the $first model$ (true model, $M_1$) has a conditional probability density function $f_{tr}(y \mid x, \sigma^2_1)$ , while the second model (rival model, $M_2$) has a conditional probability density function $f_r(y \mid x, \theta_2, \sigma^2_2)$. The corresponding cumulative probability density functions are given by $F_{tr}(C \mid x, \sigma^2_1)$ and $F_r(C \mid x, \theta_2, \sigma^2_2)$ , where $C$ represents the censoring threshold. Furthermore, the survival functions are defined as:
+$$
+\bar{F}_{tr}(C) = 1 - F_{tr}(C), \quad \bar{F}_r(C) = 1 - F_r(C).
+$$
+
+Divergence Measures:
+\begin{itemize}
+\item Censored Kullback-Leibler (CKL) divergence:
+\begin{equation}\label{eq:CKL distance measure}
+D_{CKL}(f_{tr}, f_r) = \int_{-\infty}^C f_{tr} \log \left\{ \frac{f_{tr}}{f_r} \right\} dy + \bar{F}_{tr}(C) \log \left\{ \frac{\bar{F}_{tr}(C)}{\bar{F}_r(C)} \right\}.
+\end{equation}
+\item Censored Lin-Wong (CLW) divergence:
+\begin{equation}\label{eq:CLW distance measure}
+D_{CLW}(f_{tr}, f_r) = \int_{-\infty}^C f_{tr} \log \left\{ \frac{2f_{tr}}{f_{tr} + f_r} \right\} dy + \bar{F}_{tr}(C) \log \left\{ \frac{2\bar{F}_{tr}(C)}{ \bar{F}_{tr}(C) + \bar{F}_r(C)} \right\}.
+\end{equation}
+\item Censored Bhattacharyya (CB) distance measure:
+\begin{equation}\label{eq:CB distance measure}
+D_{CB}(f_{tr}, f_r) = \int_{-\infty}^C \sqrt{f_{tr} \cdot f_r} \, dy + \sqrt{\bar{F}_{tr}(C) \cdot \bar{F}_r(C)}.
+\end{equation}
+\item Censored Chi-Square (C$\chi^2$) distance measure:
+\begin{equation}\label{eq:Cchi2 distance measure}
+D_{C\chi^2}(f_{tr}, f_r) = \int_{-\infty}^C \frac{(f_{tr})^2}{f_r} \, dy + \frac{\left(\bar{F}_{tr}(C)\right)^2}{\bar{F}_r(C)} - 1.
+\end{equation}
+\end{itemize}
+
+\hspace*{8mm} To further extend this framework, we propose four new optimal designs that explicitly incorporate the impact of Type I censored time ($C$) into the optimization process: CKL-, CLW-, C$\chi^2$-, and CB-optimal designs. These designs correspond to the Type I censored versions of KL divergence, Lin-Wong divergence, Chi-Square ($\chi^2$) distance measure, and Bhattacharyya (B), respectively. By integrating censoring considerations into the optimization framework, these new formulations aim to provide more robust and practically meaningful experimental designs, particularly in scenarios where censoring plays a crucial role.
+
+\hspace*{8mm} Define $C^*$ is the optimal criterion value obtained via optimization algorithms (e.g., PSO, L-BFGS), serving as an evaluation metric for design effectiveness. Meanwhile, $\hat{C}$ is the recalculated criterion value based on the optimized design $\xi^*$ and estimated parameters $\hat{\theta}$, used to assess the stability of the optimization process. The optimization criterion value is formally defined as:
+\begin{equation}\label{eq:criterion value}
+C^* = \max_{\xi \in \Xi} \min_{\theta_r \in \Theta_r} \left\{ \int_X \text{Div} \left( M_1(x, \theta_{tr}), M_2(x, \theta_r) \right) \xi(dx) \right\}.
+\end{equation}
+
+where:  
+\begin{itemize}
+\item $\xi \in \Xi$ represents all possible experimental designs. Our goal is to find the optimal design $\xi^*$ within this set.
+
+\item $\min_{\theta_r \in \Theta_r}$ represents the rival model parameter in the worst-case scenario, meaning that among all possible values of $\theta_r$, we select the one that minimizes the model's distinguishability.
+
+\item $\text{Div}(M_1, M_2)$ is the divergence measure that quantifies the difference between the true model $M_1$ and the competing model $M_2$. This measure can be the CKL divergence, CLW divergence, CB distance, or C$\chi^2$ distance. 
+
+\end{itemize}
+
+\hspace*{8mm} The criterion in equation \eqref{eq:criterion value} follows a max-min strategy. First, for each design $\xi$, the minimum model distinguishability is computed (i.e., the worst-case discriminability under the least favorable $\theta_r$). Then, the design $\xi^*$ that maximizes this minimum value is selected. In other words, this approach ensures that even in the worst-case scenario, the collected experimental data will still provide the highest level of model distinguishability.
+
+\begin{conjecture}
+Let $\xi^* \in \Xi$ be a regular divergence-optimal design.
+
+\begin{enumerate}[(a)]
+\item A necessary and sufficient condition for the design $\xi^*$ to be divergence-optimal is $\psi(x; \xi^*) \leq 0$ for all $x \in \mathcal{X}$, where
+\begin{equation}
+\psi(x; \xi) = \mathrm{Div}(M_1(x, \theta_{tr}), M_2(x, \hat{\theta}_r)) - \int_{\mathcal{X}} \mathrm{Div}(M_1(x, \theta_{tr}), M_2(x, \hat{\theta}_r)) \, \xi(dx)
+\end{equation}
+and $\hat{\theta}_r$ is the unique solution to the inner optimization problem:
+\begin{equation}
+\hat{\theta}_r = \arg\min_{\theta_r \in \Theta_r} \int_{\mathcal{X}} \mathrm{Div}(M_1(x, \theta_{tr}), M_2(x, \theta_r)) \, \xi(dx)
+\end{equation}
+
+\item The function $\psi(x; \xi^*)$ achieves its maximum value at the support points of the optimal design $\xi^*$.
+\end{enumerate}
+\end{conjecture}
+
+\hspace*{8mm} This conjecture generalizes the well-known equivalence theorem under KL-optimality to the broader family of divergence-based design criteria, such as CKL divergence, CLW divergence, CB distance, or C$\chi^2$ distance.
+
+\hspace*{8mm} In practical applications, this optimization problem is typically solved using numerical methods such as Particle Swarm Optimization (PSO) or L-BFGS, allowing us to obtain the most suitable $\xi^*$. The next section will present numerical simulation results based on this design criterion.
+
+\section{Numerical Integration for Criterion Computation} \label{SEC: Numerical Integration}
+
+\hspace*{8mm} In this study, numerical integration serves as the core computational tool for evaluating model discrimination criteria. The integral expressions derived—such as Equations \eqref{eq:CKL distance measure} through \eqref{eq:Cchi2 distance measure}—involve censoring adjustments and logarithmic terms, which make them analytically intractable and difficult to solve in closed-form. As a result, closed-form expression of the objective function are often unavailable or impractical. Therefore, we employ numerical approximation methods, specifically using the built-in \verb|integrate()| function in R for efficient and accurate computation.
+
+\hspace*{8mm} The fundamental idea of numerical integration originates from the concept of the Riemann sum, which approximates the integral by dividing the integration interval into multiple subintervals and summing the product of the function values and the corresponding subinterval widths. Classical methods such as the trapezoidal rule and Simpson's rule are direct extensions of this idea. However, in practical applications, uniform subdivision may be insufficient when the integrand exhibits rapid variation, sharp peaks, or censoring effects. To address these challenges and improve both accuracy and efficiency, the \verb|integrate()| function adopts an adaptive quadrature strategy, which dynamically adjusts the subdivision of the interval and the evaluation points according to the local behavior of the integrand \citep{davis2007methods}.
+
+\hspace*{8mm} The algorithm first performs a coarse estimation over the entire interval and then recursively subdivides regions where the estimated error exceeds a threshold, forming a set of unequally spaced subintervals. This approach significantly reduces unnecessary computation and concentrates computational effort on regions with high variability. In R, the implementation of \verb|integrate()| combines Romberg integration techniques with recursive partitioning logic, providing robust and accurate approximations in practical scenarios \citep{stoer1980introduction}.
+
+\hspace*{8mm} In the context of this study, the integrals associated with model discrimination criteria can be reduced to one-dimensional definite integrals through appropriate transformation and truncation handling. As such, the \verb|integrate()| function can be directly applied. Its concise syntax, fast computation, and support for customizable error tolerance and integration bounds make it a practical and efficient tool for the numerical calculations required in this research.
+
+
+\section{The PSO-QN Algorithm for Model Discrimination Design Generation}
+
+\hspace*{8mm} In this study, we employ the PSO-QN algorithm, which integrates Particle Swarm Optimization (PSO) with the Limited-memory Broyden–Fletcher–Goldfarb–Shanno (L-BFGS) method to solve nested optimization problems. This approach was first introduced by \cite{chen2020hybrid} to address the high computational costs associated with the traditional Nested-PSO \citep{chen2015minimax} framework.
+
+\hspace*{8mm} The conventional Nested-PSO \citep{chen2015minimax} applies PSO to both the outer and inner optimization layers. While effective in exploring the global optimum, this approach becomes computationally expensive, especially when dealing with high-dimensional data or large sample sizes. To overcome this limitation, \cite{chen2020hybrid} proposed the PSO-QN algorithm, which modifies the inner optimization process by combining PSO for outer global search and L-BFGS for inner local optimization. This hybrid approach significantly improves computational efficiency while maintaining strong optimization performance.
+
+\hspace*{8mm} In our study, we observe that the optimization criterion function has a nested mathematical structure:
+
+\begin{itemize}
+\item Inner Problem: Differentiable with respect to parameter $\theta_2$ and convex.  
+
+\item Outer Problem: Potentially non-convex, with multiple local extrema.
+
+\end{itemize}
+
+\hspace*{8mm} Due to the favorable mathematical properties of the inner function, gradient-based numerical optimization methods can be applied to efficiently determine the optimal solution. For instance, L-BFGS leverages first-order and approximate second-order derivative information to accelerate convergence and is particularly efficient for high-dimensional problems with lower memory requirements. Therefore, after PSO identifies candidate solutions for the global optimum, we further refine them using L-BFGS, ensuring faster and more stable convergence.
+
+\hspace*{8mm} This type of nested optimization problem can be exemplified by a KL-optimality criterion under Type-I censoring conditions, represented as Equation \eqref{PSO+L-BFGS}:
+\begin{equation} \label{PSO+L-BFGS}
+\max_{\xi\in \Xi} CKL_{2,tr}(\xi)=\overbrace{\textcolor{blue}{\max_{\xi\in \Xi}} \overbrace{\textcolor{red}{\min_{\substack{\theta_2\in \Theta_2}}\int_{X}D_{CKL}(f_{tr},f_r,x,\theta_2) \xi(dx)}}^{\textcolor{red}{L\text{-}BFGS}}}^{\textcolor{blue}{PSO}}
+\end{equation}
+
+In this formulation:
+
+\begin{itemize}
+\item Outer Problem (solved by PSO): $\max_{\xi\in \Xi} CKL_{2,tr}(\xi)$ searches for the global optimal design $\xi^*$.
+
+\item Inner Problem (handled by L-BFGS): $\min_{\theta_2\in \Theta_2}\int_{X}D_{CKL}(f_{tr},f_r,x,\theta_2) \xi(dx)$ performs local minimization of the differentiable inner objective function to evaluate the fitness for the outer problem.
+
+\end{itemize}
+
+\hspace*{8mm} In summary, PSO is responsible for the global search to handle the outer optimization, while L-BFGS refines the local search for the differentiable inner function. This hybrid approach enhances optimization efficiency and ensures robust results.
+
+\hspace*{8mm} This method has been successfully applied to model discrimination design problems, particularly in distinguishing between two competing models. However, further simulation tests are required to evaluate its performance across different divergence measures and assess its robustness.

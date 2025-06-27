@@ -1,0 +1,99 @@
+\input{preamble}  
+\usepackage{wallpaper}                               
+\CenterWallPaper{0.6}{images/ntpu.eps} 
+\usepackage{changepage}
+\begin{document}
+
+\fontsize{12}{22pt}\selectfont
+\begin{center}
+    \huge 國立臺北大學統計學系 \\ 碩士論文
+\end{center}
+\vspace*{2cm}
+\begin{center}
+    \LARGE 指導教授：陳秉洋~~博士 \\
+\end{center}
+\vspace*{2cm}
+\begin{center}
+    \LARGE 以合成最佳化演算法生成加速壽命試驗之模型辨識設計 \\
+    \vspace*{1cm}
+    Model Discrimination Design Generation for Accelerated Life Testing Experiments via Hybridized Optimization Algorithms
+\end{center}
+\vspace*{3cm}
+\begin{center}
+    \LARGE 研究生：林貫原
+\end{center} 
+\vspace*{3cm}
+\begin{center}
+    \LARGE 中華民國~一一四~年~六~月
+\end{center}
+
+
+
+
+\newpage
+%\include{thanks}  
+\thispagestyle{empty}
+\includepdf[pages=1, pagecommand={}, fitpaper=true]{考試委員審定書.pdf}
+
+\pagenumbering{roman}  
+\include{CH0_Abstract}   	
+
+\newpage
+\fontsize{12}{22pt}\selectfont 	
+\fancyfoot[C]{\thepage}
+
+\cleardoublepage
+\setcounter{tocdepth}{2} 
+
+\tableofcontents
+\newpage
+%\renewcommand{\numberline}[1]{\loflabel~#1\hspace*{1em}}
+\listoffigures 
+\newpage
+%\renewcommand{\numberline}[1]{\lotlabel~#1\hspace*{1em}}
+\listoftables 
+\newpage
+
+\ifodd\count0 \else \thispagestyle{empty}\mbox{}\clearpage\fi 
+\pagenumbering{arabic} 		
+\setcounter{page}{1} 
+\include{CH1_Introduction}
+\include{CH2_Literature_Review}
+\include{CH3_Method}
+\include{CH4_Simulation}
+\include{CH5_Conclusion}
+
+\nocite{*}               
+
+\renewcommand\bibname{參考文獻}
+\cleardoublepage
+\bibliographystyle{apalike}
+\addcontentsline{toc}{chapter}{參考文獻}
+\bibliography{ref}
+
+\appendix
+\cleardoublepage
+\include{Appendix}
+
+\cleardoublepage
+%\thispagestyle{empty}
+\begin{center}
+    \huge 著~作~權~聲~明
+\end{center}
+
+\vspace*{1cm}
+論文題目：以合成最佳化演算法生成加速壽命試驗之模型辨識設計
+
+論文頁數：97 頁
+
+系所組別：統計學系
+
+研究生：林貫原
+
+指導教授：陳秉洋
+
+畢業年月：一一四 年 六 月
+
+本論文著作權為林貫原所有，並受中華民國著作權法保護。
+
+\end{document}

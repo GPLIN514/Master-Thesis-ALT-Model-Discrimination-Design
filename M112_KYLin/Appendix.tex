@@ -1,0 +1,586 @@
+\chapter{The Directional Derivative Plots of the Resulting Model Discrimination Designs}\label{appendixA}
+
+\hspace*{8mm} This section presents the directional derivative plots corresponding to the model discrimination designs discussed in Sections \ref{SEC:DeviceA-fixed variance} and \ref{SEC:Meeker}, which are used to verify whether the proposed designs satisfy the optimality conditions outlined by the equivalence theorem. According to theoretical criteria, an optimal design must ensure that the directional derivative remains less than or equal to zero throughout the design region, and that the support points align with the local maxima of the directional derivative, each attaining a value of zero.
+
+\hspace*{8mm} The plots are grouped into two major scenarios. The first scenario, from Section \ref{SEC:DeviceA-fixed variance}, assumes both models have fixed variance, and explores four divergence measures (CKL, CLW, CB, and C$\chi^2$), with results summarized in Tables \ref{tab:CKL-results-DeviceA-sameV} to \ref{tab:Cchi2-results-DeviceA-DiffV}. The second scenario, from Section \ref{SEC:Meeker}, considers CKL-optimal designs under a stress-dependent variance structure, with corresponding results shown in Table \ref{tab:meeker_tress-variance_result}. These visualizations provide supportive evidence for evaluating whether the identified designs achieve both theoretical optimality and numerical stability.
+
+%\section*{CKL fixed both same variance}
+
+\begin{figure}[H]
+\centering
+\subfloat[$\sigma_1=\sigma_2=0.98$ (LN)\label{fig:s=0.98,2,kl,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ll_2.png}}
+\subfloat[$\sigma_1=\sigma_2=0.98$ (Weibull)\label{fig:s=0.98,2,kl,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ww_2.png}}\\
+\subfloat[$\sigma_1=\sigma_2=1.48$ (LN)\label{fig:s=1.48,3,kl,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ll_3.png}}
+\subfloat[$\sigma_1=\sigma_2=1.48$ (Weibull)\label{fig:s=1.48,3,kl,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ww_3.png}}\\
+\subfloat[$\sigma_1=\sigma_2=1.98$ (LN)\label{fig:s=1.98,4,kl,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ll_4.png}}
+\subfloat[$\sigma_1=\sigma_2=1.98$ (Weibull)\label{fig:s=1.98,4,kl,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ww_4.png}}
+\caption{The directional derivative plots of the resulting $\xi^*_{CKL}$ designs discriminating for cases of Quadratic vs. Linear means with equal variance. Results are shown in Table \ref{tab:CKL-results-DeviceA-sameV}.}
+\label{fig:CKL-fixed-both-same-variance}
+\end{figure}
+
+
+%\section*{CKL fixed different same variance(Log-Normal)}
+
+\begin{figure}[H]
+\centering
+\subfloat[$\sigma_1=1.98,\sigma_2=0.98$\label{fig:s1=1.98,s2=0.98,9,kl,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ll_9.png}}
+\subfloat[$\sigma_1=0.98,\sigma_2=1.98$\label{fig:s1=0.98,s2=1.98,10,kl,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ll_10.png}} \\
+\subfloat[$\sigma_1=0.98,\sigma_2=1.48$\label{fig:s1=0.98,s2=1.48,11,kl,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ll_11.png}}
+\subfloat[$\sigma_1=1.48,\sigma_2=0.98$\label{fig:s1=1.48,s2=0.98,12,kl,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ll_12.png}} \\
+\subfloat[$\sigma_1=0.48,\sigma_2=0.98$\label{fig:s1=0.48,s2=0.98,13,kl,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ll_13.png}}
+\subfloat[$\sigma_1=0.98,\sigma_2=0.48$\label{fig:s1=0.98,s2=0.48,14,kl,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ll_14.png}}
+\caption{The directional derivative plots of the resulting $\xi^*_{CKL}$ designs discriminating for cases of Quadratic vs. Linear means with unequal variance assuming Log-Normal response. Results are shown in Table \ref{tab:CKL-results-DeviceA-DiffV}.}
+\label{fig:CKL-fixed-both-same-variance-LN}
+\end{figure}
+
+%\section*{CKL fixed different same variance(Weibull)}
+
+\begin{figure}[H]
+\centering
+\subfloat[$\sigma_1=1.98,\sigma_2=0.98$\label{fig:s1=1.98,s2=0.98,9,kl,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ww_9.png}}
+\subfloat[$\sigma_1=0.98,\sigma_2=1.98$\label{fig:s1=0.98,s2=1.98,10,kl,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ww_10.png}} \\
+\subfloat[$\sigma_1=0.98,\sigma_2=1.48$\label{fig:s1=0.98,s2=1.48,11,kl,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ww_11.png}}
+\subfloat[$\sigma_1=1.48,\sigma_2=0.98$\label{fig:s1=1.48,s2=0.98,12,kl,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ww_12.png}} \\
+\subfloat[$\sigma_1=0.48,\sigma_2=0.98$\label{fig:s1=0.48,s2=0.98,13,kl,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ww_13.png}}
+\subfloat[$\sigma_1=0.98,\sigma_2=0.48$\label{fig:s1=0.98,s2=0.48,14,kl,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ww_14.png}}
+\caption{The directional derivative plots of the resulting $\xi^*_{CKL}$ designs discriminating for cases of Quadratic vs. Linear means with unequal variance assuming Weibull response. Results are shown in Table \ref{tab:CKL-results-DeviceA-DiffV}.}
+\label{fig:CKL-fixed-both-same-variance-WB}
+\end{figure}
+
+%\section*{CLW fixed both same variance}
+
+\begin{figure}[H]
+\centering
+\subfloat[$\sigma_1=\sigma_2=0.98$(LN)\label{fig:s=0.98,2,lw,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ll_2.png}}
+\subfloat[$\sigma_1=\sigma_2=0.98$(Weibull)\label{fig:s=0.98,2,lw,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ww_2.png}}\\
+\subfloat[$\sigma_1=\sigma_2=1.48$(LN)\label{fig:s=1.48,3,lw,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ll_3.png}}
+\subfloat[$\sigma_1=\sigma_2=1.48$(Weibull)\label{fig:s=1.48,3,lw,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ww_3.png}}\\
+\subfloat[$\sigma_1=\sigma_2=1.98$(LN)\label{fig:s=1.98,4,lw,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ll_4.png}}
+\subfloat[$\sigma_1=\sigma_2=1.98$(Weibull)\label{fig:s=1.98,4,lw,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ww_4.png}}
+\caption{The directional derivative plots of the resulting $\xi^*_{CLW}$ designs discriminating for cases of Quadratic vs. Linear means with equal variance. Results are shown in Table \ref{tab:CLW-results-DeviceA-sameV}.}
+\label{fig:CLW-fixed-both-same-variance}
+\end{figure}
+
+%\section*{CLW fixed different same variance(Log-Normal)}
+
+\begin{figure}[H]
+\centering
+\subfloat[$\sigma_1=1.98,\sigma_2=0.98$\label{fig:s1=1.98,s2=0.98,9,lw,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ll_9.png}}
+\subfloat[$\sigma_1=0.98,\sigma_2=1.98$\label{fig:s1=0.98,s2=1.98,10,lw,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ll_10.png}} \\
+\subfloat[$\sigma_1=0.98,\sigma_2=1.48$\label{fig:s1=0.98,s2=1.48,11,lw,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ll_11.png}}
+\subfloat[$\sigma_1=1.48,\sigma_2=0.98$\label{fig:s1=1.48,s2=0.98,12,lw,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ll_12.png}} \\
+\subfloat[$\sigma_1=0.48,\sigma_2=0.98$\label{fig:s1=0.48,s2=0.98,13,lw,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ll_13.png}}
+\subfloat[$\sigma_1=0.98,\sigma_2=0.48$\label{fig:s1=0.98,s2=0.48,14,lw,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ll_14.png}}
+\caption{The directional derivative plots of the resulting $\xi^*_{CLW}$ designs discriminating for cases of Quadratic vs. Linear means with unequal variance assuming Log-Normal response. Results are shown in Table \ref{tab:CLW-results-DeviceA-DiffV}.}
+\label{fig:CLW-fixed-both-same-variance-LN}
+\end{figure}
+
+%\section*{CLW fixed different same variance(Weibull)}
+
+\begin{figure}[H]
+\centering
+\subfloat[$\sigma_1=1.98,\sigma_2=0.98$\label{fig:s1=1.98,s2=0.98,9,lw,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ww_9.png}}
+\subfloat[$\sigma_1=0.98,\sigma_2=1.98$\label{fig:s1=0.98,s2=1.98,10,lw,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ww_10.png}} \\
+\subfloat[$\sigma_1=0.98,\sigma_2=1.48$\label{fig:s1=0.98,s2=1.48,11,lw,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ww_11.png}}
+\subfloat[$\sigma_1=1.48,\sigma_2=0.98$\label{fig:s1=1.48,s2=0.98,12,lw,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ww_12.png}} \\
+\subfloat[$\sigma_1=0.48,\sigma_2=0.98$\label{fig:s1=0.48,s2=0.98,13,lw,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ww_13.png}}
+\subfloat[$\sigma_1=0.98,\sigma_2=0.48$\label{fig:s1=0.98,s2=0.48,14,lw,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ww_14.png}}
+\caption{The directional derivative plots of the resulting $\xi^*_{CLW}$ designs discriminating for cases of Quadratic vs. Linear means with unequal variance assuming Weibull response. Results are shown in Table \ref{tab:CLW-results-DeviceA-DiffV}.}
+\label{fig:CLW-fixed-both-same-variance-WB}
+\end{figure}
+
+%\section*{CB fixed both same variance}
+
+\begin{figure}[H]
+\centering
+\subfloat[$\sigma_1=\sigma_2=0.98$(LN)\label{fig:s=0.98,2,B,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ll_2.png}}
+\subfloat[$\sigma_1=\sigma_2=0.98$(Weibull)\label{fig:s=0.98,2,B,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ww_2.png}}\\
+\subfloat[$\sigma_1=\sigma_2=1.48$(LN)\label{fig:s=1.48,3,B,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ll_3.png}}
+\subfloat[$\sigma_1=\sigma_2=1.48$(Weibull)\label{fig:s=1.48,3,B,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ww_3.png}}\\
+\subfloat[$\sigma_1=\sigma_2=1.98$(LN)\label{fig:s=1.98,4,B,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ll_4.png}}
+\subfloat[$\sigma_1=\sigma_2=1.98$(Weibull)\label{fig:s=1.98,4,B,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ww_4.png}}
+\caption{The directional derivative plots of the resulting $\xi^*_{CB}$ designs discriminating for cases of Quadratic vs. Linear means with equal variance. Results are shown in Table \ref{tab:CB-results-DeviceA-sameV}.}
+\label{fig:CB-fixed-both-same-variance}
+\end{figure}
+
+%\section*{CB fixed different same variance(Log-Normal)}
+
+\begin{figure}[H]
+\centering
+\subfloat[$\sigma_1=1.98,\sigma_2=0.98$\label{fig:s1=1.98,s2=0.98,9,B,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ll_9.png}}
+\subfloat[$\sigma_1=0.98,\sigma_2=1.98$\label{fig:s1=0.98,s2=1.98,10,B,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ll_10.png}} \\
+\subfloat[$\sigma_1=0.98,\sigma_2=1.48$\label{fig:s1=0.98,s2=1.48,11,B,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ll_11.png}}
+\subfloat[$\sigma_1=1.48,\sigma_2=0.98$\label{fig:s1=1.48,s2=0.98,12,B,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ll_12.png}} \\
+\subfloat[$\sigma_1=0.48,\sigma_2=0.98$\label{fig:s1=0.48,s2=0.98,13,B,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ll_13.png}}
+\subfloat[$\sigma_1=0.98,\sigma_2=0.48$\label{fig:s1=0.98,s2=0.48,14,B,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ll_14.png}}
+\caption{The directional derivative plots of the resulting $\xi^*_{CB}$ designs discriminating for cases of Quadratic vs. Linear means with unequal variance assuming Log-Normal response. Results are shown in Table \ref{tab:CB-results-DeviceA-DiffV}.}
+\label{fig:CB-fixed-both-same-variance-LN}
+\end{figure}
+
+%\section*{CB fixed different same variance(Weibull)}
+
+\begin{figure}[H]
+\centering
+\subfloat[$\sigma_1=1.98,\sigma_2=0.98$\label{fig:s1=1.98,s2=0.98,9,B,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ww_9.png}}
+\subfloat[$\sigma_1=0.98,\sigma_2=1.98$\label{fig:s1=0.98,s2=1.98,10,B,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ww_10.png}} \\
+\subfloat[$\sigma_1=0.98,\sigma_2=1.48$\label{fig:s1=0.98,s2=1.48,11,B,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ww_11.png}}
+\subfloat[$\sigma_1=1.48,\sigma_2=0.98$\label{fig:s1=1.48,s2=0.98,12,B,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ww_12.png}} \\
+\subfloat[$\sigma_1=0.48,\sigma_2=0.98$\label{fig:s1=0.48,s2=0.98,13,B,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ww_13.png}}
+\subfloat[$\sigma_1=0.98,\sigma_2=0.48$\label{fig:s1=0.98,s2=0.48,14,B,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ww_14.png}}
+\caption{The directional derivative plots of the resulting $\xi^*_{CB}$ designs discriminating for cases of Quadratic vs. Linear means with unequal variance assuming Weibull response. Results are shown in Table \ref{tab:CB-results-DeviceA-DiffV}.}
+\label{fig:CB-fixed-both-same-variance-WB}
+\end{figure}
+
+%\section*{C$\chi^2$ fixed both same variance}
+
+\begin{figure}[H]
+\centering
+\subfloat[$\sigma_1=\sigma_2=0.98$(LN)\label{fig:s=0.98,2,chi,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ll_2.png}}
+\subfloat[$\sigma_1=\sigma_2=0.98$(Weibull)\label{fig:s=0.98,2,chi,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ww_2.png}}\\
+\subfloat[$\sigma_1=\sigma_2=1.48$(LN)\label{fig:s=1.48,3,chi,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ll_3.png}}
+\subfloat[$\sigma_1=\sigma_2=1.48$(Weibull)\label{fig:s=1.48,3,chi,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ww_3.png}}\\
+\subfloat[$\sigma_1=\sigma_2=1.98$(LN)\label{fig:s=1.98,4,chi,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ll_4.png}}
+\subfloat[$\sigma_1=\sigma_2=1.98$(Weibull)\label{fig:s=1.98,4,chi,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ww_4.png}}
+\caption{The directional derivative plots of the resulting $\xi^*_{C\chi^2}$ designs discriminating for cases of Quadratic vs. Linear means with equal variance. Results are shown in Table \ref{tab:Cchi2-results-DeviceA-sameV}.}
+\label{fig:Cchi-fixed-both-same-variance}
+\end{figure}
+
+%\section*{C$\chi^2$ fixed different same variance(Log-Normal)}
+
+\begin{figure}[H]
+\centering
+\subfloat[$\sigma_1=1.98,\sigma_2=0.98$\label{fig:s1=1.98,s2=0.98,9,chi,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ll_9.png}}
+\subfloat[$\sigma_1=0.98,\sigma_2=1.98$\label{fig:s1=0.98,s2=1.98,10,chi,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ll_10.png}} \\
+\subfloat[$\sigma_1=0.98,\sigma_2=1.48$\label{fig:s1=0.98,s2=1.48,11,chi,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ll_11.png}}
+\subfloat[$\sigma_1=1.48,\sigma_2=0.98$\label{fig:s1=1.48,s2=0.98,12,chi,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ll_12.png}} \\
+\subfloat[$\sigma_1=0.48,\sigma_2=0.98$\label{fig:s1=0.48,s2=0.98,13,chi,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ll_13.png}}
+\subfloat[$\sigma_1=0.98,\sigma_2=0.48$\label{fig:s1=0.98,s2=0.48,14,chi,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ll_14.png}}
+\caption{The directional derivative plots of the resulting $\xi^*_{C\chi^2}$ designs discriminating for cases of Quadratic vs. Linear means with unequal variance assuming Log-Normal response. Results are shown in Table \ref{tab:Cchi2-results-DeviceA-DiffV}.}
+\label{fig:Cchi-fixed-both-same-variance-LN}
+\end{figure}
+
+%\section*{C$\chi^2$ fixed different same variance(Weibull)}
+
+\begin{figure}[H]
+\centering
+\subfloat[$\sigma_1=1.98,\sigma_2=0.98$\label{fig:s1=1.98,s2=0.98,9,chi,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ww_9.png}}
+\subfloat[$\sigma_1=0.98,\sigma_2=1.98$\label{fig:s1=0.98,s2=1.98,10,chi,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ww_10.png}} \\
+\subfloat[$\sigma_1=0.98,\sigma_2=1.48$\label{fig:s1=0.98,s2=1.48,11,chi,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ww_11.png}}
+\subfloat[$\sigma_1=1.48,\sigma_2=0.98$\label{fig:s1=1.48,s2=0.98,12,chi,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ww_12.png}} \\
+\subfloat[$\sigma_1=0.48,\sigma_2=0.98$\label{fig:s1=0.48,s2=0.98,13,chi,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ww_13.png}}
+\subfloat[$\sigma_1=0.98,\sigma_2=0.48$\label{fig:s1=0.98,s2=0.48,14,chi,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ww_14.png}}
+\caption{The directional derivative plots of the resulting $\xi^*_{C\chi^2}$ designs discriminating for cases of Quadratic vs. Linear means with unequal variance assuming Weibull response. Results are shown in Table \ref{tab:Cchi2-results-DeviceA-DiffV}.}
+\label{fig:Cchi-fixed-both-same-variance-WB}
+\end{figure}
+
+%\section*{CKL Stree depend on variance(Log-Normal)}
+
+\begin{figure}[H]
+\centering
+\subfloat[Meeker Case (1)\label{fig:meeker_lnIsTrue_1}]{\includegraphics[width=0.45\linewidth]{\imgdir meeker_lnIsTrue_1.png}}
+\subfloat[Meeker Case (2)\label{fig:meeker_lnIsTrue_2}]{\includegraphics[width=0.45\linewidth]{\imgdir meeker_lnIsTrue_2.png}} \\
+\subfloat[Meeker Case (3)\label{fig:meeker_lnIsTrue_3}]{\includegraphics[width=0.45\linewidth]{\imgdir meeker_lnIsTrue_3.png}}
+\subfloat[Meeker Case (4)\label{fig:meeker_lnIsTrue_4}]{\includegraphics[width=0.45\linewidth]{\imgdir meeker_lnIsTrue_4.png}} \\
+\subfloat[Meeker Case (5)\label{fig:meeker_lnIsTrue_5}]{\includegraphics[width=0.45\linewidth]{\imgdir meeker_lnIsTrue_5.png}}
+\subfloat[Meeker Case (6)\label{fig:meeker_lnIsTrue_6}]{\includegraphics[width=0.45\linewidth]{\imgdir meeker_lnIsTrue_6.png}}
+\caption{The directional derivative plots of the resulting $\xi^*_{CKL}$ designs for Meeker cases, under the same mean response structure but assuming the true model follows a Log-Normal distribution with variance depending on stress. Results are shown in Table \ref{tab:meeker_tress-variance_result}.}
+\label{fig:meeker_tress-variance_result_ln}
+\end{figure}
+
+%\section*{CKL Stree depend on variance(Weibull)}
+
+\begin{figure}[H]
+\centering
+\subfloat[Meeker Case (7)\label{fig:meeker_wbIsTrue_1}]{\includegraphics[width=0.45\linewidth]{\imgdir meeker_wbIsTrue_1.png}}
+\subfloat[Meeker Case (8)\label{fig:meeker_wbIsTrue_2}]{\includegraphics[width=0.45\linewidth]{\imgdir meeker_wbIsTrue_2.png}} \\
+\subfloat[Meeker Case (9)\label{fig:meeker_wbIsTrue_3}]{\includegraphics[width=0.45\linewidth]{\imgdir meeker_wbIsTrue_3.png}}
+\subfloat[Meeker Case (10)\label{fig:meeker_wbIsTrue_4}]{\includegraphics[width=0.45\linewidth]{\imgdir meeker_wbIsTrue_4.png}} \\
+\subfloat[Meeker Case (11)\label{fig:meeker_wbIsTrue_5}]{\includegraphics[width=0.45\linewidth]{\imgdir meeker_wbIsTrue_5.png}}
+\subfloat[Meeker Case (12)\label{fig:meeker_wbIsTrue_6}]{\includegraphics[width=0.45\linewidth]{\imgdir meeker_wbIsTrue_6.png}}
+\caption{The directional derivative plots of the resulting $\xi^*_{CKL}$ designs for Meeker cases, under the same mean response structure but assuming the true model follows a Weibull distribution with variance depending on stress. Results are shown in Table \ref{tab:meeker_tress-variance_result}.}
+\label{fig:meeker_tress-variance_result_wb}
+\end{figure}
+
+\chapter{R Implementation Example}\label{appendixB}
+
+\hspace*{8mm} The source code used in this study is available at: \href{https://github.com/GPLIN514/Master-Thesis-ALT-Model-Discrimination-Design/blob/main/Thesis-code/code/Appendix%20B%20example%20code.R}{GitHub/GPLIN514}. This appendix provides a brief explanation of the code used for the simulation and optimal design of the KL divergence under the Arrhenius model framework.
+
+\hspace*{8mm} The following code defines the mean response and dispersion functions for both the true model and the rival model under Arrhenius assumptions:
+
+\begin{lstlisting}[language=R, caption={Model structure settings}]
+af1_mean <- function(x, p) p[1] + p[2] * (11605/(x+273.15)) 
+                           + p[3] * (11605/(x+273.15))^2
+af2_mean <- function(x, p) p[1] + p[2] * (11605/(x+273.15))
+af1_disp <- function(x, p) rep(p[1], length(x))
+af2_disp <- function(x, p) rep(p[1], length(x))
+\end{lstlisting}
+
+In this design setup:
+
+\begin{itemize}
+\item The true model $M_1$ adopts a quadratic form of the Arrhenius function, expressed as:
+$$\eta_{tr}(x,\theta_1)=\zeta_1+\zeta_2x+\zeta_3x^2$$
+
+\item The rival model $M_2$ uses a linear form:
+$$\eta_2(x,\theta_2)=\delta_1+\delta_2x$$
+\end{itemize}
+
+\hspace*{8mm} Both models assume constant dispersion that is independent of the stress level, as defined in the \verb|af1_disp_Arrhenius| and \verb|af2_disp_Arrhenius| functions. These functions provide the foundation for calculating KL divergence and constructing the corresponding optimal design.
+
+\hspace*{8mm} Before searching for the max-min CKL-optimal design, the structures of the true model $\eta_{tr}(x,\theta_1)$ and the rival model $\eta_2(x,\theta_2)$ must be defined, along with a bounded parameter space for the rival model. It is important to ensure that the rival parameter space is finite. Users can define the range based on prior knowledge or regions where the KL divergence is expected to attain its minimum. If the dispersion of the rival model is to be fixed, this can be achieved by setting its upper and lower bounds to the same value, thereby excluding it from search. The relevant setup is shown in the following code.
+
+\begin{lstlisting}[language=R, caption={Setting Model Parameters}]
+# Set the nominal values for the true model
+af1_para <- c(-5, -1.5, 0.05)
+model_info <- list(
+  # The first list should be the true model and the specified nominal values
+  list(mean = af1_mean, disp = af1_disp, meanPara = af1_para, dispPara = 0.9780103),
+  # Then the rival models are listed accordingly. We also need to specify the model space.
+  list(mean = af2_mean, disp = af2_disp,
+       meanParaLower = c(-100, 0.1), meanParaUpper = c(-10, 5),
+       dispParaLower = c(0.9780103), dispParaUpper = c(0.9780103) )
+)
+\end{lstlisting}
+
+\hspace*{8mm} To perform CKL-optimal design, the divergence measure must be explicitly defined. In this study, the measure is based on the Kullback-Leibler divergence as described in Equation \eqref{eq:CKL distance measure}, and its computation is divided into two parts: one for observed (non-censored) data and another for Type I censored data, assuming a censoring time of $t_c = 5000$.
+
+\hspace*{8mm} In the R implementation, three functions are defined to handle these computations. The \verb|kl_lnln_observed| function computes the integral over the observed data, while the \verb|kl_lnln_censored| function evaluates the adjustment term for Type I censored data. The \verb|kldiv_lnln_censored5000| function combines both components to obtain the overall KL divergence. This framework effectively incorporates both censored and uncensored data contributions, enabling a more accurate evaluation of model discrimination. The corresponding R code is shown below.
+
+\begin{lstlisting}[language=R, caption={Defining the KL Divergence Function}]
+# xt is the mean values of the true model
+# xr is the mean values of the rival model
+kl_lnln_observed <- function(y, m1, m2, s1, s2) {
+  lpdf1 <- dlnorm(y, m1, s1, log = TRUE)
+  lpdf2 <- dlnorm(y, m2, s2, log = TRUE)
+  pdf1 <- exp(lpdf1)
+  val <- pdf1*(lpdf1 - lpdf2)
+  return(val)
+}
+kl_lnln_censored <- function(y, m1, m2, s1, s2) {
+  lcdf1 <- log(1 - plnorm(y, m1, s1) + 1e-12)
+  lcdf2 <- log(1 - plnorm(y, m2, s2) + 1e-12)
+  cdf1 <- exp(lcdf1)
+  val <- cdf1*(lcdf1 - lcdf2)
+  return(val)
+}
+kldiv_lnln_censored5000 <- function(xt, xr, st, sr) {
+  tc <- 5000
+  intVec <- rep(0, length(xt))
+  for (i in 1:length(xt)) {
+    intg_part <- integrate(kl_lnln_observed, 0, tc,
+                           m1 = xt[i], m2 = xr[i], 
+                           s1 = st[i], s2 = sr[i],
+                           subdivisions = 100,
+                           stop.on.error = FALSE)$value
+    cens_part <- kl_lnln_censored(tc, m1 = xt[i], m2 = xr[i],
+                                  s1 = st[i], s2 = sr[i])
+    intVec[i] <- intg_part + cens_part
+  }
+  return(intVec)
+}
+\end{lstlisting}
+
+\hspace*{8mm} In this example, we utilize the \verb|DiscrimOD| software package to perform optimal experimental design searches. As \verb|DiscrimOD| is currently in the alpha testing phase, it is only available to the development team and must be installed via a specific method.
+
+\hspace*{8mm} Before installation, ensure that you are using R version 3.4.0. Then, install the \verb|devtools| package along with two necessary dependencies: \verb|Rcpp| and \verb|RcppArmadillo|. After setting up these prerequisites, use the \verb|devtools::install_github()| function from the \verb|devtools| package to install \verb|DiscrimOD| directly from Ping-Yang Chen's GitHub repository. The R code is shown below:
+
+\begin{lstlisting}[language=R, caption={Installing the DiscrimOD Package}]
+install.packages(c("devtools", "Rcpp", "RcppArmadillo"))
+devtools::install_github("PingYangChen/DiscrimOD")
+\end{lstlisting}
+
+Once the installation is complete, load the package using the \verb|library()| function:
+
+\begin{lstlisting}[language=R, caption={Loading the DiscrimOD Package}]
+library(DiscrimOD)
+\end{lstlisting}
+
+\hspace*{8mm} The optimal discrimination design search algorithm in the \verb|DiscrimOD| package involves two types of algorithms, PSO and L-BFGS. The PSO and L-BFGS settings are defined through \verb|getPSOInfo()| function. Here, we list the most influential tuning parameters of PSO below:
+
+\begin{itemize}
+\item \verb|nSwarm|:The size of the particle swarm. Typically, we set 32 or 64 partciels.
+
+\item \verb|dsRange|:The number of maximal iterations.
+
+\item \verb|IF_INNER_LBFGS|: The logical input \verb|TRUE/FALSE| to turn on/off the L-BFGS algorithm for the inner optimization problem (minimizing the distance among parameter space). If specified \verb|IF_INNER_LBFGS = FALSE|, the \verb|DiscrimOD| package will run the NestedPSO algorithm in \cite{chen2015minimax}.
+
+\item \verb|LBFGS_RETRY|: The maximal times of trails of L-BFGS algorithm. This parameter is used to prevent failures due to poor initial vectors, and it is commonly recommended to set it to 2 or 3 attempts. However, in our simulation studies, we observed inconsistencies between the criterion value $C^*$ and the recomputed value $\hat{C}$ based on the estimated parameters and design, which is suspected to be caused by instability in the inner L-BFGS computation. To improve robustness and consistency of the results, we uniformly set this parameter to 50 in our study.
+
+\end{itemize}
+
+The codes shown below are the algorithm settings used in this example. First, for PSO-QN algorithm working on discrimination design for two models, we set 64 particles and 200 iterations for PSO, and for each computation for the inner loop, we repeat L-BFGS algorithm 50 times. The remaining settings in both algorithms are set as default values.
+
+\begin{lstlisting}[language=R, caption={Configuring Algorithm Parameters (PSO and L-BFGS)}]
+PSO_INFO <- getPSOInfo(nSwarm = 64, maxIter = 200)
+LBFGS_INFO <- getLBFGSInfo(LBFGS_RETRY = 50)
+\end{lstlisting}
+
+Note: Although the main example in this study adopts the L-BFGS method for the inner optimization routine, the DiscrimOD package also supports using Particle Swarm Optimization (PSO) for solving the inner optimization problem. This approach is referred to as the NestedPSO algorithm \citep{chen2015minimax}.
+
+\hspace*{8mm} To configure the NestedPSO algorithm, each setting in the \verb|getPSOInfo()| function must be a vector of length 2. The first element specifies the configuration for the outer PSO loop, while the second is for the inner loop. For instance, in the example below, 64 particles and 200 iterations are used for the outer loop, and 32 particles and 100 iterations for the inner loop. Most importantly, the L-BFGS algorithm must be disabled when using NestedPSO by setting \verb|IF_INNER_LBFGS = FALSE| in the \verb|getLBFGSInfo()| function. The following code illustrates how to implement this setup (note: not used in the current example, shown for demonstration purposes only):
+
+\begin{lstlisting}[language=R, caption={Alternative Setup Using NestedPSO}]
+# Set NestedPSO options. The length of setting indicates the number of loops
+NESTEDPSO_INFO <- getPSOInfo(nSwarm = c(64, 32), maxIter = c(200, 100))
+# Turn off L-BFGS implementation for the inner optimization loop
+LBFGS_NOTRUN <- getLBFGSInfo(IF_INNER_LBFGS = FALSE)
+\end{lstlisting}
+
+\hspace*{8mm} Next, we apply the \verb|DiscrimOD()| function and invoke the PSO-QN algorithm to search for the CKL-optimal design for pairwise model discrimination. In this example, we illustrate the procedure using the true model $\eta_{tr}(x, \theta_1)$ versus the rival model $\eta_2(x, \theta_2)$.
+
+\hspace*{8mm} In addition to specifying the model list, the divergence function, and the algorithm settings, it is also necessary to define the type of discrimination criterion using the argument \verb|crit_type = "pair_fixed_true"| for pairwise discrimination. Furthermore, the number of support points must be specified (here, \verb|nSupp = 3|), along with the lower and upper bounds of the design space, set as \verb|dsLower = 10| and \verb|dsUpper = 80|, respectively.
+
+\begin{lstlisting}[language=R, caption={Running DiscrimOD to Obtain the Optimal Design}]
+nSupp <- 3
+dsRange <- c(10, 80)
+res <- DiscrimOD(MODEL_INFO = model_info, DISTANCE = kldiv_lnln_censored5000,
+                 nSupp = nSupp, dsLower = dsRange[1], dsUpper = dsRange[2],
+                 crit_type = "pair_fixed_true",
+                 PSO_INFO = PSO_INFO, LBFGS_INFO = LBFGS_INFO,
+                 seed = 100, verbose = TRUE)
+\end{lstlisting}
+
+After completing the optimal design search, the \verb|DiscrimOD()| function returns a list object with several key outputs. The three most relevant fields include:
+
+\begin{itemize}
+\item Best Design and Weights(\$BESTDESIGN):
+
+This component stores the final design matrix identified by the PSO-QN algorithm. The matrix contains two columns: the first for support points and the second for the associated weights. The R code is shown below:
+
+\begin{lstlisting}[language=R, caption={Best design and weights}]
+round(res$BESTDESIGN, 3)
+\end{lstlisting}
+
+Output:
+
+\begin{lstlisting}[language=R, caption={The Output of Best design and weights}]
+       dim_1 weight
+obs_1 33.557  0.330
+obs_2 56.829  0.436
+obs_3 80.000  0.234
+\end{lstlisting}
+
+\item Criterion Value(\$BESTVAL):
+
+This is the minimized KL divergence corresponding to the best design. It serves as the criterion value used to evaluate design quality. The R code is shown below:
+
+\begin{lstlisting}[language=R, caption={KL criterion value of the best design}]
+res$BESTVAL
+\end{lstlisting}
+
+Output:
+
+\begin{lstlisting}[language=R, caption={The Output of KL criterion value of the best design}]
+[1] 0.009265602
+\end{lstlisting}
+
+\item Computation Time(\$CPUTIME):
+
+This field records the elapsed CPU time (in seconds) during the optimization process, which can be used to assess algorithm efficiency:
+
+\begin{lstlisting}[language=R, caption={CPU time of the optimization}]
+res$CPUTIME
+\end{lstlisting}
+
+Output:
+
+\begin{lstlisting}[language=R, caption={The Output of CPU time of the optimization}]
+elapsed
+42714.86
+\end{lstlisting}
+
+\end{itemize}
+
+\hspace*{8mm} To further examine the accuracy and stability of the identified design, we employ the \verb|designCriterion()| function to recompute the criterion value based on the specified models and parameters, while also obtaining the searched parameters of the rival model.
+
+\hspace*{8mm} This function accepts the design result (e.g., \verb|res$BESTDESIGN|), the model configuration (\verb|MODEL_INFO|), the divergence function (\verb|kldiv_lnln_censored5000|), the bounds of the design space, the type of discrimination criterion (e.g., \verb|"pair_fixed_true"|), and the optimization settings (\verb|PSO_INFO| and \verb|LBFGS_INFO|).
+
+The output consists of:
+
+\begin{itemize}
+\item \verb|$cri_val|:
+
+the recomputed criterion value $\hat{C}$ based on the current design and model settings. This value can be compared with the original optimal value $C^*$ to check consistency.
+
+\item \verb|$theta2|:
+
+the searched parameters of the rival model obtained under the current design, including both the true and rival model parameter vectors (with the true model often held fixed).
+
+\end{itemize}
+
+This verification step is crucial for assessing the numerical stability of the optimization process, especially whether parameter search issues may cause discrepancies in the criterion values. The R code is shown below:
+
+\begin{lstlisting}[language=R, caption={Verifying Design Stability and Parameter Search}]
+designCriterion(res$BESTDESIGN, MODEL_INFO = model_info,
+                DISTANCE = kldiv_lnln_censored5000,
+                dsLower = dsRange[1], dsUpper = dsRange[2],
+                crit_type = "pair_fixed_true", MaxMinStdVals = NULL,
+                PSO_INFO = PSO_INFO, LBFGS_INFO = LBFGS_INFO)
+\end{lstlisting}
+
+Output:
+
+\begin{lstlisting}[language=R, caption={The Output of Verifying Design Stability and Parameter Search}]
+$cri_val
+[1] 0.009265599
+
+$theta2
+             [,1]      [,2]      [,3]      [,4]
+model_1  -5.00000 -1.500000 0.0500000 0.9780103
+model_2 -66.71046  2.016919 0.9780103 0.0000000
+\end{lstlisting}
+
+\hspace*{8mm} To verify whether the resulting design is optimal or not, we use the equivalence theorem. In the \verb|DiscrimOD| package, we implement the \verb|equivalence| function. In this function, we need to input the numerical result object, \verb|res|, obtain by the \verb|DiscrimOD| function. Based on the numerical result, the \verb|equivalence| function computes the values of directional derivative function on the grid of length \verb|ngrid|. One can plot the curve of the directional derivative function by R utility function \verb|plot|. The $x$-axis is the grid vector of design space which can be found in the \verb|$Grid_1| tag. The $y$-axis is the values of directional derivative function in \verb|$DirDeriv| tag. We can also pin the support points on the curve by \verb|points| function. To make a better visualization, we use the horizontal line at $y=0$ to show the resulting design is CKL-optimal, that is, the values of directional derivative function are smaller than zero, and at the support points, the values should be zero (at least close to zero).
+
+\begin{lstlisting}[language=R, caption={Equivalence Theorem and Graphical Verification of Optimality}]
+eqv <- equivalence(ngrid = 100, PSO_RESULT = res,
+                   MODEL_INFO = model_info,
+                   DISTANCE = kldiv_lnln_censored5000,
+                   dsLower = dsRange[1], dsUpper = dsRange[2],
+                   crit_type = "pair_fixed_true",
+                   PSO_INFO = PSO_INFO, LBFGS_INFO = LBFGS_INFO)
+# Draw the directional derivative curve
+plot(eqv$Grid_1, eqv_Arrhenius$DirDeriv, type = "l",
+     col = "blue", main = "",
+     xlab = "x", ylab = "Directional Derivative"); abline(h = 0)
+points(res$BESTDESIGN[,1], rep(0, nrow(res$BESTDESIGN)), pch = 16)
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering{
+        \includegraphics[scale=0.25]{\imgdir KL_ll_3.png}}
+    \caption{Directional derivative plot generated from the example code to verify design optimality}
+\end{figure}
+
+\hspace*{8mm} Through the above codes and visualizations, we can not only confirm whether the resulting design is optimal but also examine whether the support points correspond to the zero-crossings of the directional derivative. This procedure plays a crucial role in verifying the correctness and numerical stability of the design, thereby enhancing the reliability of model discrimination.
+
+\chapter{Demonstration of the Shiny Interface}\label{appendixC}
+
+\hspace*{8mm} This appendix presents the R Shiny user interface developed for this study, which serves as an interactive platform to configure model discrimination designs, execute optimization routines, and interpret results. The interface design aligns closely with the simulation settings discussed throughout earlier chapters, allowing users to flexibly adjust design conditions based on various modeling assumptions and objectives.
+
+\hspace*{8mm} The interface supports an intuitive workflow that enables configuration of key elements such as divergence criteria, model distribution assumptions, parameter ranges, and algorithm-specific settings. 
+
+\hspace*{8mm} The full Shiny source code used in this study is openly available at: \href{https://github.com/GPLIN514/Master-Thesis-ALT-Model-Discrimination-Design/tree/main/Thesis-code/shiny-demo}{GitHub/GPLIN514}. Additionally, an online interactive version is hosted on \verb|shinyapps.io|, allowing users to directly access and explore the interface without local setup: \href{https://msgplin.shinyapps.io/Model-Discrimination-Design/}{shinyapps.io/MSGPLIN}.
+
+\hspace*{8mm} The following provides a walkthrough of the interface's core components, supported by screenshots to demonstrate how each element contributes to the model discrimination design and evaluation process.
+
+\newpage
+
+\begin{figure}[H]
+    \centering{
+        \includegraphics[scale=0.31]{\imgdir Fidalgo-shiny1.pdf}}
+    \caption{Overview of the main User Interface panel}
+    \label{fig:Fidalgo-shiny1}
+\end{figure}
+
+\hspace*{8mm} Figure \ref{fig:Fidalgo-shiny1} displays the Shiny interface designed based on the simulation setup in Section \ref{SEC:Fidalgo}. The following describes each configuration item, with the \textcolor{red}{red box} highlighting the user-defined input area:
+
+\begin{enumerate}
+\item Model Structure (Preloaded): 
+
+The interface preloads the mathematical structures of the two competing models to help users align the required parameter settings below.
+
+\item Divergence Calculation Method: 
+
+As shown in Figure \ref{fig:Fidalgo-shiny3}, users can choose between a closed-form solution and numerical integration for computing the objective function.
+
+\begin{figure}[H]
+    \centering{
+        \includegraphics[scale=0.55]{\imgdir Fidalgo-shiny3.png}}
+    \caption{Divergence calculation method selection}
+    \label{fig:Fidalgo-shiny3}
+\end{figure}
+
+\item Distribution Assumption: 
+
+As illustrated in Figure \ref{fig:Fidalgo-shiny4}, users can specify whether both models follow a Log-Normal or Weibull distribution.
+
+\begin{figure}[H]
+    \centering{
+        \includegraphics[scale=0.55]{\imgdir Fidalgo-shiny4.png}}
+    \caption{Distribution assumption selection}
+    \label{fig:Fidalgo-shiny4}
+\end{figure}
+
+\item Design Space Settings: 
+
+Users define the number of support points in the approximation design and adjust the bounds of the design variable.
+
+\item Parameter Settings: 
+
+The true model parameters are specified directly by the user, based on prior knowledge or expert input, while ranges are provided for the rival model. By default, the variance is assumed to be the same for both models, but users may modify this setting if needed.
+
+\item Algorithm Configuration: 
+
+The outer loop uses Particle Swarm Optimization (PSO), requiring the number of particles and iterations. The inner loop is set by default to use the L-BFGS method, where users must specify the number of repetitions. If the Use Inner PSO option is selected (as shown in Figure \ref{fig:Fidalgo-shiny5}), the inner optimization will switch to PSO, and an additional set of particle and iteration settings will be required.
+
+\begin{figure}[H]
+    \centering{
+        \includegraphics[scale=0.5]{\imgdir Fidalgo-shiny5.png}}
+    \caption{Algorithm configuration options}
+    \label{fig:Fidalgo-shiny5}
+\end{figure}
+
+\end{enumerate}
+
+\hspace*{8mm} The area highlighted by the \textcolor{blue}{blue box} represents the output results generated by the algorithm. The meaning of each section is described below:
+
+\begin{enumerate}
+\item Approximation Design: This part lists the final optimal design configuration, including the locations of the support points and their corresponding weights. These constitute the approximation design $\xi^*$.
+
+\item Criterion Value and CPU Time: This part presents the criterion value ($C^*$) associated with the design, as well as the total computation time (in seconds) required to obtain it. This information is used to assess the efficiency and performance of the optimization algorithm.
+
+\item Searched Parameter Values: 
+
+Since the adopted model discrimination design follows a maximin structure—finding the design that maximizes the criterion under the worst-case (minimum) parameter setting—the searched parameter combination is critical for understanding the behavior and robustness of the obtained design.
+
+\item Directional Derivative Plot: 
+
+To verify whether the selected design satisfies the optimality conditions, a directional derivative plot is generated. This plot helps confirm whether the support points correspond to the local maxima of the function and whether the curve remains entirely below 0, as required by the equivalence theorem.
+
+\end{enumerate}
+
+\hspace*{8mm} Additionally, if the Setting tab is selected, users can view the inputs they manually configured during the current analysis—such as model assumptions, parameter ranges, and algorithm settings—as shown in Figure \ref{fig:Fidalgo-shiny2}. Please note that default system values are not displayed in this section.
+
+\begin{figure}[H]
+    \centering{
+        \includegraphics[scale=0.5]{\imgdir Fidalgo-shiny2.png}}
+    \caption{Summary table of User-Defined settings}
+    \label{fig:Fidalgo-shiny2}
+\end{figure}
+
+\hspace*{8mm} Finally, several interface components in the Arrhenius and Meeker tabs differ from Fidalgo tab. The following explains their unique settings:
+
+\begin{itemize}
+
+\item Censoring Threshold Setting (both tabs): This input corresponds to the Type I censoring scenario, which addresses situations where some products have not failed by the end of the test. Users can specify the censoring threshold directly, as shown in Figure \ref{fig:Arrhenius-shiny2}.
+
+\begin{figure}[H]
+    \centering{
+        \includegraphics[scale=0.5]{\imgdir Arrhenius-shiny2.png}}
+    \caption{Censoring threshold configuration}
+    \label{fig:Arrhenius-shiny2}
+\end{figure}
+
+\item Divergence Method (Arrhenius tab only): This dropdown menu allows users to choose among four divergence criteria: KL divergence, LW divergence, Bhattacharyya distance, and Chi-square distance. These options enable flexibility for various modeling goals. The options are shown in Figure \ref{fig:Arrhenius-shiny1}. For the Meeker tab, the divergence method is pre-set to KL divergence and cannot be changed.
+
+\begin{figure}[H]
+    \centering{
+        \includegraphics[scale=0.5]{\imgdir Arrhenius-shiny1.png}}
+    \caption{Selection of divergence criteria in Arrhenius tab}
+    \label{fig:Arrhenius-shiny1}
+\end{figure}
+
+\item Model Distribution Assumptions (Meeker tab only): In this case, the aim is to evaluate the identifiability of two models with the same structural form but different distributional assumptions. Therefore, users can only specify the distribution for the true model (Log-Normal or Weibull), while the rival model's distribution is automatically assigned to be the other type. See Figure \ref{fig:Meeker-shiny} for examples.
+
+\begin{figure}[H]
+\centering
+\subfloat[True model follow Log-Normal distribution\label{fig:Meeker-shiny1}]{\includegraphics[width=0.5\linewidth]{\imgdir Meeker-shiny1.png}}\\
+\subfloat[True model follow Weibull distribution\label{fig:Meeker-shiny2}]{\includegraphics[width=0.5\linewidth]{\imgdir Meeker-shiny2.png}} 
+\caption{Model distribution options in Meeker tab}
+\label{fig:Meeker-shiny}
+\end{figure}
+
+\end{itemize}
+
+

@@ -1,0 +1,323 @@
+\chapter{文獻回顧 \label{CH: review}}
+
+\section{加速壽命試驗}
+
+\hspace*{8mm} 生產高可靠性產品一直是製造業的重要目標之一。在產品研發的初期階段，確認產品壽命是否符合既定標準至關重要。然而，當預期壽命遠遠超過可測試的時間時，常用的方法是進行加速壽命試驗（Accelerated Life Testing, ALT）。該方法通過改變環境條件（例如提高溫度、增加振動頻率等）來加速產品的老化過程，並通過設定不同的應力條件來收集數據，結合數學模型外推產品在正常使用條件下的壽命分佈。例如，藥品穩定性試驗通常需在幾週內完成。根據 \cite{guideline2003stability} 指導文件，建議在高溫、高濕環境中進行加速測試，以 Pfizer 為例，在新藥研發中，該公司會通過加速穩定性試驗模擬 2 至 5 年的儲存條件。同樣地，電動車電池的目標壽命通常為 8 至 10 年或 100,000 公里以上，但由於實際測試無法覆蓋這麼長的時間，研究人員通常通過估計電池容量隨時間的衰減曲線，進一步外推電池在實際使用條件下的壽命。 \cite{uddin2017possibility} 在不同溫度與充放電速率下的加速試驗結果來模擬長期使用情境，用於預測鋰電池在實際駕駛條件下的性能衰退。
+
+% 安定性試驗指引(Q1A) 是國際藥品法規協和會（International Conference on Harmonization, ICH）首批定稿的指引之一，早在1993 年進入第4階段1，接著在2000年代初期進行修訂2次為Q1A(R2)
+
+\hspace*{8mm} \cite{arrhenius1889reaktionsgeschwindigkeit} 提出的 Arrhenius 模型為化學反應動力學奠定了理論基礎，並被廣泛應用於可靠度分析和 ALT 等領域。該模型描述了溫度對化學反應速率或產品壽命的影響，並假設產品的失效過程遵循 Arrhenius 方程。該方程表示為：
+\begin{equation} \label{Arrhenius model}
+t(T) = A \cdot \exp\left( \frac{E_a}{K \cdot Temp} \right),
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $t(T)$：在溫度 $Temp$ 下產品的壽命；
+\item $A$：頻率因子（Pre-exponential Factor），與產品的內在性質相關，是常數；
+\item $E_a$：活化能（Activation Energy），表示驅動失效過程所需的能量，單位為電子伏特；
+\item $K$：玻爾茲曼常數（Boltzmann Constant, $8.617 \times 10^{-5} \, eV/K$）；
+\item $Temp$：克爾文溫度（Kelvin, $^{\circ}\text{C}+273.15$）。
+\end{itemize}
+
+\hspace*{8mm} 該模型假設失效速率與溫度之間呈指數關係，表示在高溫條件下，失效速率顯著加快。這一特性使得 Arrhenius 模型成為 ALT 中的核心工具，透過高溫數據的收集，可以外推產品在正常使用條件下的壽命。然而，在實務應用中，模型的準確性受多種因素影響，特別是在實驗設計、參數估計與模型辨識方面存在挑戰。
+
+\hspace*{8mm} 首先，溫度點的選擇是 ALT 中影響結果準確性的關鍵因素。如果所選的測試溫度過低，需要耗費大量時間和成本進行測試才能觀察到產品失效，無法有效縮短測試週期；反之，若溫度過高，雖可加速產品失效，但可能導致實驗條件與實際使用情境落差過大，降低結果的外推性與實用性。因此，如何在有限次數內選擇合適的溫度點成為一個重要課題。
+
+\hspace*{8mm} 其次，在參數估計方面，活化能 $E_a$ 和頻率因子 $A$ 的準確性對於壽命預測至關重要。傳統上，透過最小平方估計（Least Squares Estimation, LSE）或最大概似估計（Maximum Likelihood Estimation, MLE）來推算參數。然而，在 ALT 中，設限數據（censored data）是無可避免的，因為測試時間有限，部分產品在測試結束時仍未失效。因此，標準估計方法可能不適用，必須考慮設限數據下的修正概似函數（Modified Likelihood Function），確保參數估計在 ALT 框架下的統計合理性。
+
+\hspace*{8mm} 在 MLE 框架下，假設我們對 $j$ 個不同的溫度（應力）$T_j$ 下的樣本進行測試，並測量 $n$ 個個別樣本的壽命，所以我們記錄溫度 $T_j$ 下，第 $i$ 個樣本的壽命，記作 $t_{ij}$ 。我們認為壽命 $t_{ij}$ 服從 $Weibull(\lambda,\beta)$，其中 $\lambda_j$ 是對應溫度 $T_j$ 的尺度參數，因此需透過 Arrhenius 模型來決定，$\beta$ 是形狀參數（通常假設所有溫度條件下形狀參數相同）：
+% $t(T_j)$ 是在溫度 $T_j$ 下的平均壽命，$t_{ij}$則是個別產品在溫度 $T_j$ 下的實際測得壽命，這些數據服從 Weibull 分佈。
+\begin{equation} \notag
+f(t_{ij}; \lambda_j, \beta) = \beta \lambda_j t_{ij}^{\beta - 1} \exp(-\lambda_j t_{ij}^\beta)
+\end{equation}
+
+其中：
+\begin{enumerate}
+\item $\lambda_j$ 由 Arrhenius model 決定：
+\begin{equation} \notag
+\lambda_j = A^{-1} \exp\left(-\frac{E_a}{K T_j}\right)
+\end{equation}
+\item $\beta$ 是 Weibull 形狀參數（通常已知或額外估計）。
+\end{enumerate}
+
+若所有產品皆失效（無 Type I 設限數據），則概似函數（Likelihood Function）為：
+\begin{equation} \notag
+L(A, E_a, \beta) = \prod_{j} \prod_{i=1}^{n_j} f(t_{ij}; \lambda_j, \beta)
+\end{equation}
+
+對數概似函數（Log-Likelihood Function）為：
+\begin{equation} \notag
+\ell(A, E_a, \beta) = \sum_j \sum_{i=1}^{n_j} \left[ \ln \beta + (\beta - 1) \ln t_{ij} - \ln A - \frac{E_a}{K T_j} - A^{-1} e^{-\frac{E_a}{K T_j}} t_{ij}^\beta \right]
+\end{equation}
+
+\hspace*{8mm} 然而，在 ALT 中，部分樣本因時間限制而未失效，形成 Type I 設限數據，這時概似函數需考慮存活函數（Survival Function）：
+\begin{equation} \notag
+S(t; \lambda_j, \beta) = \exp(-\lambda_j t^\beta)
+\end{equation}
+
+因此，修正後的概似函數為：
+\begin{align}
+L(A, E_a, \beta) &= \prod_{j} \prod_{i \in \text{失效}} f(t_{ij}; \lambda_j, \beta) \times \prod_{i \in \text{設限}} S(t_{ij}; \lambda_j, \beta) \notag \\
+&= \prod_{j} \prod_{i \in \text{失效}} \beta \lambda_j t_{ij}^{\beta - 1} \exp(-\lambda_j t_{ij}^\beta) \times \prod_{i \in \text{設限}} \exp(-\lambda_j t_{ij}^\beta) \notag
+\end{align}
+
+取對數後，修正後的對數概似函數為：
+\begin{align}
+\ell(A, E_a, \beta) =& \sum_j \sum_{i \in \text{失效}} \left[ \ln \beta + (\beta - 1) \ln t_{ij} - \ln A - \frac{E_a}{K T_j} - A^{-1} e^{-\frac{E_a}{K T_j}} t_{ij}^\beta \right] \notag \\
+&- \sum_j \sum_{i \in \text{設限}} A^{-1} e^{-\frac{E_a}{K T_j}} t_{ij}^\beta \notag
+\end{align}
+
+\hspace*{8mm} 換句話說，ALT 中的參數估計必須與 Type I 設限數據對應的概似函數共同調整，才能獲得穩健的結果。目標是估計影響產品壽命的關鍵參數 $A$、$E_a$ 和 $\beta$，我們需要尋找修正後對數概似函數達到最大值的參數估計值 $\hat{A}, \hat{E}_a, \hat{\beta}$：
+
+為了得到最適合 ALT 數據的參數估計值，我們透過解以下方程組來估計：
+
+$$\frac{\partial \ell}{\partial A} = 0, \quad \frac{\partial \ell}{\partial E_a} = 0, \quad \frac{\partial \ell}{\partial \beta} = 0$$
+
+透過 MLE 獲得的參數 $\hat{A}, \hat{E}_a, \hat{\beta}$ 能夠確保 ALT 模型的準確性，進而有效推估產品在正常操作條件下的壽命。
+
+在過去的研究中，$c$-optimal設計被廣泛應用，其主要目標是透過選擇最佳的實驗條件（如溫度點），最小化關鍵參數的估計變異。特別是在 ALT 研究中，$c$-optimal 設計被廣泛用於提高活化能 $E_a$ 的估計精度，以確保壽命模型的可靠性。
+
+例如：
+\begin{enumerate}
+
+\item \cite{lu2019bayesian} 提出了一種基於雙重目標的貝葉斯序貫設計方法，結合 D-optimal 和 $c$-optimal 準則，前者應用於實驗的早期階段，以快速提高模型參數估計的精度，後者則在後期階段專注於最小化特定壽命分位數（如第 $p$ 百分位壽命）的估計變異，確保壽命預測的穩定性與準確性。
+
+\item \cite{abd2020optimal} 探討了$c$-optimal 設計在多重加速壽命試驗（Multiple ALT）中的應用，並比較了不同最佳化準則（D-, $c$-, A-optimal）在實驗設計效能上的表現，同時進行了敏感性分析（sensitivity analysis）來評估錯誤參數設定對設計結果的影響。
+
+\item \cite{newer2024optimal} 研究了$c$-optimal 設計在 ALT 中的應用，特別是在漸進 Type-I 設限（Progressive Type-I Censoring, PTIC）條件下。他們比較了多種最佳化準則（D-, E-, T-, $c$-, R-, P-optimal），並發現$c$-optimal 方法能夠有效最小化壽命分佈的特定參數（如 Weibull 分佈中的尺度參數 $\lambda_0$）的估計變異。研究結果顯示，$c$-optimal 設計在步進應力加速壽命試驗（SALT）中，能夠在測試資源有限的條件下，提高壽命分佈關鍵參數的估計精度。
+
+\end{enumerate}
+
+\hspace*{8mm} 最後，在 ALT 研究中，模型辨識問題往往被忽視。雖然 Arrhenius 模型在許多溫度加速試驗中廣泛應用，但在某些產品或材料中，高溫可能會觸發額外的物理或化學機制，導致失效模式發生變化。例如，在某些電子元件中，高溫可能不僅加速老化，還可能引發電遷移（Electromigration）或介電層破壞（Dielectric Breakdown），這些失效機制未必能完全由 Arrhenius 模型準確描述。因此，如何透過實驗數據檢驗 Arrhenius 模型的適用性，並考慮可能的替代模型，是 ALT 設計中不可忽視的課題。
+
+\hspace*{8mm} 然而，我們發現現有研究多關注於提升參數估計的精度，例如透過$c$-optimal 設計來提高模型參數的估計效率，但較少考慮當兩個模型同樣基於 Arrhenius 框架，但其數學結構存在差異時，如何設計實驗來有效區分這些模型。這引出了另一個重要問題：是否能夠透過實驗設計，使未來的數據能夠有效區分這類競爭模型？這類方法被稱為模型辨識設計（Model Discrimination Design），其核心目標是選擇合適的實驗條件，使不同模型在觀測數據上的行為產生顯著差異，從而提升模型選擇的準確性。
+
+\section{模型辨識設計}
+
+\hspace*{8mm} 在實務應用上，無論是科技業、製造業，或其他快速發展的領域，其發展變化的速度往往呈現指數級增長。在此背景下，原本所採用的模型可能因環境變化而逐漸失去適用性，導致模型的預測準確度下降，甚至影響決策的有效性。因此，如何判斷應該繼續沿用現有模型，還是更新為更能反映當前環境的新模型，成為一項重要課題。為了做出最佳決策，模型辨識設計可用來比較不同模型的適用性。在面對新的環境變數時，決策者不應單純地捨棄舊模型或全面採用新模型，而應透過嚴謹的統計方法，客觀評估各種模型的適用性，確保選擇的模型能夠有效反映當前情境，進而提升決策的準確性與可靠性。
+
+\hspace*{8mm} \cite{atkinson1975design,atkinson1975optimal} 提出了用於區分兩個對立模型的實驗設計方法，假設模型服從常態分佈，並提出了T-optimal 設計。假設現在有兩個高斯模型，它們具有相同的變異數 $\sigma^2$ 但不同的平均反應函數，分別為 $\eta_1(x, \theta_{1})$ 和 $\eta_2(x, \theta_{2})$ 。希望比較這兩個模型。在實務中，第一個模型通常被認為是已知的，可能來自於專家的意見或基於過往經驗的現有現狀。因此，我們假設第一個模型是真實模型，並記其參數為已知的 $\theta_1=\theta_{tr}$ ，即 $\eta_{tr}(x)=\eta_1(x, \theta_{tr})$ 。第二個模型則是對立模型，記為 $\eta_r(x, \theta_{2})=\eta_2(x, \theta_{2})$，其中 $\theta_2\in \Theta_2$是未知的。
+
+\hspace*{8mm} 為了在沒有資料的情況下進行模型辨識，採用了 T-optimal 設計標準，其目標函數如公式 \eqref{eq:T-optimal-1} 所示：
+\begin{equation}\label{eq:T-optimal-1}
+T_{2,tr}(\xi)=\min_{\substack{\theta_2\in \Theta_2}}\int_{X}\Delta_{2,tr}(x,\theta_2) \xi(dx)
+\end{equation}
+
+其中，$\Delta_{2,tr}(x,\theta_2)=\left[\eta_{tr}(x)-\eta_2(x,\theta_2)\right]^2$，$\xi$ 是實驗設計的分佈。我們的目標是選擇一個設計分佈 $\xi$，使得當我們最小化 $\theta_2$ 引起的模型差異後，兩個模型的差異仍然足夠大，以便後續的數據分析能清楚地區分這兩個模型。
+
+\hspace*{8mm} 然而，T-optimal 設計的目標僅僅是在最小化兩個模型對應於 $\theta_2$ 的差異情況下進行設計，但我們希望進一步確保所選設計在未來收集到數據後，兩個模型的差異只會更加顯著。因此，我們提出一個基於最大化策略的設計方法，這導致了目標函數的調整，如公式 \eqref{eq:T-optimal-2} 所述：
+\begin{equation}\label{eq:T-optimal-2}
+\max_{\xi\in \Xi} T_{2,tr}(\xi)=\max_{\xi\in \Xi} \min_{\substack{\theta_2\in \Theta_2}}\int_{X}\Delta_{2,tr}(x,\theta_2) \xi(dx)
+\end{equation}
+
+\hspace*{8mm} 這一方法的核心思想是在選擇設計分佈 $\xi$ 時，先針對每個可能的 $\theta_2$ 找到模型間差異的最小值，然後在所有可能的設計中選擇能最大化該最小差異的 $\xi$ 。此設計目標的意圖在於，無論未來收集到的數據如何影響 $\theta_2$ 的估計，兩個模型之間的實際差異只會比設計階段考慮的最小差異更大。因此，這樣的設計不僅有助於解決當前的模型辨識問題，還能提高未來實驗數據的利用效率，為模型選擇提供更強的支持。
+
+\begin{theorem}
+為了驗證找到的設計 $\xi_T^\ast$ 是否為最佳設計，我們使用等價定理（Equivalence Theorem, \citep{atkinson1975design,atkinson1975optimal}），如公式 \eqref{eq:T-optimal-3} 所示：
+\begin{equation}\label{eq:T-optimal-3}
+\psi_T(x, \xi_T^\ast) = \Delta_{2,tr}(x, \hat{\theta}_2(\xi_T^\ast)) - T_{2,tr}(\xi_T^\ast) \leq 0,
+\end{equation}
+
+其中：
+\begin{itemize}
+\item 第一項 $\Delta_{2,tr}(x, \hat{\theta}_2(\xi_T^\ast))$ 表示在設計空間 $\mathcal{X}$ 的每一點 $x$ 上，針對所有可能的 $\theta_2 \in \Theta_2$ 計算模型差異的最小值。
+
+\item 第二項 $T_{2,tr}(\xi_T^\ast)$ 是基於所選設計 $\xi_T^\ast$ 計算出的模型差異的最小值，這是經由「max-min」最佳化過程確定的全域最佳標準。
+\end{itemize}
+\end{theorem}
+
+\hspace*{8mm} 如果對於所有 $x \in \mathcal{X}$，不等式 $\psi_T(x, \xi_T^\ast) \leq 0$ 成立，則可以確認 $\xi_T^\ast$ 是 T-optimal 設計。這表明，在任何設計點上，局部模型差異的最大值都不會超過全局模型差異，從而確保設計的最佳性。
+
+\hspace*{8mm} 然而， \cite{atkinson1975design,atkinson1975optimal} 提出的 T-optimal 設計旨在通過最大化模型之間差異平方和，實現對模型的有效辨識。然而，該方法在某些應用情境下存在限制。例如，當兩個模型的變異不同或誤差項不符從常態分佈時，僅考慮差異平方和可能不足以充分反映模型之間的差異。此時應考慮分佈整體形狀的差異，這可以通過 Kullback-Leibler 散度（KL Divergence）來衡量模型之間的資訊損失。 \cite{lopez2007optimal} 針對此類情況提出了 KL-optimal 設計，並通過模擬不同條件下的情境，尋找適用於模型辨識的有效設計。
+
+\section{尋找模型辨識設計的數值方法}
+
+\hspace*{8mm} 在尋找最佳化的過程中，\cite{atkinson1975design,atkinson1975optimal} 採用了類似交換演算法的增量式設計。然而，在處理連續型設計空間時，該方法通常需先設定一組基準設計（例如隨機選取三個設計點）作為起始點。接著，演算法會從預先離散化的設計空間中（例如每隔 50 或 100 單位切分）選出候選點，逐一嘗試加入目前設計中，觀察是否能提升準則值，若有提升則保留該點。經過反覆遞迴後，最終設計可能出現多個非零權重的支撐點，甚至集中於部分區段，導致支撐點總數超出原本預期（例如原本為三點設計）。此外，若鄰近點如 99、100、101 皆帶有小權重，可能在圖形上呈現「多點集中於一區」的特性。這些現象使得交換演算法在支撐點數量與設計可解釋性上較難控制。
+
+\hspace*{8mm} 此外，綜合上述前人研究的成果與分析，以及不論是 T-optimal 設計還是 KL-optimal 設計，其極值求解過程可能耗費大量時間，對計算效率提出了挑戰。因此，採用更加高效的連續型優化演算法是一個值得探索的方向。近十年來的研究顯示，粒子群優化（Particle Swarm Optimization, PSO）在處理實驗設計問題上具有顯著優勢，能夠解決許多過去理論或傳統演算法無法有效解決的問題。因此，本研究將採用 PSO 演算法作為求解工具，以提升計算效率與結果的準確性。值得一提的是，\cite{chen2020hybrid} 已成功應用 PSO 演算法於模型辨識問題，啟發了本研究嘗試將此方法套用於可靠度領域中最常見的 Arrhenius 模型，以探索其在該領域的應用潛力。
+
+\hspace*{8mm} \cite{eberhart1995new} 首次提出粒子群優化方法，這是一種啟發式優化演算法，靈感來自於自然界中魚群與鳥群的集體行為。PSO 將每隻鳥或每條魚視為一個粒子，每個粒子代表一個候選解。通過結合自身歷史最佳解（Local Best, LBest）和群體全局最佳解（Global Best, GBest）的資訊，接著持續調整速度與位置，最終逐漸收斂至全局最佳解。針對不同類型的最佳化設計，已有眾多文獻應用 PSO 方法進行研究。例如，\cite{chen2011optimal} 探討了 A-optimal、D-optimal 和 Minimax 設計；\cite{lukemire2016using} 將 PSO 用於尋找 D-optimal 設計；\cite{walsh2022fast} 則研究了 G-optimal 設計等。
+
+\hspace*{8mm} PSO 的迭代過程包含兩個主要步驟，首先初始化粒子的速度與位置，然後根據公式 \eqref{eq:PSO_1} 計算粒子的速度，接著利用公式 \eqref{eq:PSO_2} 更新粒子的位置。在這一過程中，粒子的運動由三個關鍵組成部分構成，概念如圖 \ref{fig:PSO velocity} 所示：
+
+\begin{itemize}
+\item $\textcolor{PowerPointGreen}{(A)}$：慣性項，表示粒子的運動趨勢，通過延續前一次的速度影響當前速度。
+\item $\textcolor{blue}{(B)}$：個體學習項，通過粒子自身的歷史最佳位置 ($\xi_L^{t}$, LBest) 引導粒子向更好的解移動。
+\item $\textcolor{red}{(C)}$：群體學習項，通過群體的全局最佳位置 ($\xi_G^{t}$, GBest) 協助粒子向全局最佳解靠近。
+\end{itemize}
+
+粒子 $i$ 在時間 $t$ 和 $t+1$ 的運動由以下公式控制：
+\begin{equation}\label{eq:PSO_1}
+v_i^{t+1} = \underbrace{\varphi_{t} v_i^{t}}_{\textcolor{PowerPointGreen}{\text{(A)}}} + \underbrace{\gamma_1 \beta_1 \otimes \left[ \xi_{L}^{t} - \xi_i^{t} \right]}_{\textcolor{blue}{\text{(B)}}} + \underbrace{\gamma_2 \beta_2 \otimes \left[ \xi_G^{t} - \xi_i^{t} \right]}_{\textcolor{red}{\text{(C)}}}
+\end{equation}
+和
+\begin{equation}\label{eq:PSO_2}
+\xi_i^{t+1} = \xi_i^{t} + v_i^{t+1}, \quad \text{for } i = 1, \dots, N.
+\end{equation}
+
+\hspace*{8mm} 在公式 \eqref{eq:PSO_1} 中，$v_i^{t}$ 和 $v_i^{t+1}$ 分別代表粒子 $i$ 在時間 $t$ 和 $t+1$ 的速度；$\varphi_{t}$ 是慣性權重，其值介於 0 和 1 之間，可以是常數，也可以是隨時間遞減的函數。通常，在算法初期，較大的慣性權重有助於提升全局搜索能力，防止粒子過早陷入局部最佳解；而在算法後期，使用較小的慣性權重則有助於粒子進行精細搜索，提高解的精度並加速收斂。學習因子 $\gamma_1$ 和 $\gamma_2$ 分別對應個體學習和群體學習，控制粒子向 LBest 和 GBest 的移動權重，兩者通常設定為常數。而隨機數 $\beta_1$ 和 $\beta_2$ 是從均勻分佈 $U(0,1)$ 中隨機生成的，用於引入隨機性，增加粒子搜索的多樣性。
+
+\begin{figure}[H]
+    \centering{
+        \includegraphics[scale=0.3]{\imgdir PSO detail.png}}
+    \caption{PSO 速度運動示意圖}
+\label{fig:PSO velocity}
+\end{figure}
+
+PSO 演算法流程：（可參考圖 \ref{fig:PSO concept} ）
+
+\begin{enumerate}
+\item 初始化粒子：
+\begin{enumerate}[→]
+    \item 生成粒子群，包含 $n$ 個粒子。
+    \item 初始化粒子的位置 $\xi_i$ 和速度 $v_i$，其中 $i = 1, \dots, n$。
+    \item 確認每個粒子的自身歷史最佳解（$\xi_L^{t}$, LBest）以及群體全局最佳解（$\xi_G^{t}$, GBest）。
+\end{enumerate}
+
+\item 迭代過程：
+\begin{enumerate}[→]
+\item 運用公式 \eqref{eq:PSO_1} 計算每個粒子的速度。
+\item 運用公式 \eqref{eq:PSO_2} 更新粒子的位置。
+\item 每個粒子基於優化目標函數計算適應度值，並更新其 LBest 和 GBest。
+\item 判斷是否滿足停止條件（如達到迭代次數或適應度收斂），否則重複上述步驟。
+\end{enumerate}
+
+\item 輸出結果：
+\begin{enumerate}[→]
+    \item 以群體全局最佳解（GBest） 作為最終結果。
+\end{enumerate}
+\end{enumerate}
+
+\begin{figure}[H]
+    \centering{
+        \includegraphics[scale=0.4]{\imgdir PSO concept.png}}
+    \caption{PSO 流程圖}
+\label{fig:PSO concept}
+\end{figure}
+
+\section{現有應用於 ALT 的模型辨識設計方法}
+
+\hspace*{8mm} 在 ALT 研究中，模型辨識問題相對較少被探討，而 \cite{nasir2015simulation} 是其中較具代表性的研究之一。該研究針對 ALT 中的模型辨識問題，提出了一種基於貝葉斯方法（Bayesian Approach）的最佳化實驗設計策略，重點在於如何透過實驗設計來區分競爭模型，特別是在壽命與應力變數之間的關係可能為線性或非線性，且結構不確定的情境。他們採用 Hellinger 距離（Hellinger distance）衡量不同模型預測分佈之間的差異，並透過數值模擬來驗證該設計的有效性。
+
+\hspace*{8mm} 首先，透過圖 \ref{fig:ALT concept} 簡要說明 ALT 的概念。假設目前有兩個模型 $M_1$ 和 $M_2$，目標是預測產品的壽命第 $p$ 百分位數（$\tau_p$）。然而，當產品在正常使用條件下的壽命過長，難以在短時間內獲得失效數據時，通常會透過提高應力（stress）來加速產品故障，以縮短測試時間。  
+
+\hspace*{8mm} 在實驗設計中，設定兩個應力水準，分別為低應力（$S_{Low}$）和高應力（$S_{High}$），並在這些條件下測試產品的失效數據分佈。接著，利用外推方法預測在實際使用應力 $S_{UC}$ 下的失效分佈，進而推估產品的壽命。
+
+\hspace*{8mm} 圖中橫軸代表應力，縱軸代表產品壽命，兩者皆取對數，主要是因為許多壽命模型（如 Arrhenius 模型）呈現非線性關係，透過對數轉換可將其轉換為線性關係，便於進行統計推論。此外，在高應力條件下，產品壽命的變異性較大，數據分佈可能呈現高度偏態（Skewed），而對數變換後，壽命數據通常更接近常態分佈，有助於提高模型的適用性與參數估計的穩定性。因此，對 $M_1$ 和 $M_2$ 進行相同的實驗測試，觀察它們在不同應力條件下的壽命第 $p$ 百分位數（$\tau_p$），並分析兩者的對數變換後的壽命分佈變化 $\Delta\hat{\tau_p}$，使不同模型在不同應力條件下的行為變化更直觀，進而幫助進行模型辨識。 以下將依序描述該研究中模擬步驟的詳細資訊。
+ 
+\begin{figure}[H]
+    \centering{
+        \includegraphics[scale=0.6]{\imgdir ALT concept.png}}
+    \caption{ALT 概念圖 \citep{nasir2015simulation}}
+\label{fig:ALT concept}
+\end{figure}
+
+\hspace*{8mm} 目前的情境是，可靠度工程師對研究半導體組裝中 Au-Al 介面的金屬間化合物（IMC）生長感興趣。已知該故障機制會受到溫度應力的影響，因此需要進行加速壽命測試來估計設備的使用壽命，計劃能夠在溫度應力下區分線性模型 $M_1$ 和二次加速模型 $M_2$ ，其參數分別為 $\theta_1$ 和 $\theta_2$ 。實驗的設備與測試條件如下：
+
+\begin{itemize}
+\item 烘烤室有效期： 總測試時間為 42 天，即最長可達 1008 小時。
+
+\item 可使用的兩種烤箱類型：
+
+\begin{itemize}
+\item 低應力烤箱：溫度範圍為 $60^{\circ}\text{C}$ 至 $115^{\circ}\text{C}$。
+\item 高應力烤箱：溫度範圍為 $100^{\circ}\text{C}$ 至 $250^{\circ}\text{C}$。
+\end{itemize}
+
+\item 實驗成本限制： 最多可進行 20 次實驗。
+
+\end{itemize}
+
+本研究基於其論文中的真實工業案例，並提供詳細的模擬設置，包括以下所有要點。
+
+\begin{enumerate}
+\renewcommand{\labelenumi}{\Roman{enumi}.}
+
+\item 調整模型形式並設定欲比較的模型：
+
+首先，我們將 Arrhenius 模型（式 \eqref{Arrhenius model}）線性化，以建立模型。
+\begin{align}
+&t(T)=Aexp\left( \frac{E_a}{K \times Temp} \right)\notag \\ 
+\Rightarrow&\log(t(T))=\log(A)+\frac{E_a}{K \times Temp}\notag \\ 
+\Rightarrow&\underbrace{\log(t(T))}_{\mu}=\underbrace{\log(A)}_{\beta_0}+\underbrace{\frac{E_a}{K}}_{\beta_1} \times \underbrace{\frac{1}{Temp}}_x \label{M2 linearized}
+\end{align}
+
+接著，對加速變數進行標準化，式 \eqref{M2 linearized} 可以擴展為：
+\begin{align}
+\overbrace{\log(t(T))}^{\mu}&=\overbrace{(\beta_0+\beta_1 x_{low})}^{\gamma_0}+\overbrace{\left[\beta_1(x_{high}-x_{low})\right]}^{\gamma_1}\overbrace{\left( \frac{x-x_{low}}{x_{high}-x_{low}}\right)}^{\xi} \label{M2 normalized}
+\end{align}
+
+加入二次項，以捕捉可能的非線性加速效應，可表示為：
+\begin{equation} \label{M1 linearized}
+\mu =\beta_0+\beta_1x+\beta_2x^2
+\end{equation}
+
+將式 \eqref{M1 linearized} 的加速變數進行標準化後，擴展為：
+\begin{align}
+\overbrace{\log(t(T))}^{\mu}=&\overbrace{(\beta_0+\beta_1 x_{low})}^{\gamma_0}+\overbrace{\left[\beta_1(x_{high}-x_{low})\right]}^{\gamma_1}\overbrace{\left( \frac{x-x_{low}}{x_{high}-x_{low}}\right)}^{\xi} \notag \\
+&+\underbrace{\left[\beta_2 (x_{high}^2-x_{low}^2) \right]}_{\gamma_2}\underbrace{\left( \frac{x-x_{low}}{x_{high}-x_{low}}\right)^2}_{\xi^2} \label{M1 normalized}
+\end{align}
+
+綜合上述推導，方程式 \eqref{M2 normalized} 嵌入於 \eqref{M1 normalized} 之中，表示 $M_2$ 是$M_1$ 的一個特例。因此，我們定義 $M_1$ 和 $M_2$ 如下：
+\begin{align}
+M_1:\mu_1&=\gamma_0+\gamma_1 \xi +\gamma_2 \xi^2   \label{Final M1 normalized} \\
+M_2:\mu_2&=\gamma_0+\gamma_1 \xi   \label{Final M2 normalized}
+\end{align}
+
+另外，可靠度工程師認為 Weibull 分佈能充分描述半導體封裝中 Au-Al 金屬間化合物的生長壽命及其失效機制。因此，他們假設壽命 $T$ 服從 Weibull 分佈， $T\sim Weibull(\alpha,\beta)$，其中 $\alpha$ 為尺度參數，$\beta$ 為形狀參數。進一步透過對數轉換，將壽命轉換為最小極值分佈（SEV），$\log(t)\sim SEV(\mu,\sigma)$，其中 $\sigma=\frac{1}{\beta}$ 且 $\mu=\log(\alpha)$。
+
+對於兩個模型，對於 Type I 設限資料的情況下，超過時間 $t_c$ 的生存機率可表示為：
+\begin{equation} \label{censored}
+Pr(t>t_c)=exp\left[-\left(\frac{t_c}{\alpha}\right)^\beta\right],t_c>0
+\end{equation}
+
+\item 機率分佈的距離測度：
+
+該研究採用 Hellinger 距離測量圖 \ref{fig:ALT concept} 中的 $\Delta\hat{\tau_p}(S_{Low})$ 和 $\Delta\hat{\tau_p}(S_{High})$ 的距離，假設目前兩個模型的壽命數據分別為 $Y_1=(y_{11},y_{21}, \dots, y_{N1})$ 和 $Y_1=(y_{12},y_{22}, \dots, y_{N2})$，且兩者皆有 $N$ 筆資料。Hellinger 距離的定義如下：
+\begin{equation}
+D_H(Y_1,Y_2)=\frac{1}{\sqrt{2}}\sqrt{\sum_{i=1}^N(\sqrt{y_{i1}}-\sqrt{y_{i2}})^2}
+\end{equation}
+
+\item 效用函數定義：研究進一步定義需最大化的效用函數，該函數考慮了在低應力和高應力下的實驗情境，並利用兩個模型的數據 $Y_1$ 和 $Y_2$ 進行綜合評估。
+\begin{equation}
+u_{2|1}=D_{S_{Low}}(\hat{\tau}_{p,(M_2|Y_1)},\hat{\tau}_{p,(M_1|Y_1)}) +D_{S_{High}}(\hat{\tau}_{p,(M_2|Y_1)},\hat{\tau}_{p,(M_1|Y_1)})
+\end{equation}
+\begin{equation}
+u_{1|2}=D_{S_{Low}}(\hat{\tau}_{p,(M_1|Y_2)},\hat{\tau}_{p,(M_2|Y_2)}) +D_{S_{High}}(\hat{\tau}_{p,(M_1|Y_2)},\hat{\tau}_{p,(M_2|Y_2)})
+\end{equation}
+
+\item 效用函數的期望調整：由於在設計實驗時尚未觀察到真實數據，因此透過數據的抽樣分佈 $p(y_1|\theta_1)$ 和 $p(y_2|\theta_2)$，搭配參數的先驗分佈 $\pi(\theta_1)$ 和 $\pi(\theta_2)$，計算效用函數的期望值：
+\begin{equation}
+E(u_{2|1})=\int\int u_{2|1}p(y_1|\theta_1)\pi(\theta_1)d_{y_1}d_{\theta_1}
+\end{equation}
+\begin{equation}
+E(u_{2|1})=\int\int u_{2|1}p(y_1|\theta_1)\pi(\theta_1)d_{y_1}d_{\theta_1}
+\end{equation}
+
+\item 模型權重與最終效用函數：由於尚不清楚哪個模型是真實的，因此引入模型權重的先驗分佈 $\tau(M_1)$ 和 $\tau(M_2)$，最終效用函數 $U(\xi)$ 可表示為：
+\begin{equation}
+U(\xi)=\tau(M_1)E(u_{2|1})+\tau(M_2)E(u_{1|2})
+\end{equation}
+
+透過最大化 $U(\xi)$，可以確保設計能夠最大化兩個模型之間的差異性。
+
+\item 給定先驗分佈：
+
+\begin{itemize}
+
+\item 假設兩個模型的初始可信度相等，設定 $\tau(M_1) = \tau(M_2) = 0.5$。
+\item 假設活化能遵循均勻分佈，$E_a \sim U(1.0, 1.05)$，表示其可能值範圍在 1.0 到 1.05 eV 之間，並且各值的機率相同。
+\item 假設 $\beta_0$ 服從平均數為 0、變異數為 $1000^2$ 的常態分佈，$\beta_0 \sim N(0, 1000^2)$，反映對該參數高度不確定的假設。
+\item 同樣假設二次項 $\beta_2$ 服從 $\beta_2 \sim N(0, 1000^2)$，允許其具有廣泛的可能值。
+\item 假設壽命數據遵循 Weibull 分佈，其形狀參數 $\beta$ 服從伽瑪分佈，$\beta \sim Gamma(1,2)$。
+
+\end{itemize}
+
+\end{enumerate}
+
+\hspace*{8mm} 他們採用了基於貝葉斯方法的模擬技術，通過不斷抽取資料來估計經驗分佈的形狀，進而計算不同分佈之間的差異。在此過程中，他們使用了馬可夫鏈蒙地卡羅（Markov Chain Monte Carlo, MCMC）方法中的 Gibbs 抽樣，並利用 WinBUGS 軟體來計算 $\hat{\tau}_p$ ，同時模擬最大化效用函數以找到最佳設計 $\xi^*$ 。
+
+\hspace*{8mm} 然而，該方法存在兩個主要缺點。首先，計算過程極為耗時，特別是在高維數據或大規模樣本情況下會顯著增加計算成本。其次，由於方法本身的隨機性，每次模擬的結果可能有所差異，導致難以復現先前的結果，這進一步限制了該方法的應用範圍。
+
+\hspace*{8mm} \cite{nasir2015simulation} 在其研究中探討了模型辨識設計在可靠度測試中的應用。然而，綜上所述，其方法仍有許多待改進之處。因此，本研究將以該文獻的改進方向為出發點，進行深入探討。

@@ -1,0 +1,1601 @@
+\chapter{數值研究\label{CH: simulation}}
+
+\section{透過非設限範例進行整合方法比較}\label{SEC:Fidalgo}
+
+\hspace*{8mm} 在正式進行實驗設計的比較之前，我們首先重現 \cite{lopez2007optimal} 提出的 KL-optimal 設計範例，以驗證我們的方法能夠產生與其一致的數值結果。這一過程有助於確保計算的穩定性，並作為後續研究的基準。以下將先介紹該範例的實驗背景。
+
+\hspace*{8mm} 在實務應用中，藥代動力學模型（Pharmacokinetic Model） 的誤差通常被認為服從對數常態分佈（Log-Normal Distribution）。該研究考慮的模型為經典的 Michaelis–Menten (MM) 模型以及一種針對特定應用場景進行修正的 Modified Michaelis–Menten (MMM) 模型，其定義如下：
+\begin{align}
+\begin{cases}\textsc{MMM：}y=\frac{Vx}{K+x}+Fx+\epsilon \\\textsc{MM：}\ \ \ y=\frac{Vx}{K+x}+\epsilon \end{cases},x \in X=[aK,bK]
+\end{align}
+
+其中：
+\begin{itemize}
+\item $x$ 代表底物濃度，如血漿中藥物濃度或藥物劑量。
+\item $y$ 代表化學反應中產物形成的速率。
+\item $V$ 代表最大反應速率（Maximum Reaction Rate）。
+\item $K$ 代表 Michaelis 常數（Michaelis Constant, Km），即達到最大反應速率一半時的 $x$ 值。
+\item $\epsilon$ 為誤差項，此處假設服從對數常態分佈。
+\end{itemize}
+
+\hspace*{8mm} \cite{lopez2002design} 建議設定 $b=5$，並且在該條件下，$a=0.1$ 通常被視為最小濃度值。由於原研究採用了封閉解（Closed-Form Solution）計算 KL 散度，因此我們首先透過數學推導，以最基本的符號進行一般性公式推導，確保關鍵步驟清晰易懂。接著，為了更貼合本研究的應用情境，我們將該公式帶回模型辨識的實際框架，例如，$\sigma_1$ 會進一步具體化為 $\sigma_1(x,\theta_1)$。這樣的處理方式能夠確保數學推導的可讀性，並使後續應用更加直觀。
+
+\hspace*{8mm} 假設我們有兩個隨機變數 $P$ 和 $Q$ ，它們分別服從平均數 $\mu_1$ 和 $\mu_2$ 以及標準差 $\sigma_1$ 和 $\sigma_2$ 的對數常態分佈，其機率密度函數為：
+{\small
+\begin{equation}
+p(y) = \frac{1}{y \sigma_1 \sqrt{2\pi}} e^{-\frac{(\log y - \mu_1)^2}{2\sigma_1^2}}
+\end{equation}
+\begin{equation}
+q(y) = \frac{1}{y \sigma_2 \sqrt{2\pi}} e^{-\frac{(\log y - \mu_2)^2}{2\sigma_2^2}}
+\end{equation}
+}
+
+則 Kullback–Leibler（KL）散度可寫為：
+{\scriptsize
+\begin{align*}
+&D_{KL}(P\parallel Q)=\int_{-\infty}^{\infty}p(y)\log\left(\frac{p(y)}{q(y)}\right)dy\\
+&=\int_{0}^{\infty}\frac{1}{y \sigma_1 \sqrt{2\pi}} e^{-\frac{(\log y - \mu_1)^2}{2\sigma_1^2}}\log\left(\frac{\frac{1}{y \sigma_1 \sqrt{2\pi}} e^{-\frac{(\log y - \mu_1)^2}{2\sigma_1^2}}}{\frac{1}{y \sigma_2 \sqrt{2\pi}} e^{-\frac{(\log y - \mu_2)^2}{2\sigma_2^2}}}\right)dy\\
+&=\int_{0}^{\infty}\frac{1}{y \sigma_1 \sqrt{2\pi}} e^{-\frac{(\log y - \mu_1)^2}{2\sigma_1^2}}\left(\log\left(\frac{\sigma_2}{\sigma_1}\right)+\frac{(\log y - \mu_2)^2}{2\sigma_2^2}-\frac{(\log y - \mu_1)^2}{2\sigma_1^2}\right)dy\\
+&=\log\left(\frac{\sigma_2}{\sigma_1}\right)\underbrace{\textcolor{red}{\int_{0}^{\infty}\frac{1}{y \sigma_1 \sqrt{2\pi}} e^{-\frac{(\log y - \mu_1)^2}{2\sigma_1^2}}dy}}_{\textcolor{red}{1}}+\frac{1}{2\sigma_2^2}\underbrace{\textcolor{PowerPointGreen}{\int_{0}^{\infty}\frac{1}{y \sigma_1 \sqrt{2\pi}} e^{-\frac{(\log y - \mu_1)^2}{2\sigma_1^2}}\left(\log y - \mu_2\right)^2dy}}_{\textcolor{PowerPointGreen}{\sigma_1^2+\left(\mu_1-\mu_2\right)^2}}\\
+&-\frac{1}{2\sigma_1^2}\underbrace{\textcolor{blue}{\int_{0}^{\infty}\frac{1}{y \sigma_1 \sqrt{2\pi}} e^{-\frac{(\log y - \mu_1)^2}{2\sigma_1^2}}\left(\log y - \mu_1\right)^2dy}}_{\textcolor{blue}{\sigma_1^2}}\\
+&=\log \left(\frac{\sigma_2}{\sigma_1}\right)+\frac{\sigma_1^2+\left(\mu_1-\mu_2\right)^2}{2\sigma_2^2}-\frac{1}{2}\\
+&=\log \left(\frac{\sigma_2}{\sigma_1}\right)+\frac{\sigma_1^2-\sigma_2^2+\left(\mu_1-\mu_2\right)^2}{2\sigma_2^2}\\
+&=\log \left(\frac{\sigma_2}{\sigma_1}\right)-\frac{\sigma_2^2-\sigma_1^2+\left(\mu_2-\mu_1\right)^2}{2\sigma_2^2}
+\end{align*}
+}
+
+第一項積分為：
+\begin{equation}\notag
+\int_{0}^{\infty}\frac{1}{y \sigma_1 \sqrt{2\pi}} e^{-\frac{(\log y - \mu_1)^2}{2\sigma_1^2}}dy=1 \text{，該結果來自對數常態分佈的機率密度函數積分為 1。}
+\end{equation}
+第二項積分為：
+\begin{equation}\notag
+\begin{aligned}
+&\int_{0}^{\infty}\frac{1}{y \sigma_1 \sqrt{2\pi}} e^{-\frac{(\log y - \mu_1)^2}{2\sigma_1^2}}\left(\log y - \mu_2\right)^2dy\\
+&=E\left[\left(\log y - \mu_2\right)^2\right]\\
+&=E\left[\left(\log y -\mu_1 + \mu_1 - \mu_2\right)^2\right]\\
+&=E\left(\log y - \mu_1\right)^2+2E\left[\left(\log y -\mu_1 \right)\left( \mu_1 - \mu_2\right)\right]+E\left[\left(\mu_1 - \mu_2\right)^2\right]\\
+&=\sigma_1^2+2\left(\mu_1-\mu_2\right)E\left(\log y -\mu_1 \right)+\left(\mu_1 - \mu_2\right)^2\\
+&=\sigma_1^2+2\left(\mu_1-\mu_2\right)\underbrace{\left[E\left(\log y\right) -\mu_1\right]}_{=\mu_1-\mu_1=0} +\left(\mu_1 - \mu_2\right)^2\\
+&=\sigma_1^2+\left(\mu_1 - \mu_2\right)^2
+\end{aligned}
+\end{equation}
+
+\hspace*{8mm} 最後，將上述推導結果應用於最初的模型辨識情境，即比較兩個競爭模型 MMM 和 MM 在不同設計點 $x$ 下的區分能力。假設 $\eta_j(x,\theta_j)$ 和 $v^2_j(x,\theta_j)$ 分別為兩個競爭對數常態分佈模型的平均數及變異數，而 $\mu_j(x,\theta_j)$ 和 $\sigma^2_j(x,\theta_j)$ 則分別為觀測值對數的常態分佈的平均數及變異數，其中 $j=1,2$ 。定義如下：
+\begin{align}
+E(y)&=\eta_j(x,\theta_j)=exp{\left\{\frac{\sigma^2_j(x,\theta_j)}{2}+\mu_j(x,\theta_j)\right\}} \\
+Var(y)&=v^2_j(x,\theta_j)=\eta^2_j(x,\theta_j)\left[ exp\lbrace \sigma^2_j(x,\theta_j) \rbrace -1 \right]
+\end{align}
+
+因此，我們可以將 $\mu_j(x,\theta_j)$ 和 $\sigma^2_j(x,\theta_j)$ 進一步表達為：
+\begin{align}
+\mu_j(x,\theta_j)&=\log \left[ \frac{\eta_j(x,\theta_j)}{\left\{ 1+v^2_j(x,\theta_j)\eta_j(x,\theta_j)^{-2} \right\}^{1/2}}\right] \\
+\sigma^2_j(x,\theta_j)&=\log \left\{ 1+v^2_j(x,\theta_j)\eta_j(x,\theta_j)^{-2}\right\}
+\end{align}
+
+接著，依據先前的推導結果，KL 散度可以表示為：
+{\small
+\begin{equation}
+D_{KL}(M_1,M_2,x,\theta_1,\theta_2)=\log \left(\frac{\sigma_2(x,\theta_2)}{\sigma_1(x,\theta_1)}\right)-\frac{\sigma_2^2(x,\theta_2)-\sigma_1^2(x,\theta_1)+\left(\mu_2(x,\theta_2)-\mu_1(x,\theta_1)\right)^2}{2\sigma_2(x,\theta_2)^2}
+\end{equation}
+}
+
+\hspace*{8mm} 由於 MM 模型是 MMM 模型的嵌套版本，因此在該研究中，真實模型需假設為 MMM 模型，並且其參數已知。舉例來說，令 $\theta_1=(V,K,F)=(1,1,1)$，並假設兩個模型具有相同的變異數，即 $v^2_1(x)=v^2_2(x,\theta_2)=1$ 。然而，文獻中並未明確設定 $\theta_2$ 的範圍，因此在此假設 $\theta_2 \in [0.1,100] \times [0.1,100]$。在本設計情境中，預先設定使用三個設計點，接著利用先前所推導的目標函數封閉解形式進行計算，所得 KL-optimal 設計為：
+\begin{align*}
+\xi^*_{KL-c} = \left\{\begin{array}{ccc}
+0.1 & 2.5 & 5 \\
+0.538 & 0.329 & 0.133
+\end{array}\right\}
+\end{align*}
+
+\hspace*{8mm} 對應的準則值為 0.0149 ，並得到能使準則值達到最小的參數組合為 $\hat{\theta}_2(\xi^*_{KL-c})=(18.200,11.053)$ 。此外，透過等價定理驗證該設計是否為最佳解（圖 \ref{fig:ex.lognormal.closeform}），結果顯示其確實滿足最佳性條件，且與文獻中的結果高度一致。 PSO-QN \citep{chen2020hybrid} 的具體設定為：PSO 使用 64 個粒子，迭代 200 次，而 L-BFGS 進行 2 次迭代。總計算時間為 39 秒。
+
+\hspace*{8mm} 從上述例子可見，若需透過推導目標函數的封閉解來計算 KL-optimal 設計，過程將會相當複雜，且在許多情境下可能無法獲得封閉解，進而產生諸多限制。因此，我們希望直接採用數值積分的方式來進行計算。這種方法的優勢在於能夠適用於各種模型假設與分佈，而不受封閉解推導的限制。然而，其主要缺點是相較於封閉解，數值積分的計算時間較長。為此，以下將展示在相同情境下，直接使用數值積分所得的結果，所得 KL-optimal 設計為：
+\begin{align*}
+\xi^*_{KL-n} = \left\{\begin{array}{ccc}
+0.1 & 2.5 & 5 \\
+0.538 & 0.329 & 0.133
+\end{array}\right\}
+\end{align*}
+
+\hspace*{8mm} 對應的準則值為 0.0149 ，並得到能使準則值達到最小的參數組合為 $\hat{\theta}_2(\xi^*_{KL-n})=(18.200,11.053)$ 。此外，透過等價定理驗證該設計是否為最佳解（圖 \ref{fig:ex.lognormal.integral}），結果顯示其確實滿足最佳性條件，且與使用封閉解方法結果高度一致，這也證明我們採用的方法是可行的。 PSO-QN 的具體設定為：PSO 使用 64 個粒子，迭代 200 次，而 L-BFGS 進行 2 次迭代。總計算時間為 5165 秒。
+
+\begin{figure}[H]
+\centering
+\subfloat[封閉解（$\xi^*_{KL-c}$）\label{fig:ex.lognormal.closeform}]{\includegraphics[width=0.45\linewidth]{\imgdir ex.lognormal.closeform.png}}
+\subfloat[數值積分（$\xi^*_{KL-n}$）\label{fig:ex.lognormal.integral}]{\includegraphics[width=0.45\linewidth]{\imgdir ex.lognormal.integral.png}} \\
+\caption{針對平均反應函數為 MMM 與 MM 模型並假設皆為對數常態分佈之情境，所產生之模型辨識設計的方向導數圖}
+\label{fig:Fidalgo-lognormal}
+\end{figure}
+
+\hspace*{8mm} \cite{lopez2007optimal} 以對數常態分佈為例，探討 KL-optimal 設計的計算方法，並透過封閉解進行最佳化。該研究主要關注藥代動力學模型，其誤差結構適合採用對數常態分佈來建模。然而，在可靠度測試領域，韋伯分佈被廣泛應用於描述產品壽命，特別是在 ALT 中的故障時間建模中具有優勢。因此，為了將模型辨識設計應用於可靠度領域，本研究進一步探討相同情境下，但誤差結構採用韋伯分佈的 KL-optimal 設計。我們將遵循相同的方法論，先以基本數學符號推導 KL 散度的一般性公式，並嘗試利用目標函數的封閉解尋找最佳化設計。
+
+\hspace*{8mm} 假設我們有兩個隨機變數 $P$ 和 $Q$ ，它們分別服從形狀參數 $k_1$ 和 $k_2$ 以及比例參數 $\lambda_1$ 和 $\lambda_2$ 的韋伯分佈，其機率密度函數為：
+\begin{equation}
+p(y) = \frac{k_1}{\lambda_1} \left(\frac{y}{\lambda_1}\right)^{k_1-1} e^{-(\frac{y}{\lambda_1})^{k_1}}
+\end{equation}
+\begin{equation}
+q(y) = \frac{k_2}{\lambda_2} \left(\frac{y}{\lambda_2}\right)^{k_2-1} e^{-(\frac{y}{\lambda_2})^{k_2}}
+\end{equation}
+
+在下面的積分計算中，$\gamma$ 是 Euler-Mascheroni 常數，設
+\begin{align*}
+u=\left(\frac{y}{\lambda_1}\right)^{k_1}\Rightarrow y=\lambda_1u^{\frac{1}{k_1}}\Rightarrow du=\frac{k_1}{\lambda_1} \left(\frac{y}{\lambda_1}\right)^{k_1-1}dy
+\end{align*}
+
+則 Kullback–Leibler（KL）散度可寫為：
+{\small
+\begin{align*}
+&D_{KL}(P\parallel Q)=\int_{-\infty}^{\infty}p(y)\log\left(\frac{p(y)}{q(y)}\right)dy\\
+&=\int_{0}^{\infty}\frac{k_1}{\lambda_1} \left(\frac{y}{\lambda_1}\right)^{k_1-1} e^{-(\frac{y}{\lambda_1})^{k_1}} \log\left(\frac{\frac{k_1}{\lambda_1} \left(\frac{y}{\lambda_1}\right)^{k_1-1} e^{-(\frac{y}{\lambda_1})^{k_1}}}{\frac{k_2}{\lambda_2} \left(\frac{y}{\lambda_2}\right)^{k_2-1} e^{-(\frac{y}{\lambda_2})^{k_2}}}\right)dy\\
+&=\log\left(\frac{k_1}{k_2}\right)\underbrace{\textcolor{red}{\int_{0}^{\infty}\frac{k_1}{\lambda_1} \left(\frac{y}{\lambda_1}\right)^{k_1-1} e^{-(\frac{y}{\lambda_1})^{k_1}}dy}}_{\textcolor{red}{1}}+\log\left(\frac{\lambda_2}{\lambda_1}\right)\underbrace{\textcolor{red}{\int_{0}^{\infty}\frac{k_1}{\lambda_1} \left(\frac{y}{\lambda_1}\right)^{k_1-1} e^{-(\frac{y}{\lambda_1})^{k_1}}dy}}_{\textcolor{red}{1}}\\
+&+(k_1-1)\underbrace{\textcolor{PowerPointGreen}{\int_{0}^{\infty}\frac{k_1}{\lambda_1} \left(\frac{y}{\lambda_1}\right)^{k_1-1} e^{-(\frac{y}{\lambda_1})^{k_1}}\log\left(\frac{y}{\lambda_1}\right) dy}}_{\textcolor{PowerPointGreen}{-\frac{\gamma}{k_1}}}-\underbrace{\textcolor{blue}{\int_{0}^{\infty}\frac{k_1}{\lambda_1} \left(\frac{y}{\lambda_1}\right)^{k_1-1} e^{-(\frac{y}{\lambda_1})^{k_1}}\left(\frac{y}{\lambda_1}\right)^{k_1} dy}}_{\textcolor{blue}{1}}\\
+&-(k_2-1)\underbrace{\textcolor{PowerPointGreen}{\int_{0}^{\infty}\frac{k_1}{\lambda_1} \left(\frac{y}{\lambda_1}\right)^{k_1-1} e^{-(\frac{y}{\lambda_1})^{k_1}}\log\left(\frac{y}{\lambda_2}\right) dy}}_{\textcolor{PowerPointGreen}{\log\left(\frac{\lambda_1}{\lambda_2}\right)-\frac{\gamma}{k_1}}}+\underbrace{\textcolor{blue}{\int_{0}^{\infty}\frac{k_1}{\lambda_1} \left(\frac{y}{\lambda_1}\right)^{k_1-1} e^{-(\frac{y}{\lambda_1})^{k_1}}\left(\frac{y}{\lambda_2}\right)^{k_2} dy}}_{\textcolor{blue}{\left(\frac{\lambda_1}{\lambda_2}\right)^{k_2}\Gamma\left(\frac{k_2}{k_1}+1\right)}}\\
+&=\log\left(\frac{k_1}{k_2}\right)+\log\left(\frac{\lambda_2}{\lambda_1}\right)-\frac{k_1-1}{k_1}\gamma-1-(k_2-1)\log\left(\frac{\lambda_1}{\lambda_2}\right)+\frac{k_2-1}{k_1}\gamma+\left(\frac{\lambda_1}{\lambda_2}\right)^{k_2}\Gamma\left(\frac{k_2}{k_1}+1\right)
+\end{align*}
+}
+
+第一項及第二項積分為：
+\begin{equation}\notag
+\int_{0}^{\infty}\frac{k_1}{\lambda_1} \left(\frac{y}{\lambda_1}\right)^{k_1-1} e^{-(\frac{y}{\lambda_1})^{k_1}}dy=1 \textsc{，該結果來自韋伯分佈的機率密度函數積分為 1。}
+\end{equation}
+第三項積分為：
+\begin{align*}
+&\int_{0}^{\infty}\textcolor{red}{\frac{k_1}{\lambda_1} \left(\frac{y}{\lambda_1}\right)^{k_1-1}} e^{-\textcolor{blue}{(\frac{y}{\lambda_1})^{k_1}}}\log\left(\textcolor{PowerPointGreen}{\frac{y}{\lambda_1}}\right) \textcolor{red}{dy}\\
+=&\int_{0}^{\infty}e^{-\textcolor{blue}{u}}\log\left(\textcolor{PowerPointGreen}{u^{\frac{1}{k_1}}}\right)\textcolor{red}{du}\\
+=&\frac{1}{k_1}\int_{0}^{\infty}e^{-u}\log (u)du\\
+=&\frac{1}{k_1}\textcolor{red}{-\gamma}
+\end{align*}
+
+第四項積分為：
+\begin{align*}
+&\int_{0}^{\infty}\textcolor{red}{\frac{k_1}{\lambda_1} \left(\frac{y}{\lambda_1}\right)^{k_1-1}} e^{-\textcolor{blue}{(\frac{y}{\lambda_1})^{k_1}}}\textcolor{blue}{\left(\frac{y}{\lambda_1}\right)^{k_2}} \textcolor{red}{dy}\\
+=&\int_{0}^{\infty}\textcolor{blue}{u}e^{-\textcolor{blue}{u}}\textcolor{red}{du}\\
+=&\int_{0}^{\infty}u^{\textcolor{red}{2}-1}e^{-u}du\\
+=&\Gamma(2)\\
+=&1
+\end{align*}
+
+第五項積分為：
+\begin{align*}
+&\int_{0}^{\infty}\textcolor{red}{\frac{k_1}{\lambda_1} \left(\frac{y}{\lambda_1}\right)^{k_1-1}} e^{-\textcolor{blue}{(\frac{y}{\lambda_1})^{k_1}}}\log\left(\frac{\textcolor{PowerPointGreen}{y}}{\lambda_2}\right) dy\\
+=&\int_{0}^{\infty}e^{-\textcolor{blue}{u}}\log \left(\frac{\textcolor{PowerPointGreen}{\lambda_1u^{\frac{1}{k_1}}}}{\lambda_2}\right)\textcolor{red}{du}\\
+=&\int_{0}^{\infty}e^{-u}\log \lambda_1du+\int_{0}^{\infty}e^{-u}\log \left(u^{\frac{1}{k_1}}\right)du-\int_{0}^{\infty}e^{-u}\log \lambda_2du\\
+=&\log \lambda_1\left(-e^{-u}\mid^\infty_0\right)+\frac{1}{k_1}\int_{0}^{\infty}e^{-u}\log u du-\log \lambda_2\left(-e^{-u}\mid^\infty_0\right)\\
+=&\log \lambda_1+\frac{1}{k_1}\textcolor{red}{-\gamma}-\log \lambda_2\\
+=&\log\left(\frac{\lambda_1}{\lambda_2}\right)-\frac{\gamma}{k_1}
+\end{align*}
+
+第六項積分為：
+\begin{align*}
+&\int_{0}^{\infty}\textcolor{red}{\frac{k_1}{\lambda_1} \left(\frac{y}{\lambda_1}\right)^{k_1-1}} e^{-\textcolor{blue}{(\frac{y}{\lambda_1})^{k_1}}}\left(\frac{\textcolor{PowerPointGreen}{y}}{\lambda_2}\right)^{k_2} \textcolor{red}{dy}\\
+=&\int_{0}^{\infty}e^{-\textcolor{blue}{u}}\left(\frac{\textcolor{PowerPointGreen}{\lambda_1u^{\frac{1}{k_1}}}}{\lambda_2}\right)^{k_2} \textcolor{red}{du}\\
+=&\left(\frac{\lambda_1}{\lambda_2}\right)^{k_2}\int_{0}^{\infty}u^{\textcolor{red}{\frac{k_2}{k_1}+1}-1}e^{-u} du\\
+=&\left(\frac{\lambda_1}{\lambda_2}\right)^{k_2}\Gamma\left(\frac{k_2}{k_1}+1\right)
+\end{align*}
+
+\hspace*{8mm} 假設 $\eta_j(x,\theta_j)$ 為兩個競爭韋伯分佈模型的平均數，其中 $j=1,2$ 。定義如下：
+\begin{align}
+E(y)&=\eta_j(x,\theta_j) \\
+\lambda_j(x,\theta_j)&=\frac{\eta_j(x,\theta_j)}{\Gamma \left(1+\frac{1}{k_j}\right)}
+\end{align}
+
+\hspace*{8mm} 令 $\theta_1=(V_1,K_1,F_1)=(1,1,1)$，並假設兩個模型具有相同的變異數，即 $v^2_1(x)=v^2_2(x,\theta_2)=1$ ，且 $\theta_2=(V_2,K_2) \in [0.1,100] \times [0.1,100]$。我們採用重新參數化的韋伯分佈，其尺度參數設定為 $\lambda=exp(\mu)$ ，形狀參數設定為 $k=1/\sigma$ ，使得 $\mu$ 和 $\sigma$ 分別可近似代表對數平均數與對數變異程度。此種參數化方式有助於提高模型的可解釋性與數值穩定性，且其概念與極值理論中常見的 log-Weibull 結構相近\citep{coles2001introduction}。在此設計情境中，最佳化設計限定採用三個支持點，即指定實驗條件的數量。利用前述封閉解目標函數進行數值計算，所得 KL-optimal 設計為：
+\begin{align*}
+\xi^*_{KL-c} = \left\{\begin{array}{ccc}
+0.504 & 2.989 & 5 \\
+0.570 & 0.310 & 0.120
+\end{array}\right\}
+\end{align*}
+
+\hspace*{8mm} 對應的準則值為 0.00392 ，並得到能使準則值達到最小的參數組合為 $\hat{\theta}_2(\xi^*_{KL-c})=(22.502,14.580)$ 。此外，透過等價定理驗證該設計是否為最佳解（圖 \ref{fig:ex.weibull.closeform}），結果顯示其確實滿足最佳性條件。PSO-QN的具體設定為：PSO 使用 64 個粒子，迭代 200 次，而 L-BFGS 進行 5 次迭代。總計算時間為 40 秒。
+
+\hspace*{8mm} 相較於第一個例子，本例中推導封閉解的難度更高。因此，我們也在相同情境下透過數值積分獲得結果，並將其與使用目標函數的封閉解設計進行比較。所得 KL-optimal 設計為：
+\begin{align*}
+\xi^*_{KL-n} = \left\{\begin{array}{ccc}
+0.507 & 2.991 & 5 \\
+0.570 & 0.310 & 0.120
+\end{array}\right\}
+\end{align*}
+
+\hspace*{8mm} 對應的準則值為 0.00389，並得到能使準則值達到最小的參數組合為 $\hat{\theta}_2(\xi^*_{KL-n})=(22.548, 14.622)$。此外，透過等價定理驗證該設計是否為最佳解（圖 \ref{fig:ex.weibull.integral}），結果顯示其確實滿足最佳性條件，且與使用封閉解方法結果高度一致，這也證明我們採用的方法是可行的。 PSO-QN 的具體設定為：PSO 使用 64 個粒子，迭代 200 次，而 L-BFGS 進行 5 次迭代。總計算時間為 102768 秒。
+
+\begin{figure}[H]
+\centering
+\subfloat[封閉解（$\xi^*_{KL-c}$）\label{fig:ex.weibull.closeform}]{\includegraphics[width=0.45\linewidth]{\imgdir ex.weibull.closeform.png}}
+\subfloat[數值積分（$\xi^*_{KL-n}$）\label{fig:ex.weibull.integral}]{\includegraphics[width=0.45\linewidth]{\imgdir ex.weibull.integral.png}} \\
+\caption{針對平均反應函數為 MMM 與 MM 模型並假設皆為韋伯分佈之情境，所產生之模型辨識設計的方向導數圖}
+\label{fig:Fidalgo-weibull}
+\end{figure}
+
+\hspace*{8mm} 透過上述兩個例子，我們驗證了使用數值積分取代封閉解的可行性，並比較了數值積分方法與文獻中封閉解方法的結果，發現兩者在設計點與準則值上高度一致。此外，由於本研究的計算過程與原作者可能存在細節上的差異，因此我們通過測試來確認所實施的方法是否能夠穩定重現已發表結果。實驗結果顯示，我們的方法不僅能夠成功復現文獻中的 KL-optimal 設計，且在不同的分佈假設下皆展現良好的穩定性與適用性。因此，我們確信該方法適用於更廣泛的模型辨識問題，並可應對大部分的情境。  
+
+\hspace*{8mm} 在確認方法的可行性與穩定性後，接下來將進入本研究的核心部分，探討如何在加速壽命試驗（ALT）中應用模型辨識設計，並結合不同的散度準則來優化實驗設計。
+
+\section{Type I 設限下給定對立模型變異數之模型辨識設計}\label{SEC:DeviceA-fixed variance}
+
+\hspace*{8mm} 承接前一小節的結果驗證，我們確認所提出的方法具備穩定性與可行性。接下來，我們將研究焦點導入本研究的主軸：以可靠度領域中常用的 Arrhenius 模型為基礎，結合 ALT 中常見的 Type I 設限數據（即產品於實驗終止時尚未失效），進一步比較我們所提出的四種最佳化設計在雙模型辨識下的表現。
+
+本節中設計的兩個競爭模型如下：
+
+\begin{itemize}
+\item 真實模型 $M_1$ 為二次形式：
+\begin{equation}\label{DeviceA_truemodel}
+\eta_{tr}(x,\theta_1)=\zeta_1+\zeta_2x+\zeta_3x^2
+\end{equation}
+
+\item 競爭模型 $M_2$ 為線性形式：
+\begin{equation}\label{DeviceA_rivalmodel}
+\eta_{2}(x,\theta_2)=\delta_1+\delta_2x
+\end{equation}
+
+\end{itemize}
+
+\hspace*{8mm} 在此，$\eta(x)$ 表示模型的平均反應函數（Mean Response Function），即轉換後反應變數 $\log(t)$ 的期望值。此轉換來自於 Arrhenius 模型，透過對壽命 $t$ 取對數，將原本指數型的溫度-壽命關係線性化（見式 \eqref{M2 linearized}）。誤差項 $\epsilon$ 假設遵循對數位置尺度分佈（Log-location-scale Distribution）。由於兩個模型互為巢狀（Nested Models），因此設定真實模型為 $M_1$，且參數向量 $\theta$ 分別對應於 $M_1$ 的 $(\zeta_1, \zeta_2, \zeta_3)$ 和 $M_2$ 的 $(\delta_1, \delta_2)$。
+
+\hspace*{8mm} 為了將溫度轉換為可用於建模的加速變數，參考 Arrhenius 模型的轉換形式，我們定義連結函數如下：
+\begin{equation}\label{link_function}
+x = \frac{11605}{\text{Temp}_C + 273.15}
+\end{equation}
+% \frac{1}{k}\approx \frac{1}{8.617 \times 10^{-5}} \approx 11605
+其中 $\text{Temp}_C$ 為攝氏溫度。此轉換反映高溫會加速失效速率並縮短壽命的物理機制。
+
+\hspace*{8mm} 在此基礎下，我們假設產品壽命 $t$ 分佈為對數常態分佈則經最大概似估計後，對應之標準差估計值（以外部真實數據進行模擬，設限時間為 5000）為 $\hat{\sigma} = 0.9780103$，因此以下情境模擬將從這此估計參數出發討論，並設置真實模型參數 $\theta_{tr} = (\zeta_1, \zeta_2, \zeta_3) = (-5.0, -1.5, 0.05)$。對立模型參數範圍為 $\theta_2 = (\delta_1, \delta_2) \in [-100, -10] \times [0.1, 5.0]$。設計空間為 $x\in [10,80]$。
+
+\hspace*{8mm} 在後續模擬中之標準差參數，皆是以最大概似估計值 $\hat{\sigma} = 0.9780103$ 為基準，進行擴展討論。為簡化呈現，文中僅以其首位近似值（如：0.98, 1.48, 1.98 等）標示之，實際使用數值仍保留完整精度（如 0.9780103, 1.4780103, 1.9780103 等）。PSO-QN 的具體設定為：PSO 使用 64 個粒子，迭代 200 次，而 L-BFGS 進行 50 次迭代。
+
+\hspace*{8mm} 下表 \ref{tab:CKL-results-DeviceA-sameV} 至 \ref{tab:Cchi2-results-DeviceA-DiffV} 中，欄位 Dis. 代表所假設的模型分佈類型，包括對數常態分佈（Log-Normal, LN）與韋伯分佈（Weibull, WB）。本研究分別在四種不同的散度準則下，搜尋模型辨識的最佳實驗設計及能使準則值達到最小的參數組合 $\hat{\theta}$，同時計算準則值 $C^*$ 以評估設計效能。為了檢視最佳化過程的穩定性，本研究將最終取得的設計與參數重新帶回演算法中，再次計算準則值 $\hat{C}$，以確認結果一致性。Time 欄位則記錄每組情境下的 CPU 計算時間，單位為秒（Seconds），以便比較不同設計之計算效率。
+
+\hspace*{8mm} 最後，欄位 Eqv. 紀錄了等價定理（Equivalence Theorem）檢查的結果。至於如何判斷是否滿足最佳性條件，我們根據以下幾個特徵進行判定：
+
+\begin{enumerate} 
+\item 所選擇的近似設計之設計點皆具有非零權重。 
+\item 在方向導數圖（Directional Derivative Plot）中，藍色函數線應整體位於 0 以下，表示目前的設計在所有設計點下皆無提升空間。
+\item 圖中標記的設計點（黑點）必須剛好位於該函數的局部最大值處，且此最大值應恰為 0，這是等價定理成立的核心條件。
+\item 整體曲線應呈現光滑連續且近似拋物線的形狀，符合傳統最佳化設計理論的幾何特徵。
+\end{enumerate}
+
+最佳性（Optimality）檢查結果分為三種等級：
+
+\begin{itemize}
+\item $\surd$ 表示完全滿足最佳性條件：符合前述四項特徵，包括設計點具有權重、方向導數函數全數位於 0 以下、設計點對應至局部最大值且該最大值為 0，以及圖形呈現平滑連續等。
+
+\item $\triangle$ 表示部分滿足最佳性條件，常見的情況如下：
+
+\begin{itemize} 
+\item 雖然函數值皆低於 0，且設計點也對應至函數的局部最大值，但僅有一個點具有非零權重。
+\item 函數線僅有小部分超過 0，整體仍維持在 0 附近，從數值判斷仍具備達成最佳性的潛力。
+\item 函數值皆低於 0，但函數的局部最大值位置與支持點未重疊。
+\item 未顯示方向導數函數，曲線變動幅度極小，導致難以明確判斷最佳性，但其具潛力滿足最佳性條件。
+\end{itemize}
+
+\item $\times$ 表示不滿足最佳性條件：上述四項條件皆未達成。 
+\end{itemize}
+
+\hspace*{8mm} 表 \ref{tab:CKL-results-DeviceA-sameV}、表 \ref{tab:CLW-results-DeviceA-sameV}、表 \ref{tab:CB-results-DeviceA-sameV}、表 \ref{tab:Cchi2-results-DeviceA-sameV} 分別呈現四種不同散度（CKL、CLW、CB、C$\chi^2$）在假設兩個模型具有相同變異數下的最佳化設計結果；而表 \ref{tab:CKL-results-DeviceA-DiffV}、表 \ref{tab:CLW-results-DeviceA-DiffV}、表 \ref{tab:CB-results-DeviceA-DiffV}、表 \ref{tab:Cchi2-results-DeviceA-DiffV} 則對應於兩模型具有不同變異數的情況下，分別比較這些距離測度的表現。
+
+\begin{enumerate}
+\item CKL-optimal 設計（表 \ref{tab:CKL-results-DeviceA-sameV} 與 \ref{tab:CKL-results-DeviceA-DiffV}）共模擬了 18 個例子，其中有 12 個完全滿足最佳性條件（$\surd$），3 個部分滿足（$\triangle$），3 個未滿足（$\times$）。
+\item CLW-optimal 設計（表 \ref{tab:CLW-results-DeviceA-sameV} 與 \ref{tab:CLW-results-DeviceA-DiffV}）共模擬了 18 個例子，其中僅 4 個完全滿足最佳性條件（$\surd$），6 個部分滿足（$\triangle$），8 個不滿足（$\times$）。
+\item CB-optimal 設計（表 \ref{tab:CB-results-DeviceA-sameV} 與 \ref{tab:CB-results-DeviceA-DiffV}）雖然共模擬 18 個例子，但無任何例子完全滿足最佳性條件（$\surd$），14 個屬於部分滿足（$\triangle$），4 個不滿足（$\times$）。
+\item C$\chi^2$-optimal 設計（表 \ref{tab:Cchi2-results-DeviceA-sameV} 與 \ref{tab:Cchi2-results-DeviceA-DiffV}）共模擬 18 個例子，僅 2 個完全滿足（$\surd$），7 個部分滿足（$\triangle$），9 個不滿足（$\times$）。
+\end{enumerate}
+
+\hspace*{8mm} 整體來看，當設計結果完全滿足最佳性條件時，準則值 $C^*$ 與利用該設計與參數重新代入計算所得的 $\hat{C}$ 幾乎一致，顯示演算法穩定、設計具可靠性。需要特別指出的是：CB-optimal 設計由於其距離測度的公式結構特殊，常出現 $C^*=1$、$C^*=0$ 或極小值。這類設計通常在極短時間內即完成最佳化程序，顯示演算法可能快速收斂至一個錯誤或次佳的區域，而非真正的最佳點。因此，即使計算速度快，設計結果往往無法滿足最佳性條件，應審慎看待這類快速收斂的情況。
+
+\hspace*{8mm} 另一方面，針對部分滿足或完全不滿足最佳性條件的例子，可能的原因包括多方面。首先，積分過程可能出現數值不穩定的情況。儘管前述模擬已驗證數值積分的可行性，但在考慮 Type I 設限資料與更複雜的模型結構後，目標函數的數學形式變得更加複雜，仍可能導致局部積分誤差進而影響準則函數的準確性。另一個重要因素與內層最佳化問題的性質有關。雖然該目標函數在理論上具有可微性，但在實務上可能並不具備足夠的光滑性。特別是當函數表現出多個局部極值、呈現波浪狀結構時，像 L-BFGS 這類依賴局部曲率資訊、並假設存在單一收斂區域的準牛頓法，容易因為誤估梯度或陷入局部極小值而導致搜尋失敗，將難以有效收斂，導致設計品質下降。
+
+\hspace*{8mm} 總結而言，儘管模擬設計採取一致初始條件，但設計結果仍易受到模型假設、目標函數特性與數值穩定性等因素的影響，因此對每一組設計結果應結合等價性檢查與方向導數圖進行整體評估，以提高設計可靠性與實用價值。
+
+\newpage
+
+\begin{table}[H]\scriptsize
+\caption{針對平均反應函數為二次與線性模型且變異數相同之情境，所產生之CKL-optimal 設計的結果。}
+\label{tab:CKL-results-DeviceA-sameV}
+\begin{adjustwidth}{-2.5cm}{-2.5cm} 
+\makebox[\linewidth][c]{%
+\renewcommand{\arraystretch}{1.402} % 調整行間距
+\setlength{\tabcolsep}{3pt} 
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+Dis. & $\sigma$ & $\boldsymbol{\xi^*_{CKL}}$ & $C^* (\hat{C})$ & $\boldsymbol{\hat{\theta}_2(\xi^*_{CKL})}$ & \textbf{Eqv.} & \textbf{Opt?} & \textbf{Time} \\
+\hline
+LN & 0.98 & $\left\{\begin{array}{ccc}
+33.557 & 56.829 & 80 \\
+0.330 & 0.436 & 0.234
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.00927 \\
+(0.00927)
+\end{array}$ & 
+$(-66.712, 2.017)$ & 
+\ref{fig:s=0.98,2,kl,ll} & $\surd$ & 18386 \\
+\hline
+LN & 1.48 & $\left\{\begin{array}{ccc}
+29.699 & 55.482 & 80 \\
+0.360 & 0.413 & 0.227
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.00517 \\
+(0.00517)
+\end{array}$ & 
+$(-67.204, 2.031)$ & 
+\ref{fig:s=1.48,3,kl,ll} & $\surd$ & 58458 \\
+\hline
+LN & 1.98 & $\left\{\begin{array}{ccc}
+25.854 & 55.196 & 80 \\
+0.366 & 0.407 & 0.227
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.00385 \\
+(0.00380)
+\end{array}$ & 
+$(-66.268, 2.006)$ & 
+\ref{fig:s=1.98,4,kl,ll} & $\triangle$ & 49577 \\
+\hline
+WB & 0.98 & $\left\{\begin{array}{ccc}
+32.545 & 57.686 & 80 \\
+0.368 & 0.415 & 0.217
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.00822 \\
+(0.00822)
+\end{array}$ & 
+$(-66.459, 2.010)$ & 
+\ref{fig:s=0.98,2,kl,ww} & $\triangle$ & 59919 \\
+\hline
+WB & 1.48 & $\left\{\begin{array}{ccc}
+25.576 & 55.791 & 80 \\
+0.441 & 0.359 & 0.200
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.00489 \\
+(0.00489)
+\end{array}$ & 
+$(-67.083, 2.028)$ & 
+\ref{fig:s=1.48,3,kl,ww} & $\surd$ & 68091 \\
+\hline
+WB & 1.98 & $\left\{\begin{array}{ccc}
+18.386 & 53.830 & 80 \\
+0.484 & 0.325 & 0.191
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.00386 \\
+(0.00386)
+\end{array}$ & 
+$(-63.987, 1.944)$ & 
+\ref{fig:s=1.98,4,kl,ww} & $\times$ & 62045 \\
+\hline
+\end{tabular}
+}
+\end{adjustwidth}
+\end{table}
+
+\begin{table}[H]\scriptsize
+\caption{針對平均反應函數為二次與線性模型且變異數不同之情境，所產生之CKL-optimal 設計的結果。}
+\label{tab:CKL-results-DeviceA-DiffV}
+\begin{adjustwidth}{-2.5cm}{-2.5cm} 
+\makebox[\linewidth][c]{%
+\renewcommand{\arraystretch}{1.402} % 調整行間距
+\setlength{\tabcolsep}{3pt} 
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+\hline
+Dis. & $\sigma_1$ & $\sigma_2$ & $\boldsymbol{\xi^*_{CKL}}$ & $C^* (\hat{C})$ & $\boldsymbol{\hat{\theta}_2(\xi^*_{CKL})}$ & \textbf{Eqv.} & \textbf{Opt?} & \textbf{Time} \\
+\hline
+LN & 1.98 & 0.98 & $\left\{\begin{array}{ccc}
+76.132 & 80 & 80 \\
+0.000 & 0.000 & 1.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.841 \\
+(0.841)
+\end{array}$ & 
+$(-52.575, 1.591)$ & 
+\ref{fig:s1=1.98,s2=0.98,9,kl,ll} & $\triangle$ & 62666 \\
+\hline
+LN & 0.98 & 1.98 & $\left\{\begin{array}{ccc}
+50.868 & 65.674 & 80 \\
+0.167 & 0.545 & 0.289
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.327 \\
+(0.327)
+\end{array}$ & 
+$(-63.613, 1.925)$ & 
+\ref{fig:s1=0.98,s2=1.98,10,kl,ll} & $\surd$ & 53043 \\
+\hline
+LN & 0.98 & 1.48 & $\left\{\begin{array}{ccc}
+33.417 & 62.084 & 80 \\
+0.032 & 0.587 & 0.381
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.133 \\
+(0.133)
+\end{array}$ & 
+$(-64.846, 1.962)$ & 
+\ref{fig:s1=0.98,s2=1.48,11,kl,ll} & $\surd$ & 54685 \\
+\hline
+LN & 1.48 & 0.98 & $\left\{\begin{array}{ccc}
+52.007 & 67.791 & 80 \\
+0.085 & 0.577 & 0.338
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.230 \\
+(0.230)
+\end{array}$ & 
+$(-62.900, 1.904)$ & 
+\ref{fig:s1=1.48,s2=0.98,12,kl,ll} & $\surd$ & 65978 \\
+\hline
+LN & 0.48 & 0.98 & $\left\{\begin{array}{ccc}
+43.412 & 61.109 & 80 \\
+0.213 & 0.521 & 0.266
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.339 \\
+(0.339)
+\end{array}$ & 
+$(-65.183, 1.972)$ & 
+\ref{fig:s1=0.48,s2=0.98,13,kl,ll} & $\times$ & 23744 \\
+\hline
+LN & 0.98 & 0.48 & $\left\{\begin{array}{ccc}
+47.75 & 64.187 & 80 \\
+0.161 & 0.547 & 0.292
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.885 \\
+(0.885)
+\end{array}$ & 
+$(-64.115, 1.940)$ & 
+\ref{fig:s1=0.98,s2=0.48,14,kl,ll} & $\surd$ & 30497 \\
+\hline
+WB & 1.98 & 0.98 & $\left\{\begin{array}{ccc}
+58.678 & 69.702 & 80 \\
+0.154 & 0.551 & 0.295
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.600 \\
+(0.600)
+\end{array}$ & 
+$(-61.542, 1.884)$ & 
+\ref{fig:s1=1.98,s2=0.98,9,kl,ww} & $\surd$ & 109772 \\
+\hline
+WB & 0.98 & 1.98 & $\left\{\begin{array}{ccc}
+46.469 & 62.717 & 80 \\
+0.215 & 0.525 & 0.261
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.292 \\
+(0.292)
+\end{array}$ & 
+$(-64.861, 1.955)$ & 
+\ref{fig:s1=0.98,s2=1.98,10,kl,ww} & $\surd$ & 76696 \\
+\hline
+WB & 0.98 & 1.48 & $\left\{\begin{array}{ccc}
+32.393 & 59.119 & 80 \\
+0.064 & 0.597 & 0.339
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.117 \\
+(0.117)
+\end{array}$ & 
+$(-66.032, 1.992)$ & 
+\ref{fig:s1=0.98,s2=1.48,11,kl,ww} & $\surd$ & 79644 \\
+\hline
+WB & 1.48 & 0.98 & $\left\{\begin{array}{ccc}
+49.573 & 64.735 & 80 \\
+0.181 & 0.549 & 0.270
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.176 \\
+(0.600)
+\end{array}$ & 
+$(-63.807, 1.939)$ & 
+\ref{fig:s1=1.48,s2=0.98,12,kl,ww} & $\surd$ & 102226 \\
+\hline
+WB & 0.48 & 0.98 & $\left\{\begin{array}{ccc}
+41.993 & 58.347 & 76.142 \\
+0.231 & 0.526 & 0.244
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.303 \\
+(0.227)
+\end{array}$ & 
+$(-70.313, 2.112)$ & 
+\ref{fig:s1=0.48,s2=0.98,13,kl,ww} & $\times$ & 62836 \\
+\hline
+WB & 0.98 & 0.48 & $\left\{\begin{array}{ccc}
+45.473 & 62.576 & 80 \\
+0.189 & 0.551 & 0.260
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.635 \\
+(0.635)
+\end{array}$ & 
+$(-64.316, 1.957)$ & 
+\ref{fig:s1=0.98,s2=0.48,14,kl,ww} & $\surd$ & 81337 \\
+\hline
+\end{tabular}
+}
+\end{adjustwidth}
+\end{table}
+
+\begin{table}[H]\scriptsize
+\caption{針對平均反應函數為二次與線性模型且變異數相同之情境，所產生之CLW-optimal 設計的結果。}
+\label{tab:CLW-results-DeviceA-sameV}
+\begin{adjustwidth}{-2.5cm}{-2.5cm} 
+\makebox[\linewidth][c]{%
+\renewcommand{\arraystretch}{1.402} % 調整行間距
+\setlength{\tabcolsep}{3pt} 
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+Dis. & $\sigma$ & $\boldsymbol{\xi^*_{CLW}}$ & $C^* (\hat{C})$ & $\boldsymbol{\hat{\theta}_2(\xi^*_{CLW})}$ & \textbf{Eqv.} & \textbf{Opt?} & \textbf{Time} \\
+\hline
+LN & 0.98 & $\left\{\begin{array}{ccc}
+10 & 31.597 & 31.714 \\
+0.000 & 0.999 & 0.001
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.00551 \\
+(0.00551)
+\end{array}$ & 
+$(-94.530, 3.277)$ & 
+\ref{fig:s=0.98,2,lw,ll} & $\times$ & 793 \\
+\hline
+LN & 1.48 & $\left\{\begin{array}{ccc}
+79.410 & 80 & 80 \\
+1.000 & 0.000 & 0.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.693 \\
+(-2.675\times 10^{-6})
+\end{array}$ & 
+$(-86.830, 2.632)$ & 
+\ref{fig:s=1.48,3,lw,ll} & $\times$ & 3239 \\
+\hline
+LN & 1.98 & $\left\{\begin{array}{ccc}
+80 & 80 & 80 \\
+0.066 & 0.143 & 0.791
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.693 \\
+(-7.356\times 10^{-6})
+\end{array}$ & 
+$(-73.661, 2.232)$ & 
+\ref{fig:s=1.98,4,lw,ll} & $\times$ & 3299 \\
+\hline
+WB & 0.98 & $\left\{\begin{array}{ccc}
+66.764 & 69.61 & 80 \\
+0.001 & 0.998 & 0.001
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.694 \\
+(0.694)
+\end{array}$ & 
+$(-67.984, 2.751)$ & 
+\ref{fig:s=0.98,2,lw,ww} & $\triangle$ & 3175 \\
+\hline
+WB & 1.48 & $\left\{\begin{array}{ccc}
+58.379 & 59.356 & 80 \\
+0.001 & 0.989 & 0.010
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.693 \\
+(-8.071\times 10^{-6})
+\end{array}$ & 
+$(-62.162, 1.883)$ & 
+\ref{fig:s=1.48,3,lw,ww} & $\times$ & 5288 \\
+\hline
+WB & 1.98 & $\left\{\begin{array}{ccc}
+16.897 & 53.487 & 80 \\
+0.482 & 0.311 & 0.207
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.00107 \\
+(-0.000827)
+\end{array}$ & 
+$(-62.796, 1.907)$ & 
+\ref{fig:s=1.98,4,lw,ww} & $\surd$ & 32163 \\
+\hline
+\end{tabular}
+}
+\end{adjustwidth}
+\end{table}
+
+\begin{table}[H]\scriptsize
+\caption{針對平均反應函數為二次與線性模型且變異數不同之情境，所產生之CLW-optimal 設計的結果。}
+\label{tab:CLW-results-DeviceA-DiffV}
+\begin{adjustwidth}{-2.5cm}{-2.5cm} 
+\makebox[\linewidth][c]{%
+\renewcommand{\arraystretch}{1.402} % 調整行間距
+\setlength{\tabcolsep}{3pt} 
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+\hline
+Dis. & $\sigma_1$ & $\sigma_2$ & $\boldsymbol{\xi^*_{CLW}}$ & $C^* (\hat{C})$ & $\boldsymbol{\hat{\theta}_2(\xi^*_{CLW})}$ & \textbf{Eqv.} & \textbf{Opt?} & \textbf{Time} \\
+\hline
+LN & 1.98 & 0.98 & $\left\{\begin{array}{ccc}
+52.005 & 57.073 & 80 \\
+0.000 & 1.000 & 0.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.0751 \\
+(0.0732)
+\end{array}$ & 
+$(-66.588, 2.010)$ & 
+\ref{fig:s1=1.98,s2=0.98,9,lw,ll} & $\times$ & 4343 \\
+\hline
+LN & 0.98 & 1.98 & $\left\{\begin{array}{ccc}
+57.022 & 68.893 & 72.433 \\
+0.000 & 0.000 & 1.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.705 \\
+(0.705)
+\end{array}$ & 
+$(-82.884, 4.692)$ & 
+\ref{fig:s1=0.98,s2=1.98,10,lw,ll} & $\triangle$ & 2592 \\
+\hline
+LN & 0.98 & 1.48 & $\left\{\begin{array}{ccc}
+61.118 & 62.214 & 80 \\
+0.726 & 0.126 & 0.148
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.0475 \\
+(0.0451)
+\end{array}$ & 
+$(-62.081, 1.880)$ & 
+\ref{fig:s1=0.98,s2=1.48,11,lw,ll} & $\surd$ & 3316 \\
+\hline
+LN & 1.48 & 0.98 & $\left\{\begin{array}{ccc}
+57.404 & 61.771 & 80 \\
+0.288 & 0.217 & 0.495
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.0315 \\
+(0.0307)
+\end{array}$ & 
+$(-62.481, 1.892)$ & 
+\ref{fig:s1=1.48,s2=0.98,12,lw,ll} & $\surd$ & 3583 \\
+\hline
+LN & 0.48 & 0.98 & $\left\{\begin{array}{ccc}
+69.351 & 76.607 & 80 \\
+0.856 & 0.031 & 0.113
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.695 \\
+(0.131)
+\end{array}$ & 
+$(-84.952, 2.556)$ & 
+\ref{fig:s1=0.48,s2=0.98,13,lw,ll} & $\times$ & 2608 \\
+\hline
+LN & 0.98 & 0.48 & $\left\{\begin{array}{ccc}
+45.006 & 50.316 & 80 \\
+0.436 & 0.000 & 0.564
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.0858 \\
+(0.686)
+\end{array}$ & 
+$(-71.609, 2.537)$ & 
+\ref{fig:s1=0.98,s2=0.48,14,lw,ll} & $\triangle$ & 3455 \\
+\hline
+WB & 1.98 & 0.98 & $\left\{\begin{array}{ccc}
+76.217 & 80 & 80 \\
+1.000 & 0.000 & 0.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.693 \\
+(0.0664)
+\end{array}$ & 
+$(-66.549, 2.020)$ & 
+\ref{fig:s1=1.98,s2=0.98,9,lw,ww} & $\triangle$ & 2497 \\
+\hline
+WB & 0.98 & 1.98 & $\left\{\begin{array}{ccc}
+49.129 & 63.954 & 80 \\
+0.230 & 0.513 & 0.257
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.496 \\
+(0.496)
+\end{array}$ & 
+$(-65.295, 1.943)$ & 
+\ref{fig:s1=0.98,s2=1.98,10,lw,ww} & $\times$ & 666111 \\
+\hline
+WB & 0.98 & 1.48 & $\left\{\begin{array}{ccc}
+31.711 & 59.803 & 80 \\
+0.203 & 0.533 & 0.265
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.0386 \\
+(0.0366)
+\end{array}$ & 
+$(-70.211, 2.114)$ & 
+\ref{fig:s1=0.98,s2=1.48,11,lw,ww} & $\triangle$ & 5097 \\
+\hline
+WB & 1.48 & 0.98 & $\left\{\begin{array}{ccc}
+62.798 & 65.451 & 80 \\
+0.583 & 0.330 & 0.087
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.0284 \\
+(0.693)
+\end{array}$ & 
+$(-59.234, 2.380)$ & 
+\ref{fig:s1=1.48,s2=0.98,12,lw,ww} & $\surd$ & 4659 \\
+\hline
+WB & 0.48 & 0.98 & $\left\{\begin{array}{ccc}
+74.778 & 75.283 & 75.604 \\
+0.030 & 0.477 & 0.493
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.351 \\
+(0.693)
+\end{array}$ & 
+$(-40.068, 1.937)$ & 
+\ref{fig:s1=0.48,s2=0.98,13,lw,ww} & $\triangle$ & 3694 \\
+\hline
+WB & 0.98 & 0.48 & $\left\{\begin{array}{ccc}
+41.785 & 60.771 & 80 \\
+0.462 & 0.538 & 0.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.0703 \\
+(0.596)
+\end{array}$ & 
+$(-73.372, 2.611)$ & 
+\ref{fig:s1=0.98,s2=0.48,14,lw,ww} & $\times$ & 4721 \\
+\hline
+\end{tabular}
+}
+\end{adjustwidth}
+\end{table}
+
+\begin{table}[H]\scriptsize
+\caption{針對平均反應函數為二次與線性模型且變異數相同之情境，所產生之CB-optimal 設計的結果。}
+\label{tab:CB-results-DeviceA-sameV}
+\begin{adjustwidth}{-2.5cm}{-2.5cm} 
+\makebox[\linewidth][c]{%
+\renewcommand{\arraystretch}{1.402} % 調整行間距
+\setlength{\tabcolsep}{3pt} 
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+Dis. & $\sigma$ & $\boldsymbol{\xi^*_{CB}}$ & $C^* (\hat{C})$ & $\boldsymbol{\hat{\theta}_2(\xi^*_{CB})}$ & \textbf{Eqv.} & \textbf{Opt?} & \textbf{Time} \\
+\hline
+LN & 0.98 & $\left\{\begin{array}{ccc}
+10 & 10 & 10 \\
+0.001 & 0.210 & 0.789
+\end{array}\right\}$ &
+$\begin{array}{c}
+1 \\
+(1)
+\end{array}$ & 
+$(-83.787, 3.896)$ & 
+\ref{fig:s=0.98,2,B,ll} & $\triangle$ & 319 \\
+\hline
+LN & 1.48 & $\left\{\begin{array}{ccc}
+21.036 & 37.942 & 43.839 \\
+1.000 & 0.000 & 0.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+4.661\times 10^{-75} \\
+(1.000)
+\end{array}$ & 
+$(-50.864, 2.922)$ & 
+\ref{fig:s=1.48,3,B,ll} & $\triangle$ & 336 \\
+\hline
+LN & 1.98 & $\left\{\begin{array}{ccc}
+10 & 10 & 10 \\
+0.037 & 0.225 & 0.738
+\end{array}\right\}$ &
+$\begin{array}{c}
+1.000 \\
+(1.807\times 10^{-43})
+\end{array}$ & 
+$(-65.133, 0.757)$ & 
+\ref{fig:s=1.98,4,B,ll} & $\times$ & 308 \\
+\hline
+WB & 0.98 & $\left\{\begin{array}{ccc}
+13.011 & 31.319 & 72.62 \\
+0.715 & 0.020 & 0.265
+\end{array}\right\}$ &
+$\begin{array}{c}
+0 \\
+(0)
+\end{array}$ & 
+$(-98.112, 1.771)$ & 
+\ref{fig:s=0.98,2,B,ww} & $\triangle$ & 549 \\
+\hline
+WB & 1.48 & $\left\{\begin{array}{ccc}
+11.236 & 16.331 & 51.198 \\
+0.127 & 0.102 & 0.771
+\end{array}\right\}$ &
+$\begin{array}{c}
+0 \\
+(0)
+\end{array}$ & 
+$(-60.391, 0.729)$ & 
+\ref{fig:s=1.48,3,B,ww} & $\triangle$ & 443 \\
+\hline
+WB & 1.98 & $\left\{\begin{array}{ccc}
+11.969 & 22.932 & 40.06 \\
+0.432 & 0.001 & 0.567
+\end{array}\right\}$ &
+$\begin{array}{c}
+0 \\
+(0)
+\end{array}$ & 
+$(-77.064, 1.004)$ & 
+\ref{fig:s=1.98,4,B,ww} & $\triangle$ & 1871 \\
+\hline
+\end{tabular}
+}
+\end{adjustwidth}
+\end{table}
+
+\begin{table}[H]\scriptsize
+\caption{針對平均反應函數為二次與線性模型且變異數不同之情境，所產生之CB-optimal 設計的結果。}
+\label{tab:CB-results-DeviceA-DiffV}
+\begin{adjustwidth}{-2.5cm}{-2.5cm} 
+\makebox[\linewidth][c]{%
+\renewcommand{\arraystretch}{1.402} % 調整行間距
+\setlength{\tabcolsep}{3pt} 
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+\hline
+Dis. & $\sigma_1$ & $\sigma_2$ & $\boldsymbol{\xi^*_{CB}}$ & $C^* (\hat{C})$ & $\boldsymbol{\hat{\theta}_2(\xi^*_{CB})}$ & \textbf{Eqv.} & \textbf{Opt?} & \textbf{Time} \\
+\hline
+LN & 1.98 & 0.98 & $\left\{\begin{array}{ccc}
+10 & 10 & 10 \\
+0.018 & 0.328 & 0.654
+\end{array}\right\}$ &
+$\begin{array}{c}
+1.000 \\
+(9.038\times 10^{-60})
+\end{array}$ & 
+$(-80.856, 1.492)$ & 
+\ref{fig:s1=1.98,s2=0.98,9,B,ll} & $\triangle$ & 320 \\
+\hline
+LN & 0.98 & 1.98 & $\left\{\begin{array}{ccc}
+10 & 10 & 10 \\
+0.042 & 0.058 & 0.900
+\end{array}\right\}$ &
+$\begin{array}{c}
+1 \\
+(1)
+\end{array}$ & 
+$(-62.980, 3.691)$ & 
+\ref{fig:s1=0.98,s2=1.98,10,B,ll} & $\times$ & 2592 \\
+\hline
+LN & 0.98 & 1.48 & $\left\{\begin{array}{ccc}
+10 & 10 & 10 \\
+0.004 & 0.355 & 0.641
+\end{array}\right\}$ &
+$\begin{array}{c}
+1 \\
+(1.761\times 10^{-116})
+\end{array}$ & 
+$(-77.233, 0.903)$ & 
+\ref{fig:s1=0.98,s2=1.48,11,B,ll} & $\times$ & 333 \\
+\hline
+LN & 1.48 & 0.98 & $\left\{\begin{array}{ccc}
+15.502 & 40.168 & 76.326 \\
+0.088 & 0.276 & 0.637
+\end{array}\right\}$ &
+$\begin{array}{c}
+0 \\
+(0.256)
+\end{array}$ & 
+$(-43.561, 2.292)$ & 
+\ref{fig:s1=1.48,s2=0.98,12,B,ll} & $\times$ & 443 \\
+\hline
+LN & 0.48 & 0.98 & $\left\{\begin{array}{ccc}
+10 & 10 & 13.664 \\
+0.336 & 0.527 & 0.137
+\end{array}\right\}$ &
+$\begin{array}{c}
+1 \\
+(1)
+\end{array}$ & 
+$(-12.408, 4.678)$ & 
+\ref{fig:s1=0.48,s2=0.98,13,B,ll} & $\triangle$ & 333 \\
+\hline
+LN & 0.98 & 0.48 & $\left\{\begin{array}{ccc}
+29.672 & 67.096 & 74.092 \\
+0.621 & 0.198 & 0.180
+\end{array}\right\}$ &
+$\begin{array}{c}
+0 \\
+(2.069\times 10^{-20})
+\end{array}$ & 
+$(-88.604, 2.237)$ & 
+\ref{fig:s1=0.98,s2=0.48,14,B,ll} & $\triangle$ & 316 \\
+\hline
+WB & 1.98 & 0.98 & $\left\{\begin{array}{ccc}
+34.337 & 71.517 & 79.083 \\
+0.118 & 0.545 & 0.338
+\end{array}\right\}$ &
+$\begin{array}{c}
+0 \\
+(0)
+\end{array}$ & 
+$(-78.484, 1.190)$ & 
+\ref{fig:s1=1.98,s2=0.98,9,B,ww} & $\triangle$ & 1120 \\
+\hline
+WB & 0.98 & 1.98 & $\left\{\begin{array}{ccc}
+25.219 & 33.485 & 72.658 \\
+0.127 & 0.763 & 0.110
+\end{array}\right\}$ &
+$\begin{array}{c}
+0 \\
+(0)
+\end{array}$ & 
+$(-63.610, 0.858)$ & 
+\ref{fig:s1=0.98,s2=1.98,10,B,ww} & $\triangle$ & 1452 \\
+\hline
+WB & 0.98 & 1.48 & $\left\{\begin{array}{ccc}
+22.499 & 23.034 & 43.321 \\
+0.144 & 0.322 & 0.534
+\end{array}\right\}$ &
+$\begin{array}{c}
+0 \\
+(0)
+\end{array}$ & 
+$(-67.238, 0.887)$ & 
+\ref{fig:s1=0.98,s2=1.48,11,B,ww} & $\triangle$ & 445 \\
+\hline
+WB & 1.48 & 0.98 & $\left\{\begin{array}{ccc}
+10 & 10 & 10 \\
+0.057 & 0.419 & 0.524
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.999 \\
+(0.999)
+\end{array}$ & 
+$(-58.774, 3.780)$ & 
+\ref{fig:s1=1.48,s2=0.98,12,B,ww} & $\triangle$ & 706 \\
+\hline
+WB & 0.48 & 0.98 & $\left\{\begin{array}{ccc}
+48.499 & 55.901 & 62.657 \\
+0.007 & 0.823 & 0.170
+\end{array}\right\}$ &
+$\begin{array}{c}
+0 \\
+(2.870\times 10^{-17})
+\end{array}$ & 
+$(-43.884, 3.505)$ & 
+\ref{fig:s1=0.48,s2=0.98,13,B,ww} & $\triangle$ & 518 \\
+\hline
+WB & 0.98 & 0.48 & $\left\{\begin{array}{ccc}
+10 & 46.047 & 70.919 \\
+1.000 & 0.000 & 0.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+1.000 \\
+(1.000)
+\end{array}$ & 
+$(-52.593, 3.173)$ & 
+\ref{fig:s1=0.98,s2=0.48,14,B,ww} & $\triangle$ & 551 \\
+\hline
+\end{tabular}
+}
+\end{adjustwidth}
+\end{table}
+
+\begin{table}[H]\scriptsize
+\caption{針對平均反應函數為二次與線性模型且變異數相同之情境，所產生之C$\chi^2$-optimal 設計的結果。}
+\label{tab:Cchi2-results-DeviceA-sameV}
+\begin{adjustwidth}{-2.5cm}{-2.5cm} 
+\makebox[\linewidth][c]{%
+\renewcommand{\arraystretch}{1.402} % 調整行間距
+\setlength{\tabcolsep}{3pt} 
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+Dis. & $\sigma$ & $\boldsymbol{\xi^*_{C\chi^2}}$ & $C^* (\hat{C})$ & $\boldsymbol{\hat{\theta}_2(\xi^*_{C\chi^2})}$ & \textbf{Eqv.} & \textbf{Opt?} & \textbf{Time} \\
+\hline
+LN & 0.98 & $\left\{\begin{array}{ccc}
+80 & 80 & 80 \\
+0.014 & 0.449 & 0.537
+\end{array}\right\}$ &
+$\begin{array}{c}
+4.938 \times 10^{11}\\
+(-1.698\times 10^{-10})
+\end{array}$ & 
+$(-75.507, 2.289)$ & 
+\ref{fig:s=0.98,2,chi,ll} & $\times$ & 3394 \\
+\hline
+LN & 1.48 & $\left\{\begin{array}{ccc}
+41.953 & 46.694 & 47.929 \\
+0.000 & 0.000 & 1.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+726.370 \\
+(-9.216\times 10^{-6})
+\end{array}$ & 
+$(-65.563,1.983)$ & 
+\ref{fig:s=1.48,3,chi,ll} & $\times$ & 2277 \\
+\hline
+LN & 1.98 & $\left\{\begin{array}{ccc}
+22.557 & 28.732 & 34.66 \\
+0.000 & 1.000 & 0.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.0230 \\
+(0.0233)
+\end{array}$ & 
+$(-64.951, 1.967)$ & 
+\ref{fig:s=1.98,4,chi,ll} & $\triangle$ & 1353 \\
+\hline
+WB & 0.98 & $\left\{\begin{array}{ccc}
+11.049 & 16.362 & 34.388 \\
+0.000 & 0.000 & 1.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.0296 \\
+(-4.966\times 10^{-9})
+\end{array}$ & 
+$(-59.045, 1.819)$ & 
+\ref{fig:s=0.98,2,chi,ww} & $\triangle$ & 25836 \\
+\hline
+WB & 1.48 & $\left\{\begin{array}{ccc}
+29.181 & 46.269 & 61.937 \\
+0.999 & 0.000 & 0.001
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.0196 \\
+(-4.332\times 10^{-9})
+\end{array}$ & 
+$(-71.474, 2.151)$ & 
+\ref{fig:s=1.48,3,chi,ww} & $\times$ & 65818 \\
+\hline
+WB & 1.98 & $\left\{\begin{array}{ccc}
+12.069 & 23.116 & 31.719 \\
+0.000 & 1.000 & 0.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.0146 \\
+(-4.941\times 10^{-9})
+\end{array}$ & 
+$(-62.198, 1.919)$ & 
+\ref{fig:s=1.98,4,chi,ww} & $\times$ & 47360 \\
+\hline
+\end{tabular}
+}
+\end{adjustwidth}
+\end{table}
+
+\begin{table}[H]\scriptsize
+\caption{針對平均反應函數為二次與線性模型且變異數不同之情境，所產生之C$\chi^2$-optimal 設計的結果。}
+\label{tab:Cchi2-results-DeviceA-DiffV}
+\begin{adjustwidth}{-2.5cm}{-2.5cm} 
+\makebox[\linewidth][c]{%
+\renewcommand{\arraystretch}{1.402} % 調整行間距
+\setlength{\tabcolsep}{3pt} 
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+\hline
+Dis. & $\sigma_1$ & $\sigma_2$ & $\boldsymbol{\xi^*_{C\chi^2}}$ & $C^* (\hat{C})$ & $\boldsymbol{\hat{\theta}_2(\xi^*_{C\chi^2})}$ & \textbf{Eqv.} & \textbf{Opt?} & \textbf{Time} \\
+\hline
+LN & 1.98 & 0.98 & $\left\{\begin{array}{ccc}
+80 & 80 & 80 \\
+0.000 & 0.005 & 0.995
+\end{array}\right\}$ &
+$\begin{array}{c}
+457251.8 \\
+(-0.969)
+\end{array}$ & 
+$(-59.428, 1.893)$ & 
+\ref{fig:s1=1.98,s2=0.98,9,chi,ll} & $\times$ & 5395 \\
+\hline
+LN & 0.98 & 1.98 & $\left\{\begin{array}{ccc}
+45.597 & 61.641 & 64.68 \\
+0.000 & 1.000 & 0.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.532 \\
+(0.526)
+\end{array}$ & 
+$(-59.442, 1.804)$ & 
+\ref{fig:s1=0.98,s2=1.98,10,chi,ll} & $\triangle$ & 2931 \\
+\hline
+LN & 0.98 & 1.48 & $\left\{\begin{array}{ccc}
+30.879 & 61.575 & 69.17 \\
+0.000 & 1.000 & 0.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.219 \\
+(0.218)
+\end{array}$ & 
+$(-64.922, 1.967)$ & 
+\ref{fig:s1=0.98,s2=1.48,11,chi,ll} & $\triangle$ & 2413 \\
+\hline
+LN & 1.48 & 0.98 & $\left\{\begin{array}{ccc}
+43.696 & 45.881 & 66.72 \\
+0.000 & 0.000 & 1.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+13.689 \\
+(13.692)
+\end{array}$ & 
+$(-62.586, 1.890)$ & 
+\ref{fig:s1=1.48,s2=0.98,12,chi,ll} & $\triangle$ & 4297 \\
+\hline
+LN & 0.48 & 0.98 & $\left\{\begin{array}{ccc}
+54.039 & 80 & 80 \\
+0.000 & 0.004 & 0.996
+\end{array}\right\}$ &
+$\begin{array}{c}
+8.422\times 10^{11} \\
+(-1.000)
+\end{array}$ & 
+$(-69.759, 2.146)$ & 
+\ref{fig:s1=0.48,s2=0.98,13,chi,ll} & $\times$ & 3450 \\
+\hline
+LN & 0.98 & 0.48 & $\left\{\begin{array}{ccc}
+80 & 80 & 80 \\
+0.022 & 0.380 & 0.598
+\end{array}\right\}$ &
+$\begin{array}{c}
+4.938\times 10^{15} \\
+(167714.9)
+\end{array}$ & 
+$(-75.719, 2.287)$ & 
+\ref{fig:s1=0.98,s2=0.48,14,chi,ll} & $\times$ & 3560 \\
+\hline
+WB & 1.98 & 0.98 & $\left\{\begin{array}{ccc}
+10 & 34.502 & 53.741 \\
+1.000 & 0.000 & 0.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+-51105.61 \\
+(-163214.6)
+\end{array}$ & 
+$(-45.631, 2.366)$ & 
+\ref{fig:s1=1.98,s2=0.98,9,chi,ww} & $\times$ & 72416 \\
+\hline
+WB & 0.98 & 1.98 & $\left\{\begin{array}{ccc}
+56.336 & 58.701 & 76.992 \\
+0.000 & 1.000 & 0.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.494 \\
+(0.487)
+\end{array}$ & 
+$(-58.049, 1.761)$ & 
+\ref{fig:s1=0.98,s2=1.98,10,chi,ww} & $\times$ & 26184 \\
+\hline
+WB & 0.98 & 1.48 & $\left\{\begin{array}{ccc}
+30.746 & 61.381 & 80 \\
+0.000 & 0.361 & 0.639
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.192 \\
+(0.189)
+\end{array}$ & 
+$(-62.108, 1.878)$ & 
+\ref{fig:s1=0.98,s2=1.48,11,chi,ww} & $\times$ & 94295 \\
+\hline
+WB & 1.48 & 0.98 & $\left\{\begin{array}{ccc}
+80 & 80 & 80 \\
+0.002 & 0.005 & 0.993
+\end{array}\right\}$ &
+$\begin{array}{c}
+1.152 \\
+(1.152)
+\end{array}$ & 
+$(-56.581, 1.735)$ & 
+\ref{fig:s1=1.48,s2=0.98,12,chi,ww} & $\triangle$ & 154226 \\
+\hline
+WB & 0.48 & 0.98 & $\left\{\begin{array}{ccc}
+41.312 & 57.184 & 74.433 \\
+0.228 & 0.526 & 0.246
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.507 \\
+(0.507)
+\end{array}$ & 
+$(-66.715, 2.013)$ & 
+\ref{fig:s1=0.48,s2=0.98,13,chi,ww} & $\triangle$ & 92497 \\
+\hline
+WB & 0.98 & 0.48 & $\left\{\begin{array}{ccc}
+10 & 32.163 & 46.132 \\
+0.000 & 0.005 & 0.995
+\end{array}\right\}$ &
+$\begin{array}{c}
+4996.081 \\
+(-12323.91)
+\end{array}$ & 
+$(-55.175, 2.385)$ & 
+\ref{fig:s1=0.98,s2=0.48,14,chi,ww} & $\times$ & 5097 \\
+\hline
+\end{tabular}
+}
+\end{adjustwidth}
+\end{table}
+
+\section{Type I 設限下對立模型變異數參數化之模型辨識設計}
+
+\hspace*{8mm} 根據前一小節的結果，僅有 CKL-optimal 設計在有設限時間的情況下仍能保持穩定表現，因此接下來我們將專注於 CKL-optimal 設計進行模擬分析。與前一節固定兩模型變異數不同，本節進一步將變異數納入參數搜尋中，以建立更具彈性與實務性的分析架構。
+
+\subsection{相同分佈假設下競爭平均反應函數之變異參數化}
+
+\hspace*{8mm} 為了探討在對立模型中，變異數亦需納入參數搜尋的情境，本節延續前述的實驗設計設定。真實模型的參數設為 $\theta_{tr} = (\zeta_1, \zeta_2, \zeta_3) = (-5.0, -1.5, 0.05)$，並採用先前表現良好的變異數值（0.9780103 與 1.4780103）。對立模型的參數設定為 $(\delta_1, \delta_2) \in [-100, -10] \times [0.1, 5.0]$，其變異數 $\sigma_2$ 被視為一個未知常數，範圍設定為 $\sigma_2 \in [0.4780103, 4.9780103]$，設限時間為 5000。實驗設計空間則為 $x \in [10, 80]$。PSO-QN 的具體設定為：PSO 使用 64 個粒子，迭代 200 次，而 L-BFGS 進行 50 次迭代。
+
+\hspace*{8mm} 本節將分別探討在兩種情況下，當兩個模型皆假設為對數常態分佈與皆假設為韋伯分佈時的 CKL-optimal 設計結果。
+
+目前的模型設定如下：
+
+\begin{itemize}
+\item 真實模型 $M_1$ 為二次形式：
+\begin{equation}
+\eta_{tr}(x,\theta_1)=\zeta_1+\zeta_2x+\zeta_3x^2
+\end{equation}
+
+\item 競爭模型 $M_2$ 為線性形式：
+\begin{equation}
+\eta_{2}(x,\theta_2)=\delta_1+\delta_2x
+\end{equation}
+
+\end{itemize}
+
+\hspace*{8mm} 其中與先前設定不同的是，參數向量分別為 $\theta_{tr}=(\zeta_1,\zeta_2,\zeta_3)$ 與 $\theta_2=(\delta_1,\delta_2,\sigma_2)$，即競爭模型 $M_2$ 額外包含一個在優化過程中被視為一個搜索變數的未知變異數參數 $\sigma_2$。
+
+\begin{itemize}
+\item 兩模型皆服從對數常態分佈：
+
+\begin{enumerate}
+
+\item 真實模型變異數為 0.9780103：
+\begin{align*}
+\xi^*_{CKL} = \left\{\begin{array}{ccc}
+33.799 & 57.185 & 80 \\
+0.317 & 0.443 & 0.240
+\end{array}\right\}
+\end{align*}
+
+對應的準則值為 $9.116\times 10^{-3}$，並得到能使準則值達到最小的參數組合為 $\hat{\theta}_2(\xi^*_{CKL})=(\hat{\delta_1},\hat{\delta_2},\hat{\sigma_2})=(-66.584, 2.013, 0.965)$。此外，透過等價定理驗證該設計是否為最佳解（圖 \ref{fig:estimate_variance_ex1}），結果顯示其確實滿足最佳性條件。總計算時間為 144836 秒。
+%0.009116113重新計算的準則值
+
+\item 真實模型變異數為 1.4780103：
+\begin{align*}
+\xi^*_{CKL} = \left\{\begin{array}{ccc}
+29.974 & 56.272 & 80 \\
+0.339 & 0.423 & 0.238
+\end{array}\right\}
+\end{align*}
+
+對應的準則值為 0.00501，並得到能使準則值達到最小的參數組合為 $\hat{\theta}_2(\xi^*_{CKL})=(\hat{\delta_1},\hat{\delta_2},\hat{\sigma_2})=(-66.986, 2.025, 1.457)$。此外，透過等價定理驗證該設計是否為最佳解（圖 \ref{fig:estimate_variance_ex2}），結果顯示其確實滿足最佳性條件。總計算時間為 149893 秒。
+%0.005005545重新計算的準則值
+
+\end{enumerate}
+
+\begin{figure}[H]
+\centering
+\subfloat[$\sigma_1=0.9780103$\label{fig:estimate_variance_ex1}]{\includegraphics[width=0.45\linewidth]{\imgdir estimate_variance_ex1(0.97lnln).png}}
+\subfloat[$\sigma_1=1.4780103$\label{fig:estimate_variance_ex2}]{\includegraphics[width=0.45\linewidth]{\imgdir estimate_variance_ex2(1.47lnln).png}} \\
+\caption{針對平均反應函數為二次與線性模型且變異數相同之對數常態分佈情境，所產生之 $\xi^*_{CKL}$ 設計的方向導數圖。}
+\label{fig:DeviceA_estimate_variance_lognormal}
+\end{figure}
+
+\item 兩模型皆服從韋伯分佈：
+
+\begin{enumerate}
+
+\item 真實模型變異數為 0.9780103：
+\begin{align*}
+\xi^*_{CKL} = \left\{\begin{array}{ccc}
+33.531 & 58.185 & 80 \\
+0.340 & 0.434 & 0.226
+\end{array}\right\}
+\end{align*}
+
+對應的準則值為 0.00784，並得到能使準則值達到最小的參數組合為 $\hat{\theta}_2(\xi^*_{CKL})=(\hat{\delta_1},\hat{\delta_2},\hat{\sigma_2})=(-66.207, 2.002, 0.957)$。此外，透過等價定理驗證該設計是否為最佳解（圖 \ref{fig:estimate_variance_ex3}），結果顯示其確實滿足最佳性條件。總計算時間為 134408 秒。
+%0.007835339重新計算的準則值
+
+\item 真實模型變異數為 1.4780103：
+\begin{align*}
+\xi^*_{CKL} = \left\{\begin{array}{ccc}
+26.713 & 57.032 & 80 \\
+0.396 & 0.382 & 0.222
+\end{array}\right\}
+\end{align*}
+
+對應的準則值為 $4.491\times 10^{-3}$，並得到能使準則值達到最小的參數組合為 $\hat{\theta}_2(\xi^*_{CKL})=(\hat{\delta_1},\hat{\delta_2},\hat{\sigma_2})=(-66.560, 2.013, 1.441)$。此外，透過等價定理驗證該設計是否為最佳解（圖 \ref{fig:estimate_variance_ex4}），結果顯示其確實滿足最佳性條件。總計算時間為 85551 秒。
+%0.004275654重新計算的準則值
+
+\end{enumerate}
+
+\begin{figure}[H]
+\centering
+\subfloat[$\sigma_1=0.9780103$\label{fig:estimate_variance_ex3}]{\includegraphics[width=0.45\linewidth]{\imgdir estimate_variance_ex3(0.97wewe).png}}
+\subfloat[$\sigma_1=1.4780103$\label{fig:estimate_variance_ex4}]{\includegraphics[width=0.45\linewidth]{\imgdir estimate_variance_ex4(1.47wewe).png}} \\
+\caption{針對平均反應函數為二次與線性模型且變異數相同之韋伯分佈情境，所產生之 $\xi^*_{CKL}$ 設計的方向導數圖。}
+\label{fig:DeviceA_estimate_variance_weibull}
+\end{figure}
+
+\end{itemize}
+
+\hspace*{8mm} 在這個延伸的設計情境中，我們將競爭模型的變異數視為未知參數，並與位置參數一同納入最佳化架構中。圖 \ref{fig:DeviceA_estimate_variance_lognormal} 與圖 \ref{fig:DeviceA_estimate_variance_weibull} 所示為各設計結果對應的方向導數圖。從圖中可見，雖然部分設計尚未完全符合最佳性條件，但整體表現皆具有高度潛力，若進一步提升演算法的迭代次數，預期將可達成更佳的收斂與設計品質。值得注意的是，各情境中搜尋出的變異數 $\hat{\sigma}_2$ 皆趨近於真實模型所設定的 $\sigma_1$，這個結果並不是說模型能夠「成功還原」真實變異，而是透露出一項更重要的設計原理：為了最大化模型之間的可區辨性，CKL 準則下的競爭模型傾向選擇與真實模型變異數接近的結構，藉此放大平均結構之間的差異，達到最佳模型辨識效果。
+
+\hspace*{8mm} 為協助觀察固定變異數與搜尋變異數兩種情境下的設計差異，表 \ref{tab:CKL-results-DeviceA-sameV} 的資訊已整合至表 \ref{tab:design_comparison0.98} 與表 \ref{tab:design_comparison1.48}，同時呈現支撐點、對應權重與在設限時間 $C$ 前的累積失效機率，有助於視覺與數值層面的整體比較。
+
+\hspace*{8mm} 從兩種分佈的結果觀察可知，將對立模型變異數納入搜尋後，對數常態分佈與韋伯分佈的前兩個支撐點皆有往高應力方向移動的趨勢，但幅度不同：對數常態分佈的位移較小、變化溫和，而韋伯分佈則顯示出明顯偏向高應力區的設計調整，反映出其對尾部特性與設限效應的敏感性更高。
+
+\hspace*{8mm} 另一方面，為確認設計的實用性，我們計算各支撐點在 $C$ 前的累積失效機率，確保在有限觀測時間內能觀察到足夠的失效事件。若失效機率過低，容易導致資料過度設限，不利於模型辨識與參數搜尋。
+
+\hspace*{8mm} 結果顯示，所有設計點的累積失效機率多介於 5\% 至 100\% 間，意味每個點皆能觀察到一定比例的失效樣本，避免資訊不足，有助於提升模型辨識能力與整體實驗效率，證實 CKL-optimal 設計在設限條件下具備良好可行性與辨識效能。
+
+\begin{table}[H] \scriptsize
+\caption{針對平均反應函數為二次與線性模型且變異數相同之情境，給定變異數與變異數參數化所產生之CKL-optimal 設計的設計點、權重、在設限時間前產品失效之累積機率（$\sigma$ = 0.9780103）。}
+\label{tab:design_comparison0.98}
+\centering
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Model} & \textbf{Point} & \textbf{Weight} & \textbf{Cumulative Probability} \\
+\midrule
+\textbf{Log-Normal (fixed $\theta_2$)} & & & \\
+\quad & 33.557 & 0.330 & 0.0902 \\
+\quad & 56.829 & 0.436 & 1.000 \\
+\quad & 80 & 0.234 & 1\\
+\addlinespace
+\textbf{Log-Normal (unknown $\theta_2$)} & & & \\
+\quad & 33.799 & 0.317 & 0.102 \\
+\quad & 57.185 & 0.443 & 1.000 \\
+\quad & 80 & 0.226 & 1 \\
+\addlinespace
+\textbf{Weibull (fixed $\theta_2$)} & & & \\
+\quad & 32.545 & 0.368 & 0.177 \\
+\quad & 57.686 & 0.415 & 1 \\
+\quad & 80 & 0.217 & 1 \\
+\addlinespace
+\textbf{Weibull (unknown $\theta_2$)} & & & \\
+\quad & 33.531 & 0.340 & 0.229 \\
+\quad & 58.185 & 0.434 & 1 \\
+\quad & 80 & 0.226 & 1 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H] \scriptsize
+\caption{針對平均反應函數為二次與線性模型且變異數相同之情境，給定變異數與變異數參數化所產生之CKL-optimal 設計的設計點、權重、在設限時間前產品失效之累積機率（$\sigma$ = 1.4780103）。}
+\label{tab:design_comparison1.48}
+\centering
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Model} & \textbf{Point} & \textbf{Weight} & \textbf{Cumulative Probability} \\
+\midrule
+\textbf{Log-Normal (fixed $\theta_2$)} & & & \\
+\quad & 29.699 & 0.360 & 0.0506 \\
+\quad & 55.482 & 0.413 & 0.997 \\
+\quad & 80 & 0.227 & 1 \\
+\addlinespace
+\textbf{Log-Normal (unknown $\theta_2$)} & & & \\
+\quad & 29.974 & 0.339 & 0.0566 \\
+\quad & 56.272 & 0.423 & 0.998 \\
+\quad & 80 & 0.238 & 1 \\
+\addlinespace
+\textbf{Weibull (fixed $\theta_2$)} & & & \\
+\quad & 25.576 & 0.441 & 0.0801 \\
+\quad & 55.791 & 0.359 & 1 \\
+\quad & 80 & 0.200 & 1 \\
+\addlinespace
+\textbf{Weibull (unknown $\theta_2$)} & & & \\
+\quad & 26.713 & 0.396 & 0.100 \\
+\quad & 57.032 & 0.382 & 1 \\
+\quad & 80 & 0.222 & 1 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{競爭分佈假設下相同平均反應函數之應力相依變異}\label{SEC:Meeker}
+
+\hspace*{8mm} 本小節參考 \cite{pascual1997analysis} 提出之疲勞壽命模型架構，考量壽命資料存在疲勞極限（Fatigue Limit）條件，且標準差隨應力水準變動的情形。過去的疲勞壽命模型大多假設無疲勞極限且標準差為常數，然而在實際數據中，這類假設常導致模型誤差。引入標準差隨應力變化的結構，能更準確描述疲勞壽命曲線（S-N Curve）上的彎曲現象（Curvature）及資料分散特性。
+
+\hspace*{8mm} 為精確建構壽命分佈，本節採用該文中所建議之平均反應模型及與應力相關的標準差結構，並以其透過最大概似估計（MLE）及概似比信賴區間（Profile Likelihood Confidence Interval）方法所推得之參數估計結果作為模擬情境設定的基礎。其餘模擬情境則為自行設定，唯須符合兩項基本原則：首先，平均反應函數 $\eta(x,\theta)$ 必須為隨應力變動的遞減函數，且其值需保持為正，以確保模型在數值運算上的合理性與穩定性；其次，標準差隨應力改變之變異幅度須控制在合理範圍內，以避免因 $exp()$ 過大導致數值爆炸（Overflow）。值得注意的是，他們的研究估計了參數 $\gamma=75.71$，該參數同時出現在平均反應函數和變異數結構中，後續的模擬中將採用該值。
+
+\hspace*{8mm} 基於上述條件，本節進行一系列數值模擬與模型辨識分析。模擬情境如表 \ref{tab:meekercase-situation} 所示（設限時間為1000），真實模型 $M_1$ 和競爭模型 $M_2$ 的結構如下，每個公式都包含一個平均回應函數和一個應力相關標準差函數。
+
+\begin{itemize}
+\item The true model $M_1$ is:
+\begin{equation}\label{meeker_truemodel}
+\eta_{tr}(x,\theta)=\zeta_1+\zeta_2\log(x-\gamma)
+\end{equation}
+\begin{equation}\label{meeker_truemodel_variance}
+\sigma_1=exp\left\{\phi_1+\phi_2\log(x-\gamma)\right\}
+\end{equation}
+
+\item The rival model $M_2$: 
+\begin{equation}\label{meeker_rivalmodel}
+\eta_2(x,\theta)=\delta_1+\delta_2\log(x-\gamma)
+\end{equation}
+\begin{equation}\label{meeker_truemodel_variance}
+\sigma_2=exp\left\{\kappa_1+\kappa_2\log(x-\gamma)\right\}
+\end{equation}
+
+\end{itemize}
+
+\hspace*{8mm} 值得注意的是，在結果表格中，搜尋出的參數向量為 $\hat{\theta}2(\xi^*{CKL})=(\hat{\delta_1},\hat{\delta_2},\hat{\kappa_1},\hat{\kappa_2})$，分別對應到平均反應模型與應力相關變異數模型的參數。
+
+\hspace*{8mm} 在本研究最後的模擬案例中，雖然多數結果在數值上不穩定或方向導數圖難以解讀，但仍有部分案例展現出潛在可行性。具體而言，部分設計雖為退化（Degenerate）形式，僅包含單一支持點，其方向導數在整體設計區間內仍維持於零以下，顯示在等價理論下具穩定性。此外，亦有數組非退化設計，其方向導數曲線局部略為呈現正值，但這些正值的尺度極小（例如約 $10^{-9}$ ，且整體趨勢快速回落至零以下。這樣的現象顯示該設計具改善空間與轉為最佳設計的潛力。整體模擬結果詳見表 \ref{tab:meeker_tress-variance_result}，顯示不同組合條件下設計表現的變化情形。
+
+\hspace*{8mm} 實作上使用的積分計算亦可能是導致數值不穩定的來源之一，尤其對於設限項所對應之對數函數寫法，在特定參數與支撐點組合下易產生無法積分的非有限值。這樣的錯誤不僅會影響準則函數的正確性，也可能造成最佳化過程過早終止或陷入無意義的局部解。未來研究可考慮對積分結構進行優化，例如透過數值近似公式重寫對數項、改進積分上下限的設定，或加入判斷積分錯誤的補救機制，以提升整體演算法的穩健性與準確性。
+
+\hspace*{8mm} 此外，先前在模擬 CKL、CLW、CB 及 C$\chi^2$ 準則時已發現，內層最佳化中的目標函數雖理論上可微，但實務上可能缺乏足夠光滑性。當函數呈現多個局部極值或波浪結構時，像 L-BFGS 這類依賴局部曲率的演算法容易收斂困難，造成梯度搜尋偏差與結果品質下降。在本節更複雜的情境下，此類問題更為明顯，顯示未來有必要針對目標函數結構與求解策略進行調整。
+
+\begin{table}[H] \scriptsize
+\caption{針對 Meeker 案例中平均反應函數相同且變異數與應力相依時之模擬設定}
+\label{tab:meekercase-situation}
+\centering
+\makebox[\linewidth][c]{%
+\renewcommand{\arraystretch}{1.35} % 調整行間距
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{cccccrrrrrrrrrr}
+  \toprule
+  &\multicolumn{2}{c}{Dis.} &&& \multicolumn{4}{c}{$M_1$} & & \multicolumn{4}{c}{$M_2$}\\
+  \cline{2-3} \cline{6-9} \cline{11-14}
+  Case & $M_1$ & $M_2$ && & $\zeta_1$ & $\zeta_2$ & $\phi_1$ & $\phi_2$ && $\delta_1$ & $\delta_2$ & $\kappa_1$ & $\kappa_2$ \\ 
+  \hline
+   (1) & \multirow{6}{*}{LN} & \multirow{6}{*}{WB} && & 14.75 & -1.39 & 10.97 & -2.5 && [12.06,17.44] & [-2.02,-0.76] & [10,20] & [-3,-0.01] \\ 
+   (2) &&&& & 14.75 & -1.39 & 10.97 & -2.5 && [15.9,21.45] & [-2.81,-0.92] & [10,20] & [-3,-0.01] \\ 
+   (3) &&&& & 10 & -2 & 0.63 & -0.91 && [9.5,15] & [-2.1,-1] & [0.5,1] & [-1,-0.81] \\ 
+   (4) &&&& & 43 & -0.63 & 4.32 & -0.88 && [5,50] & [-1,-0.05] & [3.12,5.32] & [-1,-0.5] \\ 
+   (5) &&&& & 458 & -53 & 4.32 & -0.88 && [432,480] & [-100,-1] & [3.12,5.32] & [-1,-0.5] \\ 
+   (6) &&&& & 53.39 & -7.81 & 4.32 & -0.88 && [50,60] & [-10,-5] & [3.12,5.32] & [-1,-0.5] \\ 
+   \toprule
+   (7) & \multirow{6}{*}{WB} & \multirow{6}{*}{LN} && & 14.75 & -1.39 & 10.97 & -2.5 && [12.06,17.44] & [-2.02,-0.76] & [10,20] & [-3,-0.01] \\ 
+   (8) &&&& & 14.75 & -1.39 & 10.97 & -2.5 && [15.9,21.45] & [-2.81,-0.92] & [10,20] & [-3,-0.01] \\ 
+   (9) &&&& & 10 & -2 & 0.63 & -0.91 && [9.5,15] & [-2.1,-1] & [0.5,1] & [-1,-0.81] \\ 
+   (10) &&&& & 43 & -0.63 & 4.32 & -0.88 && [5,50] & [-1,-0.05] & [3.12,5.32] & [-1,-0.5] \\ 
+   (11) &&&& & 458 & -53 & 4.32 & -0.88 && [432,480] & [-100,-1] & [3.12,5.32] & [-1,-0.5] \\ 
+   (12) &&&& & 53.39 & -7.81 & 4.32 & -0.88 && [50,60] & [-10,-5] & [3.12,5.32] & [-1,-0.5] \\ 
+  \toprule
+    \end{tabular}
+    }
+\end{table}
+
+\begin{table}[H] \scriptsize 
+\caption{針對 Meeker 案例中平均反應函數相同且變異數與應力相依時之情
+境，所產生之 CKL-optimal 設計的結果。}
+\label{tab:meeker_tress-variance_result}
+\begin{adjustwidth}{-2.5cm}{-2.5cm} 
+\makebox[\linewidth][c]{%
+\renewcommand{\arraystretch}{1.35} % 調整行間距
+\setlength{\tabcolsep}{3pt} 
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+Case & $\boldsymbol{\xi^*_{CKL}}$ & $C^* (\hat{C})$ & $\boldsymbol{\hat{\theta}_2(\xi^*_{CKL})}$ & \textbf{Eqv.} & \textbf{Opt?} & \textbf{Time} \\
+\hline
+(1) & $\left\{\begin{array}{cccc}
+88.245 & 115.191 & 122.132 & 123.571 \\
+1.000 & 0.000 & 0.000 & 0.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+2.023\times 10^{-8} \\
+(4.956\times 10^{-9})
+\end{array}$ & 
+$(14.918, -1.350, 11.824, -2.942)$ & 
+\ref{fig:meeker_lnIsTrue_1} & $\triangle$ & 4083 \\
+\hline
+(2) & $\left\{\begin{array}{cccc}
+76.389 & 86.024 & 94.240 & 112.132 \\
+0.000 & 1.000 & 0.000 & 0.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+6.725\times 10^{-8} \\
+(2.136\times 10^{-8})
+\end{array}$ & 
+$(20.968, -2.056, 10, -2.397)$ & 
+\ref{fig:meeker_lnIsTrue_2} & $\triangle$ & 5043 \\
+\hline
+(3) & $\left\{\begin{array}{cccc}
+111.009 & 112.296 & 113.75 & 150 \\
+0.000 & 0.000 & 1.000 & 0.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+27.167 \\
+(6.275\times 10^{-5})
+\end{array}$ & 
+$(10.597, -1.873, 0.723, -0.922)$ & 
+\ref{fig:meeker_lnIsTrue_3} & $\times$ & 4245 \\
+\hline
+(4) & $\left\{\begin{array}{cccc}
+77.297 & 78.038 & 109.932 & 132.334 \\
+1.000 & 0.000 & 0.000 & 0.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+2.449\times 10^{-12} \\
+(5.462\times 10^{-14})
+\end{array}$ & 
+$(36.931, -0.523, 3.791, -0.878)$ & 
+\ref{fig:meeker_lnIsTrue_4} & $\times$ & 3897 \\
+\hline
+(5) & $\left\{\begin{array}{cccc}
+90.99 & 98.775 & 108.941 & 116.822 \\
+0.464 & 0.231 & 0.271 & 0.035
+\end{array}\right\}$ &
+$\begin{array}{c}
+0 \\
+(0)
+\end{array}$ & 
+$(455.318, -49.116, 4.219, -0.533)$ & 
+\ref{fig:meeker_lnIsTrue_5} & $\triangle$ & 1376 \\
+\hline
+(6) & $\left\{\begin{array}{cccc}
+123.238 & 123.969 & 125.026 & 127.373 \\
+0.022 & 0.977 & 0.000 & 0.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+2.265\times 10^{-14} \\
+(-4.305\times 10^{-49})
+\end{array}$ & 
+$(55.951, -6.358, 3.846, -0.928)$ & 
+\ref{fig:meeker_lnIsTrue_6} & $\triangle$ & 7386 \\
+\hline
+(7) & $\left\{\begin{array}{cccc}
+76 & 86.748 & 126.815 & 150 \\
+0.476 & 0.247 & 0.000 & 0.277
+\end{array}\right\}$ &
+$\begin{array}{c}
+1.235\times 10^{-4} \\
+(1.208\times 10^{-4})
+\end{array}$ & 
+$(17.44, -1.638, 10, -2.028)$ & 
+\ref{fig:meeker_wbIsTrue_1} & $\triangle$ & 48506 \\
+\hline
+(8) & $\left\{\begin{array}{cccc}
+76 & 87.744 & 97.631 & 150 \\
+0.469 & 0.242 & 0.000 & 0.289
+\end{array}\right\}$ &
+$\begin{array}{c}
+1.173\times 10^{-4} \\
+(1.156\times 10^{-4})
+\end{array}$ & 
+$(18.350, -1.781, 10.011, -2.012)$ & 
+\ref{fig:meeker_wbIsTrue_2} & $\triangle$ & 54794 \\
+\hline
+(9) & $\left\{\begin{array}{cccc}
+80.622 & 94.153 & 94.67 & 127.625 \\
+0.259 & 0.519 & 0.000 & 0.221
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.0907 \\
+(0.0872)
+\end{array}$ & 
+$(9.972, -1.995, 0.882, -0.839)$ & 
+\ref{fig:meeker_wbIsTrue_3} & $\times$ & 217023 \\
+\hline
+(10) & $\left\{\begin{array}{cccc}
+76 & 76.879 & 76.950 & 118.382 \\
+0.000 & 0.000 & 1.000 & 0.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+3.197\times 10^{-9} \\
+(3.808\times 10^{-10})
+\end{array}$ & 
+$(27.531, -0.658, 4.374, -0.728)$ & 
+\ref{fig:meeker_wbIsTrue_4} & $\triangle$ & 1487 \\
+\hline
+(11) & $\left\{\begin{array}{cccc}
+79.235 & 94.878 & 110.173 & 150 \\
+0.000 & 1.000 & 0.000 & 0.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+1.808\times 10^{-91} \\
+(1.534\times 10^{-92})
+\end{array}$ & 
+$(473.842, -9.458, 4.621, -0.364)$ & 
+\ref{fig:meeker_wbIsTrue_5} & $\triangle$ & 1436 \\
+\hline
+(12) & $\left\{\begin{array}{cccc}
+104.273 & 113.865 & 130.105 & 150 \\
+0.982 & 0.000 & 0.000 & 0.018
+\end{array}\right\}$ &
+$\begin{array}{c}
+8.222\times 10^{-8} \\
+(4.220\times 10^{-8})
+\end{array}$ & 
+$(54.974, -7.423, 4.200, -0.586)$ & 
+\ref{fig:meeker_wbIsTrue_6} & $\triangle$ & 6743 \\
+\hline
+\end{tabular}
+}
+\end{adjustwidth}
+\end{table}

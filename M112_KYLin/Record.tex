@@ -1,0 +1,2986 @@
+\documentclass[12pt, a4paper]{article}
+\input{preamble_GP}  % 使用自己維護的定義檔
+\usepackage{multirow}
+\usepackage{rotating}
+%-----------------------------------------------------------------------------------------------------------------------
+% 文章開始
+\title{Model Discrimination Design Generation for Accelerated Life Testing Experiments via Hybridized Optimization Algorithms}	% 使用設定的字型
+%\author{{\KT 林貫原}}				% 使用設定的小字體
+\date{} 			
+\begin{document}
+\renewcommand{\tablename}{Table}	
+\renewcommand{\figurename}{Figure}
+\maketitle
+\fontsize{12}{22pt}\selectfont 
+
+
+
+
+
+
+
+
+The $M_1$ model is a quadratic equation:
+$$\mu_1=\theta_{11}+\theta_{12}x+\theta_{13}x^2+\epsilon$$
+
+The $M_2$ model can be expressed as a linear equation:
+$$\mu_2=\theta_{21}+\theta_{22}x+\epsilon,$$
+where $\mu_1$ is the mean of the response variable $y$ and $\epsilon$ is the error term.
+
+The two models are nested, so the true model must be the larger one, that is, the $M_1$ model. Let the nominal value of $\theta_{tr} = (\theta_{11}, \theta_{12}, \theta_{13}) = (-5.0, -1.5,0.05)$. For the rival model, we set $\theta_r = (\theta_{21}, \theta_{22}) \in [-100,-10] \times [0.1,5.0]$. The design space is $s\in [10,80]$.
+
+In the context of approximate design, $ \xi $ represents the design measure, which is defined as a collection of three design points $ \{x_1, x_2, x_3\} $ along with their associated weights $ \{w_1, w_2, w_3\} $ satisfying $ \sum_{i=1}^3 w_i = 1 $, where $ w_i \geq 0 $.. This approach assumes the use of three points to approximate the design efficiently.
+
+Mathematically, the design $ \xi $ is represented as:
+$$
+\xi = \left\{\begin{array}{ccc}
+x_1 & x_2 & x_3 \\
+w_1 & w_2 & w_3
+\end{array}\right\}
+$$
+
+In approximate design, $ \xi $ is optimized to maximize the divergence criteria, ensuring that the design is efficient for discriminating between competing models. $ \xi^* $ denotes the optimal approximate design, which ensures maximum efficiency for distinguishing between competing models or for precise parameter estimation.
+
+$C^*$ is the maximum criterion value obtained from the optimization algorithm (e.g., PSO, LBFGS), measuring the design's effectiveness. $\hat{C}$ is recalculated using the optimized design and estimated parameters $\hat{\theta}$ to verify its quality and consistency.
+
+$$
+C^* = {\underset{\xi \in s}{\operatorname{arg\,max}}} \min_{\theta_r \in \Theta_r} \left\{ \int_X \sum_{i=1}^3 w_i \cdot \text{Div} \left( M_1(x_i, \theta_{tr}), M_2(x_i, \theta_r) \right) \xi(dx) \right\}.
+$$
+
+\(\text{Div}\) represents a divergence criterion. We consider four types of divergence. We use the following notations. Let \( f_{tr}(y \mid x, \sigma^2_{tr}) \) and \( f_r(y \mid x, \theta_r, \sigma^2_r) \) represent the conditional probability density functions for the true and rival models, respectively. The cumulative distribution functions of these densities are denoted as \( F_{tr}(C \mid x, \sigma^2_{tr}) \) and \( F_r(C \mid x, \theta_r, \sigma^2_r) \), where \( C \) is the censoring point. The survival functions are defined as \( \bar{F}_{tr}(C) = 1 - F_{tr}(C) \) and \( \bar{F}_r(C) = 1 - F_r(C) \).
+
+\begin{itemize}
+\item KL divergence:
+$$
+D_{KL}^C(f_{tr}, f_r) = \int_{-\infty}^C f_{tr} \log \left\{ \frac{f_{tr}}{f_r} \right\} dy + \bar{F}_{tr}(C) \log \left\{ \frac{\bar{F}_{tr}(C)}{\bar{F}_r(C)} \right\}.
+$$
+%D_{KL}^C(f_{tr}, f_r) = \int_{-\infty}^C f_{tr}(y \mid x, \sigma^2_{tr}) \log \left\{ \frac{f_{tr}(y \mid x, \sigma^2_{tr})}{f_r(y \mid x, \theta_r, \sigma^2_r)} \right\} dy + \left[ 1 - F_{tr}(C \mid x, \sigma^2_{tr}) \log \left\{ \frac{1 - F_{tr}(C \mid x, \sigma^2_{tr})}{1 - F_r(C \mid x, \theta_r, \sigma^2_r)} \right\} \right].
+\item LW divergence:
+$$
+D_{LW}^C(f_{tr}, f_r) = \int_{-\infty}^C f_{tr} \log \left\{ \frac{2f_{tr}}{f_{tr} + f_r} \right\} dy + \bar{F}_{tr}(C) \log \left\{ \frac{2\bar{F}_{tr}(C)}{ \bar{F}_{tr}(C) + \bar{F}_r(C)} \right\}.
+$$
+%D_{LW}^C(f_{tr}, f_r) = \int_{-\infty}^C f_{tr}(y \mid x, \sigma^2_{tr}) \log \left\{ \frac{2 f_{tr}(y \mid x, \sigma^2_{tr})}{f_{tr}(y \mid x, \sigma^2_{tr}) + f_r(y \mid x, \theta_r, \sigma^2_r)} \right\} dy + \left[ 1 - F_{tr}(C \mid x, \sigma^2_{tr}) \log \left\{ \frac{2 (1 - F_{tr}(C \mid x, \sigma^2_{tr}))}{2 - F_{tr}(C \mid x, \sigma^2_{tr}) - F_r(C \mid x, \theta_r, \sigma^2_r)} \right\} \right].
+\item Bhattacharyya(B) distance measure:
+$$
+D_B^C(f_{tr}, f_r) = \int_{-\infty}^C \sqrt{f_{tr} \cdot f_r} \, dy + \sqrt{\bar{F}_{tr}(C) \cdot \bar{F}_r(C)}.
+$$
+%D_B^C(f_{tr}, f_r) = \int_{-\infty}^C \sqrt{f_{tr}(y \mid x, \sigma^2_{tr}) \cdot f_r(y \mid x, \theta_r, \sigma^2_r)} dy + \sqrt{(1 - F_{tr}(C \mid x, \sigma^2_{tr})) \cdot (1 - F_r(C \mid x, \theta_r, \sigma^2_r))}.
+\item $\chi^2$ distance measure:
+$$
+D_{\chi^2}^C(f_{tr}, f_r) = \int_{-\infty}^C \frac{(f_{tr})^2}{f_r} \, dy + \frac{\left(\bar{F}_{tr}(C)\right)^2}{\bar{F}_r(C)} - 1.
+$$
+%D_{\chi^2}^C(f_{tr}, f_r) = \int_{-\infty}^C \frac{(f_{tr}(y \mid x, \sigma^2_{tr}) - f_r(y \mid x, \theta_r, \sigma^2_r))^2}{f_r(y \mid x, \theta_r, \sigma^2_r)} dy + \frac{(1 - F_{tr}(C \mid x, \sigma^2_{tr}) - (1 - F_r(C \mid x, \theta_r, \sigma^2_r)))^2}{1 - F_r(C \mid x, \theta_r, \sigma^2_r)}.
+\end{itemize}
+
+For situation 1: 
+Two log-normal distributions with different model.
+
+PSO-QN (Chen et al., 2020) details are:
+\begin{itemize}
+
+\item PSO : 64 particles and 200 iterations.
+\item BFGS : 50 iterations. (First case is 20 iterations)
+
+\end{itemize}
+
+Important findings:
+\begin{enumerate}
+\item When the standard deviation of the two distribution is large, there is a computational issues.
+%當兩分配的標準差很大時，會有計算上的問題。
+\item The performance of KL divergence remains highly stable as long as the standard deviation of the distribution is not too large. It consistently identifies the optimal approximation design, regardless of whether the two models follow the same distribution or different distributions.
+%KL-divergence的表現只要當分配的標準差不大時，表現都很穩定，幾乎都能找到最佳的近似設計，不管是當兩個模型為相同分配抑或是兩個模型不同分配時。
+\item The $ \chi^2 $ divergence tends to either converge to a single point or fail entirely to identify an optimal approximate design.
+%$\chi^2$很容易收斂到一個點，不然就會完全找不到最佳化近似設計
+\item The criterion value derived from the $B$ divergence is either 0, 1, or an exceptionally small number.
+% B divergence計算出的criterion值不是0就是1不然就是極小值
+
+\end{enumerate}
+
+
+
+
+
+
+
+
+\newpage
+
+% Case 1.1
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{12pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\multicolumn{5}{|c|}{\textbf{Settings}} \\ 
+\hline
+\((\theta_{11}, \theta_{12}, \theta_{13})\) & \(s\) & \(\theta_{21} \text{ bound}\) & \(\theta_{22} \text{ bound}\) & \(\text{Distribution}\) \\
+\hline
+\((-5, -1.5, 0.05)\) & \(0.9780103\) & \([-100, -10]\) & \([0.1, 5]\) & \(\text{Log-normal}\)\\
+\hline
+\end{tabular}
+\caption{Settings for the Optimal Design (Case 1.1)}
+\label{tab:settings1.1}
+\end{table}
+
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{8pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+\textbf{Div.} & \(\boldsymbol{\xi^*}\) & \(C^* (\hat{C})\) & \(\boldsymbol{\hat{\theta}(\xi^*)}\) & \textbf{Eqv.} & \textbf{Opt?} & \textbf{CPU time} \\
+\hline
+KL & \(\left\{\begin{array}{ccc}
+33.554 & 56.829 & 80 \\
+0.330 & 0.436 & 0.234
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.00927 \\
+(0.00927)
+\end{array}\) & 
+\((-66.712, 2.017)\) & 
+Figure \ref{fig:s=0.97,1,kl,ll} & $\surd$ & 18385.63 \\
+\hline
+LW & \(\left\{\begin{array}{ccc}
+68.674 & 80 & 80 \\
+1.000 & 0.000 & 0.000
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.705 \\
+(-5.96\times 10^{-7})
+\end{array}\) & 
+\((-64.963, 1.964)\) & 
+Figure \ref{fig:s=0.97,1,lw,ll} & $\triangle$ & 992.47 \\
+\hline
+B & \(\left\{\begin{array}{ccc}
+10 & 10 & 10 \\
+0.000 & 0.004 & 0.996
+\end{array}\right\}\) &
+\(\begin{array}{c}
+1 \\
+(2.11\times 10^{-8})
+\end{array}\) & 
+\((-79.371, 1.953)\) & 
+Figure \ref{fig:s=0.97,1,bhattacharyya,ll} & $\triangle$ & 143.42 \\
+\hline
+\(\chi^2\) & \(\left\{\begin{array}{ccc}
+10 & 12.237 & 34.775 \\
+0.000 & 0.000 & 1.000
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.0397 \\
+(0.153)
+\end{array}\) & 
+\((-52.267, 1.623)\) & 
+Figure \ref{fig:s=0.97,1,chi2,ll} & $\triangle$ & 206.32 \\
+\hline
+\end{tabular}
+\caption{Summary of Divergence and Optimal Design Results (Case 1.1)}
+\label{tab:results1.1}
+\end{table}
+
+
+
+
+
+% ------------------------------------------------
+% Case 1.2
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{12pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\multicolumn{5}{|c|}{\textbf{Settings}} \\ 
+\hline
+\((\theta_{11}, \theta_{12}, \theta_{13})\) & \(s\) & \(\theta_{21} \text{ bound}\) & \(\theta_{22} \text{ bound}\) & \(\text{Distribution}\) \\
+\hline
+\((-5, -1.5, 0.05)\) & \(0.9780103\) & \([-100, -10]\) & \([0.1, 5]\) & \(\text{Log-normal}\)\\
+\hline
+\end{tabular}
+\caption{Settings for the Optimal Design (Case 1.2)}
+\label{tab:settings1.2}
+\end{table}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{8pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+\textbf{Div.} & \(\boldsymbol{\xi^*}\) & \(C^* (\hat{C})\) & \(\boldsymbol{\hat{\theta}(\xi^*)}\) & \textbf{Eqv.} & \textbf{Opt?} & \textbf{CPU time} \\
+\hline
+KL & \(\left\{\begin{array}{ccc}
+33.557 & 56.829 & 80 \\
+0.330 & 0.436 & 0.234
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.00927 \\
+(0.00927)
+\end{array}\) & 
+\((-66.710, 2.017)\) & 
+Figure \ref{fig:s=0.97,2,kl,ll} & $\surd$ & 42714.86 \\
+\hline
+LW & \(\left\{\begin{array}{ccc}
+10 & 31.597 & 31.714 \\
+0.000 & 0.999 & 0.001
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.00551 \\
+(0.00551)
+\end{array}\) & 
+\((-94.530, 3.277)\) & 
+Figure \ref{fig:s=0.97,2,lw,ll} & $\times$ & 792.61 \\
+\hline
+B & \(\left\{\begin{array}{ccc}
+10 & 10 & 10 \\
+0.001 & 0.210 & 0.789
+\end{array}\right\}\) &
+\(\begin{array}{c}
+1 \\
+(1)
+\end{array}\) & 
+\((-83.787, 3.896)\) & 
+Figure \ref{fig:s=0.97,2,bhattacharyya,ll} & $\triangle$ & 318.65 \\
+\hline
+\(\chi^2\) & \(\left\{\begin{array}{ccc}
+49.736 & 64.061 & 80 \\
+0.000 & 0.000 & 1.000
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.0339 \\
+(-1.70\times 10^{-10})
+\end{array}\) & 
+\((-86.455, 2.622)\) & 
+Figure \ref{fig:s=0.97,2,chi2,ll} & $\triangle$ & 2067.13 \\
+\hline
+\end{tabular}
+\caption{Summary of Divergence and Optimal Design Results (Case 1.2)}
+\label{tab:results1.2}
+\end{table}
+
+
+
+% ------------------------------------------------
+% Case 1.3
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{12pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\multicolumn{5}{|c|}{\textbf{Settings}} \\ 
+\hline
+\((\theta_{11}, \theta_{12}, \theta_{13})\) & \(s\) & \(\theta_{21} \text{ bound}\) & \(\theta_{22} \text{ bound}\) & \(\text{Distribution}\) \\
+\hline
+\((-5, -1.5, 0.05)\) & \(1.4780103\) & \([-100, -10]\) & \([0.1, 5]\) & \(\text{Log-normal}\)\\
+\hline
+\end{tabular}
+\caption{Settings for the Optimal Design (Case 1.3)}
+\label{tab:settings1.3}
+\end{table}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{8pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+\textbf{Div.} & \(\boldsymbol{\xi^*}\) & \(C^* (\hat{C})\) & \(\boldsymbol{\hat{\theta}(\xi^*)}\) & \textbf{Eqv.} & \textbf{Opt?} & \textbf{CPU time} \\
+\hline
+KL & \(\left\{\begin{array}{ccc}
+29.699 & 55.482 & 80 \\
+0.36 & 0.413 & 0.227
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.00517 \\
+(0.00517)
+\end{array}\) & 
+\((-67.204, 2.031)\) & 
+Figure \ref{fig:s=1.47,3,kl,ll} & $\surd$ & 58457.59 \\
+\hline
+LW & \(\left\{\begin{array}{ccc}
+79.41 & 80 & 80 \\
+1.000 & 0.000 & 0.000
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.693 \\
+(-2.67\times 10^{-6})
+\end{array}\) & 
+\((-86.830, 2.632)\) & 
+Figure \ref{fig:s=1.47,3,lw,ll} & $\times$ & 3238.59 \\
+\hline
+B & \(\left\{\begin{array}{ccc}
+21.036 & 37.942 & 43.839 \\
+1.000 & 0.000 & 0.000
+\end{array}\right\}\) &
+\(\begin{array}{c}
+4.66\times 10^{-75} \\
+(1.000)
+\end{array}\) & 
+\((-50.864, 2.922)\) & 
+Figure \ref{fig:s=1.47,3,bhattacharyya,ll} & $\triangle$ & 335.67 \\
+\hline
+\(\chi^2\) & \(\left\{\begin{array}{ccc}
+80 & 80 & 80 \\
+0.109 & 0.445 & 0.445
+\end{array}\right\}\) &
+\(\begin{array}{c}
+4.44\times 10^{11} \\
+(5.71\times 10^{-7})
+\end{array}\) & 
+\((-64.928, 1.967)\) & 
+Figure \ref{fig:s=1.47,3,chi2,ll} & $\times$ & 4768.38 \\
+\hline
+\end{tabular}
+\caption{Summary of Divergence and Optimal Design Results (Case 1.3)}
+\label{tab:results1.3}
+\end{table}
+
+
+
+
+
+
+% ------------------------------------------------
+% Case 1.4
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{12pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\multicolumn{5}{|c|}{\textbf{Settings}} \\ 
+\hline
+\((\theta_{11}, \theta_{12}, \theta_{13})\) & \(s\) & \(\theta_{21} \text{ bound}\) & \(\theta_{22} \text{ bound}\) & \(\text{Distribution}\) \\
+\hline
+\((-5, -1.5, 0.05)\) & \(1.9780103\) & \([-100, -10]\) & \([0.1, 5]\) & \(\text{Log-normal}\)\\
+\hline
+\end{tabular}
+\caption{Settings for the Optimal Design (Case 1.4)}
+\label{tab:settings1.4}
+\end{table}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{8pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+\textbf{Div.} & \(\boldsymbol{\xi^*}\) & \(C^* (\hat{C})\) & \(\boldsymbol{\hat{\theta}(\xi^*)}\) & \textbf{Eqv.} & \textbf{Opt?} & \textbf{CPU time} \\
+\hline
+KL & \(\left\{\begin{array}{ccc}
+25.854 & 55.196 & 80 \\
+0.366 & 0.407 & 0.227
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.00385 \\
+(0.00380)
+\end{array}\) & 
+\((-66.268, 2.006)\) & 
+Figure \ref{fig:s=1.97,4,kl,ll} & $\triangle$ & 49577.37 \\
+\hline
+LW & \(\left\{\begin{array}{ccc}
+80 & 80 & 80 \\
+0.066 & 0.143 & 0.791
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.693 \\
+(-7.36\times 10^{-6})
+\end{array}\) & 
+\((-73.661, 2.232)\) & 
+Figure \ref{fig:s=1.97,4,lw,ll} & $\times$ & 3299.47 \\
+\hline
+B & \(\left\{\begin{array}{ccc}
+10 & 10 & 10 \\
+0.037 & 0.225 & 0.738
+\end{array}\right\}\) &
+\(\begin{array}{c}
+1.000 \\
+(1.81\times 10^{-43})
+\end{array}\) & 
+\((-65.133, 0.757)\) & 
+Figure \ref{fig:s=1.97,4,bhattacharyya,ll} & $\times$ & 307.77 \\
+\hline
+\(\chi^2\) & \(\left\{\begin{array}{ccc}
+10.716 & 28.722 & 80 \\
+0.000 & 1.000 & 0.000
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.0229 \\
+(7874775)
+\end{array}\) & 
+\((-49.991, 2.677)\) & 
+Figure \ref{fig:s=1.97,4,chi2,ll} & $\triangle$ & 1730.36 \\
+\hline
+\end{tabular}
+\caption{Summary of Divergence and Optimal Design Results (Case 1.4)}
+\label{tab:results1.4}
+\end{table}
+
+
+
+
+
+
+
+% ------------------------------------------------
+% Case 1.5
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{12pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\multicolumn{5}{|c|}{\textbf{Settings}} \\ 
+\hline
+\((\theta_{11}, \theta_{12}, \theta_{13})\) & \(s\) & \(\theta_{21} \text{ bound}\) & \(\theta_{22} \text{ bound}\) & \(\text{Distribution}\) \\
+\hline
+\((-5, -1.5, 0.05)\) & \(5.9780103\) & \([-100, -10]\) & \([0.1, 5]\) & \(\text{Log-normal}\)\\
+\hline
+\end{tabular}
+\caption{Settings for the Optimal Design (Case 1.5)}
+\label{tab:settings1.5}
+\end{table}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{8pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+\textbf{Div.} & \(\boldsymbol{\xi^*}\) & \(C^* (\hat{C})\) & \(\boldsymbol{\hat{\theta}(\xi^*)}\) & \textbf{Eqv.} & \textbf{Opt?} & \textbf{CPU time} \\
+\hline
+KL & \(\left\{\begin{array}{ccc}
+?? & ?? & ?? \\
+0.??? & 0.??? & 0.???
+\end{array}\right\}\) &
+\(\begin{array}{c}
+?? \\
+(??)
+\end{array}\) & 
+\((??, ??)\) & 
+Figure \ref{fig:s=5.97,5,kl,ll} & ?? & ?? \\
+\hline
+LW & \(\left\{\begin{array}{ccc}
+10 & 10 & 54.727 \\
+0.009 & 0.588 & 0.404
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.000724 \\
+(8.23\times 10^{-6})
+\end{array}\) & 
+\((-77.290, 2.314)\) & 
+Figure \ref{fig:s=5.97,5,lw,ll} & $\times$ & 18598.84 \\
+\hline
+B & \(\left\{\begin{array}{ccc}
+10 & 20.414 & 20.415 \\
+0.000 & 1.000 & 0.000
+\end{array}\right\}\) &
+\(\begin{array}{c}
+4.36\times 10^{-13} \\
+(6.70\times 10^{-26})
+\end{array}\) & 
+\((-92.329, 0.129)\) & 
+Figure \ref{fig:s=5.97,5,bhattacharyya,ll} & $\triangle$ & 1609.64 \\
+\hline
+\(\chi^2\) & \(\left\{\begin{array}{ccc}
+10 & 46.353 & 80 \\
+0.657 & 0.309 & 0.034
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.00323 \\
+(0.00128)
+\end{array}\) & 
+\((-76.483, 2.290)\) & 
+Figure \ref{fig:s=5.97,5,chi2,ll} & $\times$ & 101203.4 \\
+\hline
+\end{tabular}
+\caption{Summary of Divergence and Optimal Design Results (Case 1.5)}
+\label{tab:results1.5}
+\end{table}
+
+
+
+
+% ------------------------------------------------
+% Case 1.6
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{12pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\multicolumn{5}{|c|}{\textbf{Settings}} \\ 
+\hline
+\((\theta_{11}, \theta_{12}, \theta_{13})\) & \(s\) & \(\theta_{21} \text{ bound}\) & \(\theta_{22} \text{ bound}\) & \(\text{Distribution}\) \\
+\hline
+\((-5, -1.5, 0.05)\) & \(10.9780103\) & \([-100, -10]\) & \([0.1, 5]\) & \(\text{Log-normal}\)\\
+\hline
+\end{tabular}
+\caption{Settings for the Optimal Design (Case 1.6)}
+\label{tab:settings1.6}
+\end{table}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{8pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+\textbf{Div.} & \(\boldsymbol{\xi^*}\) & \(C^* (\hat{C})\) & \(\boldsymbol{\hat{\theta}(\xi^*)}\) & \textbf{Eqv.} & \textbf{Opt?} & \textbf{CPU time} \\
+\hline
+KL & \(\left\{\begin{array}{ccc}
+?? & ?? & ?? \\
+0.??? & 0.??? & 0.???
+\end{array}\right\}\) &
+\(\begin{array}{c}
+?? \\
+(??)
+\end{array}\) & 
+\((??, ??)\) & 
+Figure \ref{fig:s=10.97,6,kl,ll} & ?? & ?? \\
+\hline
+LW & \(\left\{\begin{array}{ccc}
+10 & 47.578 & 80 \\
+0.327 & 0.442 & 0.232
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.000321 \\
+(-0.00467)
+\end{array}\) & 
+\((-57.808, 1.783)\) & 
+Figure \ref{fig:s=10.97,6,lw,ll} & $\times$ & 102255.6 \\
+\hline
+B & \(\left\{\begin{array}{ccc}
+29.672 & 67.096 & 74.092 \\
+0.621 & 0.198 & 0.180
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0 \\
+(2.98\times 10^{-10})
+\end{array}\) & 
+\((-99.974, 0.100)\) & 
+Figure \ref{fig:s=10.97,6,bhattacharyya,ll} & $\times$ & 315.59 \\
+\hline
+\(\chi^2\) & \(\left\{\begin{array}{ccc}
+?? & ?? & ?? \\
+0.??? & 0.??? & 0.???
+\end{array}\right\}\) &
+\(\begin{array}{c}
+?? \\
+(??)
+\end{array}\) & 
+\((??, ??)\) & 
+Figure \ref{fig:s=10.97,6,chi2,ll} & ?? & ?? \\
+\hline
+\end{tabular}
+\caption{Summary of Divergence and Optimal Design Results (Case 1.6)}
+\label{tab:results1.6}
+\end{table}
+
+
+
+
+
+
+% ------------------------------------------------
+% Case 1.7
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{12pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\multicolumn{6}{|c|}{\textbf{Settings}} \\ 
+\hline
+\((\theta_{11}, \theta_{12}, \theta_{13})\) & \(s_1\) & \(s_2\) & \(\theta_{21} \text{ bound}\) & \(\theta_{22} \text{ bound}\) & \(\text{Distribution}\) \\
+\hline
+\((-5, -1.5, 0.05)\) & \(0.9780103\) & \(10.9780103\) & \([-100, -10]\) & \([0.1, 5]\) & \(\text{Log-normal}\)\\
+\hline
+\end{tabular}
+\caption{Settings for the Optimal Design (Case 1.7)}
+\label{tab:settings1.7}
+\end{table}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{8pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+\textbf{Div.} & \(\boldsymbol{\xi^*}\) & \(C^* (\hat{C})\) & \(\boldsymbol{\hat{\theta}(\xi^*)}\) & \textbf{Eqv.} & \textbf{Opt?} & \textbf{CPU time} \\
+\hline
+KL & \(\left\{\begin{array}{ccc}
+57.381 & 70.646 & 80 \\
+0.109 & 0.614 & 0.277
+\end{array}\right\}\) &
+\(\begin{array}{c}
+1.922 \\
+(1.922)
+\end{array}\) & 
+\((-63.053, 1.909)\) & 
+Figure \ref{fig:s1=0.97,s2=10.97,7,kl,ll} & $\surd$ & 40094.06 \\
+\hline
+LW & \(\left\{\begin{array}{ccc}
+66.317 & 79.752 & 80 \\
+1.000 & 0.000 & 0.000
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.518 \\
+(0.518)
+\end{array}\) & 
+\((-55.771, 1.696)\) & 
+Figure \ref{fig:s1=0.97,s2=10.97,7,lw,ll} & $\surd$ & 27307.88 \\
+\hline
+B & \(\left\{\begin{array}{ccc}
+31.243 & 49.233 & 66.595 \\
+0.000 & 0.000 & 1.000
+\end{array}\right\}\) &
+\(\begin{array}{c}
+1.91\times 10^{-7} \\
+(7.31\times 10^{-10})
+\end{array}\) & 
+\((-99.998, 0.100)\) & 
+Figure \ref{fig:s1=0.97,s2=10.97,7,bhattacharyya,ll} & $\triangle$ & 315.59 \\
+\hline
+\(\chi^2\) & \(\left\{\begin{array}{ccc}
+50.53 & 65.031 & 80 \\
+0.207 & 0.524 & 0.269
+\end{array}\right\}\) &
+\(\begin{array}{c}
+6.953 \\
+(6.953)
+\end{array}\) & 
+\((-63.827, 1.932)\) & 
+Figure \ref{fig:s1=0.97,s2=10.97,7,chi2,ll} & $\surd$ & 47799.88 \\
+\hline
+\end{tabular}
+\caption{Summary of Divergence and Optimal Design Results (Case 1.7)}
+\label{tab:results1.7}
+\end{table}
+
+
+
+
+% ------------------------------------------------
+% Case 1.8
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{12pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\multicolumn{6}{|c|}{\textbf{Settings}} \\ 
+\hline
+\((\theta_{11}, \theta_{12}, \theta_{13})\) & \(s_1\) & \(s_2\) & \(\theta_{21} \text{ bound}\) & \(\theta_{22} \text{ bound}\) & \(\text{Distribution}\) \\
+\hline
+\((-5, -1.5, 0.05)\) & \(5.9780103\) & \(0.9780103\) & \([-100, -10]\) & \([0.1, 5]\) & \(\text{Log-normal}\)\\
+\hline
+\end{tabular}
+\caption{Settings for the Optimal Design (Case 1.8)}
+\label{tab:settings1.8}
+\end{table}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{8pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+\textbf{Div.} & \(\boldsymbol{\xi^*}\) & \(C^* (\hat{C})\) & \(\boldsymbol{\hat{\theta}(\xi^*)}\) & \textbf{Eqv.} & \textbf{Opt?} & \textbf{CPU time} \\
+\hline
+KL & \(\left\{\begin{array}{ccc}
+33.554 & 56.829 & 80 \\
+0.330 & 0.436 & 0.234
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.00927 \\
+(0.306)
+\end{array}\) & 
+\((-53.171, 1.596)\) & 
+Figure \ref{fig:s1=5.97,s2=0.97,8,kl,ll} & $\times$ & 18385.63 \\
+\hline
+LW & \(\left\{\begin{array}{ccc}
+80 & 80 & 80 \\
+0.000 & 0.000 & 1.000
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.502 \\
+(0.278)
+\end{array}\) & 
+\((-75.782, 2.300)\) & 
+Figure \ref{fig:s1=5.97,s2=0.97,8,lw,ll} & $\triangle$ & 27307.88 \\
+\hline
+B & \(\left\{\begin{array}{ccc}
+20.8 & 26.185 & 65.624 \\
+0.111 & 0.876 & 0.013
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0 \\
+(0)
+\end{array}\) & 
+\((-77.021, 0.983)\) & 
+Figure \ref{fig:s1=5.97,s2=0.97,8,bhattacharyya,ll} & $\times$ & 346.77 \\
+\hline
+\(\chi^2\) & \(\left\{\begin{array}{ccc}
+10 & 10 & 80 \\
+0.000 & 0.000 & 1.000
+\end{array}\right\}\) &
+\(\begin{array}{c}
+3.24\times 10^{14} \\
+(3.24\times 10^{14})
+\end{array}\) & 
+\((-38.316, 2.626)\) & 
+Figure \ref{fig:s1=5.97,s2=0.97,8,chi2,ll} & $\times$ & 4570.58 \\
+\hline
+\end{tabular}
+\caption{Summary of Divergence and Optimal Design Results (Case 1.8)}
+\label{tab:results1.8}
+\end{table}
+
+
+
+
+
+
+% ------------------------------------------------
+% Case 1.9
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{12pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\multicolumn{6}{|c|}{\textbf{Settings}} \\ 
+\hline
+\((\theta_{11}, \theta_{12}, \theta_{13})\) & \(s_1\) & \(s_2\) & \(\theta_{21} \text{ bound}\) & \(\theta_{22} \text{ bound}\) & \(\text{Distribution}\) \\
+\hline
+\((-5, -1.5, 0.05)\) & \(1.9780103\) & \(0.9780103\) & \([-100, -10]\) & \([0.1, 5]\) & \(\text{Log-normal}\)\\
+\hline
+\end{tabular}
+\caption{Settings for the Optimal Design (Case 1.9)}
+\label{tab:settings1.9}
+\end{table}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{8pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+\textbf{Div.} & \(\boldsymbol{\xi^*}\) & \(C^* (\hat{C})\) & \(\boldsymbol{\hat{\theta}(\xi^*)}\) & \textbf{Eqv.} & \textbf{Opt?} & \textbf{CPU time} \\
+\hline
+KL & \(\left\{\begin{array}{ccc}
+76.132 & 80 & 80 \\
+0.000 & 0.000 & 1.000
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.841 \\
+(0.841)
+\end{array}\) & 
+\((-52.575, 1.591)\) & 
+Figure \ref{fig:s1=1.97,s2=0.97,9,kl,ll} & $\triangle$ & 62666.23 \\
+\hline
+LW & \(\left\{\begin{array}{ccc}
+52.005 & 57.073 & 80 \\
+0.000 & 1.000 & 0.000
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.0751 \\
+(0.0732)
+\end{array}\) & 
+\((-66.588, 2.010)\) & 
+Figure \ref{fig:s1=1.97,s2=0.97,9,lw,ll} & $\times$ & 4342.73 \\
+\hline
+B & \(\left\{\begin{array}{ccc}
+10 & 10 & 10 \\
+0.018 & 0.328 & 0.654
+\end{array}\right\}\) &
+\(\begin{array}{c}
+1.000 \\
+(9.04\times 10^{-60})
+\end{array}\) & 
+\((-80.856, 1.492)\) & 
+Figure \ref{fig:s1=1.97,s2=0.97,9,bhattacharyya,ll} & $\triangle$ & 320.32 \\
+\hline
+\(\chi^2\) & \(\left\{\begin{array}{ccc}
+34.004 & 39.414 & 80 \\
+0.000 & 0.000 & 1.000
+\end{array}\right\}\) &
+\(\begin{array}{c}
+5.11\times 10^{11} \\
+(2.099)
+\end{array}\) & 
+\((-51.521, 1.610)\) & 
+Figure \ref{fig:s1=1.97,s2=0.97,9,chi2,ll} & $\times$ & 1800.64 \\
+\hline
+\end{tabular}
+\caption{Summary of Divergence and Optimal Design Results (Case 1.9)}
+\label{tab:results1.9}
+\end{table}
+
+
+
+
+% ------------------------------------------------
+% Case 1.10
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{12pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\multicolumn{6}{|c|}{\textbf{Settings}} \\ 
+\hline
+\((\theta_{11}, \theta_{12}, \theta_{13})\) & \(s_1\) & \(s_2\) & \(\theta_{21} \text{ bound}\) & \(\theta_{22} \text{ bound}\) & \(\text{Distribution}\) \\
+\hline
+\((-5, -1.5, 0.05)\) & \(0.9780103\) & \(1.9780103\) & \([-100, -10]\) & \([0.1, 5]\) & \(\text{Log-normal}\)\\
+\hline
+\end{tabular}
+\caption{Settings for the Optimal Design (Case 1.10)}
+\label{tab:settings1.10}
+\end{table}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{8pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+\textbf{Div.} & \(\boldsymbol{\xi^*}\) & \(C^* (\hat{C})\) & \(\boldsymbol{\hat{\theta}(\xi^*)}\) & \textbf{Eqv.} & \textbf{Opt?} & \textbf{CPU time} \\
+\hline
+KL & \(\left\{\begin{array}{ccc}
+50.868 & 65.674 & 80 \\
+0.167 & 0.545 & 0.289
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.327 \\
+(0.327)
+\end{array}\) & 
+\((-63.613, 1.925)\) & 
+Figure \ref{fig:s1=0.97,s2=1.97,10,kl,ll} & $\surd$ & 53042.82 \\
+\hline
+LW & \(\left\{\begin{array}{ccc}
+57.022 & 68.893 & 72.433 \\
+0.000 & 0.000 & 1.000
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.705 \\
+(0.705)
+\end{array}\) & 
+\((-82.884, 4.692)\) & 
+Figure \ref{fig:s1=0.97,s2=1.97,10,lw,ll} & $\triangle$ & 2592.02 \\
+\hline
+B & \(\left\{\begin{array}{ccc}
+10 & 10 & 10 \\
+0.042 & 0.058 & 0.900
+\end{array}\right\}\) &
+\(\begin{array}{c}
+1 \\
+(1)
+\end{array}\) & 
+\((-62.980, 3.691)\) & 
+Figure \ref{fig:s1=0.97,s2=1.97,10,bhattacharyya,ll} & $\times$ & 2592.02 \\
+\hline
+\(\chi^2\) & \(\left\{\begin{array}{ccc}
+61.641 & 79.576 & 80 \\
+1.000 & 0.000 & 0.000
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.532 \\
+(0.532)
+\end{array}\) & 
+\((-64.916, 1.966)\) & 
+Figure \ref{fig:s1=0.97,s2=1.97,10,chi2,ll} & $\times$ & 2865.72 \\
+\hline
+\end{tabular}
+\caption{Summary of Divergence and Optimal Design Results (Case 1.10)}
+\label{tab:results1.10}
+\end{table}
+
+
+
+
+
+
+% ------------------------------------------------
+% Case 1.11
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{12pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\multicolumn{6}{|c|}{\textbf{Settings}} \\ 
+\hline
+\((\theta_{11}, \theta_{12}, \theta_{13})\) & \(s_1\) & \(s_2\) & \(\theta_{21} \text{ bound}\) & \(\theta_{22} \text{ bound}\) & \(\text{Distribution}\) \\
+\hline
+\((-5, -1.5, 0.05)\) & \(0.9780103\) & \(1.4780103\) & \([-100, -10]\) & \([0.1, 5]\) & \(\text{Log-normal}\)\\
+\hline
+\end{tabular}
+\caption{Settings for the Optimal Design (Case 1.11)}
+\label{tab:settings1.11}
+\end{table}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{8pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+\textbf{Div.} & \(\boldsymbol{\xi^*}\) & \(C^* (\hat{C})\) & \(\boldsymbol{\hat{\theta}(\xi^*)}\) & \textbf{Eqv.} & \textbf{Opt?} & \textbf{CPU time} \\
+\hline
+KL & \(\left\{\begin{array}{ccc}
+33.417 & 62.084 & 80 \\
+0.032 & 0.587 & 0.381
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.133 \\
+(0.133)
+\end{array}\) & 
+\((-64.846, 1.962)\) & 
+Figure \ref{fig:s1=0.97,s2=1.47,11,kl,ll} & $\surd$ & 54684.59 \\
+\hline
+LW & \(\left\{\begin{array}{ccc}
+61.118 & 62.214 & 80 \\
+0.726 & 0.126 & 0.148
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.0475 \\
+(0.0451)
+\end{array}\) & 
+\((-62.081, 1.880)\) & 
+Figure \ref{fig:s1=0.97,s2=1.47,11,lw,ll} & $\surd$ & 3315.76 \\
+\hline
+B & \(\left\{\begin{array}{ccc}
+10 & 10 & 10 \\
+0.004 & 0.355 & 0.641
+\end{array}\right\}\) &
+\(\begin{array}{c}
+1 \\
+(1.76\times 10^{-116})
+\end{array}\) & 
+\((-77.233, 0.903)\) & 
+Figure \ref{fig:s1=0.97,s2=1.47,11,bhattacharyya,ll} & $\times$ & 333.47 \\
+\hline
+\(\chi^2\) & \(\left\{\begin{array}{ccc}
+10 & 43.65 & 80 \\
+0.000 & 0.983 & 0.017
+\end{array}\right\}\) &
+\(\begin{array}{c}
+12171.83 \\
+(63890.04)
+\end{array}\) & 
+\((-76.179, 2.107)\) & 
+Figure \ref{fig:s1=0.97,s2=1.47,11,chi2,ll} & $\times$ & 2002.29 \\
+\hline
+\end{tabular}
+\caption{Summary of Divergence and Optimal Design Results (Case 1.11)}
+\label{tab:results1.11}
+\end{table}
+
+
+
+
+
+
+% ------------------------------------------------
+% Case 1.12
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{12pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\multicolumn{6}{|c|}{\textbf{Settings}} \\ 
+\hline
+\((\theta_{11}, \theta_{12}, \theta_{13})\) & \(s_1\) & \(s_2\) & \(\theta_{21} \text{ bound}\) & \(\theta_{22} \text{ bound}\) & \(\text{Distribution}\) \\
+\hline
+\((-5, -1.5, 0.05)\) & \(1.4780103\) & \(0.9780103\) & \([-100, -10]\) & \([0.1, 5]\) & \(\text{Log-normal}\)\\
+\hline
+\end{tabular}
+\caption{Settings for the Optimal Design (Case 1.12)}
+\label{tab:settings1.12}
+\end{table}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{8pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+\textbf{Div.} & \(\boldsymbol{\xi^*}\) & \(C^* (\hat{C})\) & \(\boldsymbol{\hat{\theta}(\xi^*)}\) & \textbf{Eqv.} & \textbf{Opt?} & \textbf{CPU time} \\
+\hline
+KL & \(\left\{\begin{array}{ccc}
+52.007 & 67.791 & 80 \\
+0.085 & 0.577 & 0.338
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.230 \\
+(0.230)
+\end{array}\) & 
+\((-62.900, 1.904)\) & 
+Figure \ref{fig:s1=1.47,s2=0.97,12,kl,ll} & $\surd$ & 65978.45 \\
+\hline
+LW & \(\left\{\begin{array}{ccc}
+57.404 & 61.771 & 80 \\
+0.288 & 0.217 & 0.495
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.0315 \\
+(0.0307)
+\end{array}\) & 
+\((-62.481, 1.892)\) & 
+Figure \ref{fig:s1=1.47,s2=0.97,12,lw,ll} & $\surd$ & 3583.25 \\
+\hline
+B & \(\left\{\begin{array}{ccc}
+15.502 & 40.168 & 76.326 \\
+0.088 & 0.276 & 0.637
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0 \\
+(0.256)
+\end{array}\) & 
+\((-43.561, 2.292)\) & 
+Figure \ref{fig:s1=1.47,s2=0.97,12,bhattacharyya,ll} & $\times$ & 443.16 \\
+\hline
+\(\chi^2\) & \(\left\{\begin{array}{ccc}
+20.27 & 75.15 & 80 \\
+0.000 & 0.000 & 1.000
+\end{array}\right\}\) &
+\(\begin{array}{c}
+4.44\times 10^{11} \\
+(15.170)
+\end{array}\) & 
+\((-70.166, 2.117)\) & 
+Figure \ref{fig:s1=1.47,s2=0.97,12,chi2,ll} & $\triangle$ & 3002.61 \\
+\hline
+\end{tabular}
+\caption{Summary of Divergence and Optimal Design Results (Case 1.12)}
+\label{tab:results1.12}
+\end{table}
+
+
+
+
+% ------------------------------------------------
+% Case 1.13
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{12pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\multicolumn{6}{|c|}{\textbf{Settings}} \\ 
+\hline
+\((\theta_{11}, \theta_{12}, \theta_{13})\) & \(s_1\) & \(s_2\) & \(\theta_{21} \text{ bound}\) & \(\theta_{22} \text{ bound}\) & \(\text{Distribution}\) \\
+\hline
+\((-5, -1.5, 0.05)\) & \(0.4780103\) & \(0.9780103\) & \([-100, -10]\) & \([0.1, 5]\) & \(\text{Log-normal}\)\\
+\hline
+\end{tabular}
+\caption{Settings for the Optimal Design (Case 1.13)}
+\label{tab:settings1.13}
+\end{table}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{8pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+\textbf{Div.} & \(\boldsymbol{\xi^*}\) & \(C^* (\hat{C})\) & \(\boldsymbol{\hat{\theta}(\xi^*)}\) & \textbf{Eqv.} & \textbf{Opt?} & \textbf{CPU time} \\
+\hline
+KL & \(\left\{\begin{array}{ccc}
+43.412 & 61.109 & 80 \\
+0.213 & 0.521 & 0.266
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.339 \\
+(0.339)
+\end{array}\) & 
+\((-65.183, 1.972)\) & 
+Figure \ref{fig:s1=0.47,s2=0.97,13,kl,ll} & $\times$ & 23744.38 \\
+\hline
+LW & \(\left\{\begin{array}{ccc}
+69.351 & 76.607 & 80 \\
+0.856 & 0.031 & 0.113
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.695 \\
+(0.131)
+\end{array}\) & 
+\((-84.952, 2.556)\) & 
+Figure \ref{fig:s1=0.47,s2=0.97,13,lw,ll} & $\times$ & 2607.94 \\
+\hline
+B & \(\left\{\begin{array}{ccc}
+10 & 10 & 13.664 \\
+0.336 & 0.527 & 0.137
+\end{array}\right\}\) &
+\(\begin{array}{c}
+1 \\
+(1)
+\end{array}\) & 
+\((-12.408, 4.678)\) & 
+Figure \ref{fig:s1=0.47,s2=0.97,13,bhattacharyya,ll} & $\triangle$ & 333.25 \\
+\hline
+\(\chi^2\) & \(\left\{\begin{array}{ccc}
+70.982 & 80 & 80 \\
+0.000 & 0.446 & 0.554
+\end{array}\right\}\) &
+\(\begin{array}{c}
+8.42207\times 10^{11} \\
+(1727.206)
+\end{array}\) & 
+\((-57.526, 1.637)\) & 
+Figure \ref{fig:s1=0.47,s2=0.97,13,chi2,ll} & $\times$ & 2801.72 \\
+\hline
+\end{tabular}
+\caption{Summary of Divergence and Optimal Design Results (Case 1.13)}
+\label{tab:results1.13}
+\end{table}
+
+
+
+
+% ------------------------------------------------
+% Case 1.14
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{12pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\multicolumn{6}{|c|}{\textbf{Settings}} \\ 
+\hline
+\((\theta_{11}, \theta_{12}, \theta_{13})\) & \(s_1\) & \(s_2\) & \(\theta_{21} \text{ bound}\) & \(\theta_{22} \text{ bound}\) & \(\text{Distribution}\) \\
+\hline
+\((-5, -1.5, 0.05)\) & \(0.9780103\) & \(0.4780103\) & \([-100, -10]\) & \([0.1, 5]\) & \(\text{Log-normal}\)\\
+\hline
+\end{tabular}
+\caption{Settings for the Optimal Design (Case 1.14)}
+\label{tab:settings1.14}
+\end{table}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{8pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+\textbf{Div.} & \(\boldsymbol{\xi^*}\) & \(C^* (\hat{C})\) & \(\boldsymbol{\hat{\theta}(\xi^*)}\) & \textbf{Eqv.} & \textbf{Opt?} & \textbf{CPU time} \\
+\hline
+KL & \(\left\{\begin{array}{ccc}
+47.75 & 64.187 & 80 \\
+0.161 & 0.547 & 0.292
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.885 \\
+(0.885)
+\end{array}\) & 
+\((-64.115, 1.940)\) & 
+Figure \ref{fig:s1=0.97,s2=0.47,14,kl,ll} & $\surd$ & 30496.58 \\
+\hline
+LW & \(\left\{\begin{array}{ccc}
+45.006 & 50.316 & 80 \\
+0.436 & 0.000 & 0.564
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.0858 \\
+(0.686)
+\end{array}\) & 
+\((-71.609, 2.537)\) & 
+Figure \ref{fig:s1=0.97,s2=0.47,14,lw,ll} & $\triangle$ & 3454.97 \\
+\hline
+B & \(\left\{\begin{array}{ccc}
+29.672 & 67.096 & 74.092 \\
+0.621 & 0.198 & 0.180
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0 \\
+(2.07\times 10^{-20})
+\end{array}\) & 
+\((-88.604, 2.237)\) & 
+Figure \ref{fig:s1=0.97,s2=0.47,14,bhattacharyya,ll} & $\triangle$ & 315.59 \\
+\hline
+\(\chi^2\) & \(\left\{\begin{array}{ccc}
+14.673 & 19.686 & 80 \\
+0.000 & 0.000 & 1.000
+\end{array}\right\}\) &
+\(\begin{array}{c}
+4.938\times 10^{11} \\
+(1.0393)
+\end{array}\) & 
+\((-42.628, 1.320)\) & 
+Figure \ref{fig:s1=0.97,s2=0.47,14,chi2,ll} & $\triangle$ & 1283.75 \\
+\hline
+\end{tabular}
+\caption{Summary of Divergence and Optimal Design Results (Case 1.14)}
+\label{tab:results1.14}
+\end{table}
+
+
+
+\newpage
+
+For situation 2: 
+Two Weibull distributions with different model.
+
+PSO-QN (Chen et al., 2020) details are:
+\begin{itemize}
+
+\item PSO : 64 particles and 200 iterations.
+\item BFGS : 50 iterations. (First case is 20 iterations)
+
+\end{itemize}
+
+Inportant finding:
+\begin{enumerate}
+\item For two models both following Weibull distributions, where the B divergence plot shows directional derivatives close to zero, the primary reason lies in the similarity of the models' parameters or distribution shapes. This makes it challenging to effectively distinguish between the two models at the current design points.
+%針對兩個模型皆為 Weibull 分配且 B divergence 圖像呈現方向導數幾乎全為零的情況，其主要原因是兩個模型的參數非常接近或分布形狀相似，導致在當前設計點下難以有效區分兩模型。
+\item Similar to the case of log-normal distributions, it is challenging to maintain consistency between $C^*$ and $\hat{C}$ in terms of the criterion value. This discrepancy highlights the instability of the BFGS optimization method in this context.
+%與對數常態分佈的情況類似，在準則值方面保持 $C^*$ 和 $hat{C}$ 之間的一致性是具有挑戰性的。這種差異凸顯了 BFGS 優化方法在這種情況下的不穩定性。
+
+\end{enumerate}
+
+
+
+
+\newpage
+
+
+
+
+
+
+
+
+
+
+
+
+% --------------------------------------------
+
+% Case 2.1
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{12pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\multicolumn{5}{|c|}{\textbf{Settings}} \\ 
+\hline
+\((\theta_{11}, \theta_{12}, \theta_{13})\) & \(s\) & \(\theta_{21} \text{ bound}\) & \(\theta_{22} \text{ bound}\) & \(\text{Distribution}\) \\
+\hline
+\((-5, -1.5, 0.05)\) & \(0.9780103\) & \([-100, -10]\) & \([0.1, 5]\) & \(\text{Weibull}\)\\
+\hline
+\end{tabular}
+\caption{Settings for the Optimal Design (Case 2.1)}
+\label{tab:settings2.1}
+\end{table}
+
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{8pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+\textbf{Div.} & \(\boldsymbol{\xi^*}\) & \(C^* (\hat{C})\) & \(\boldsymbol{\hat{\theta}(\xi^*)}\) & \textbf{Eqv.} & \textbf{Opt?} & \textbf{CPU time} \\
+\hline
+KL & \(\left\{\begin{array}{ccc}
+32.416 & 57.683 & 80 \\
+0.375 & 0.410 & 0.215
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.00855 \\
+(0.00818)
+\end{array}\) & 
+\((-66.371, 2.007)\) & 
+Figure \ref{fig:s=0.97,1,kl,ww} & $\triangle$ & 7707.16 \\
+\hline
+LW & \(\left\{\begin{array}{ccc}
+31.393 & 54.77 & 80 \\
+0.589 & 0.058 & 0.353
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.00836 \\
+(0.000782)
+\end{array}\) & 
+\((-67.056, 2.031)\) & 
+Figure \ref{fig:s=0.97,1,lw,ww} & $\times$ & 2097.92 \\
+\hline
+B & \(\left\{\begin{array}{ccc}
+10 & 10 & 10 \\
+0.016 & 0.363 & 0.621
+\end{array}\right\}\) &
+\(\begin{array}{c}
+1.000 \\
+(0)
+\end{array}\) & 
+\((-73.995, 1.011)\) & 
+Figure \ref{fig:s=0.97,1,bhattacharyya,ww} & $\triangle$ & 237.17 \\
+\hline
+\(\chi^2\) & \(\left\{\begin{array}{ccc}
+73.505 & 80 & 80 \\
+1.000 & 0.000 & 0.000
+\end{array}\right\}\) &
+\(\begin{array}{c}
+144.174 \\
+(107.054)
+\end{array}\) & 
+\((-50.160, 1.680)\) & 
+Figure \ref{fig:s=0.97,1,chi2,ww} & $\triangle$ & 5198.78 \\
+\hline
+\end{tabular}
+\caption{Summary of Divergence and Optimal Design Results (Case 2.1)}
+\label{tab:results2.1}
+\end{table}
+
+
+
+% ------------------------------------------------
+% Case 2.2
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{12pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\multicolumn{5}{|c|}{\textbf{Settings}} \\ 
+\hline
+\((\theta_{11}, \theta_{12}, \theta_{13})\) & \(s\) & \(\theta_{21} \text{ bound}\) & \(\theta_{22} \text{ bound}\) & \(\text{Distribution}\) \\
+\hline
+\((-5, -1.5, 0.05)\) & \(0.9780103\) & \([-100, -10]\) & \([0.1, 5]\) & \(\text{Weibull}\)\\
+\hline
+\end{tabular}
+\caption{Settings for the Optimal Design (Case 2.2)}
+\label{tab:settings2.2}
+\end{table}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{8pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+\textbf{Div.} & \(\boldsymbol{\xi^*}\) & \(C^* (\hat{C})\) & \(\boldsymbol{\hat{\theta}(\xi^*)}\) & \textbf{Eqv.} & \textbf{Opt?} & \textbf{CPU time} \\
+\hline
+KL & \(\left\{\begin{array}{ccc}
+32.545 & 57.686 & 80 \\
+0.368 & 0.415 & 0.217
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.00822 \\
+(0.00822)
+\end{array}\) & 
+\((-66.459, 2.010)\) & 
+Figure \ref{fig:s=0.97,2,kl,ww} & $\triangle$ & 59919.28 \\
+\hline
+LW & \(\left\{\begin{array}{ccc}
+66.764 & 69.61 & 80 \\
+0.001 & 0.998 & 0.001
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.694 \\
+(0.694)
+\end{array}\) & 
+\((-67.984, 2.751)\) & 
+Figure \ref{fig:s=0.97,2,lw,ww} & $\triangle$ & 3175.08 \\
+\hline
+B & \(\left\{\begin{array}{ccc}
+13.011 & 31.319 & 72.62 \\
+0.715 & 0.020 & 0.265
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0 \\
+(0)
+\end{array}\) & 
+\((-98.112, 1.771)\) & 
+Figure \ref{fig:s=0.97,2,bhattacharyya,ww} & $\triangle$ & 548.61 \\
+\hline
+\(\chi^2\) & \(\left\{\begin{array}{ccc}
+72.7 & 80 & 80 \\
+1.000 & 0.000 & 0.000
+\end{array}\right\}\) &
+\(\begin{array}{c}
+131.333 \\
+(84.964)
+\end{array}\) & 
+\((-35.435, 1.235)\) & 
+Figure \ref{fig:s=0.97,2,chi2,ww} & $\times$ & 15923.92 \\
+\hline
+\end{tabular}
+\caption{Summary of Divergence and Optimal Design Results (Case 2.2)}
+\label{tab:results2.2}
+\end{table}
+
+
+
+
+% ------------------------------------------------
+% Case 2.3
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{12pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\multicolumn{5}{|c|}{\textbf{Settings}} \\ 
+\hline
+\((\theta_{11}, \theta_{12}, \theta_{13})\) & \(s\) & \(\theta_{21} \text{ bound}\) & \(\theta_{22} \text{ bound}\) & \(\text{Distribution}\) \\
+\hline
+\((-5, -1.5, 0.05)\) & \(1.4780103\) & \([-100, -10]\) & \([0.1, 5]\) & \(\text{Weibull}\)\\
+\hline
+\end{tabular}
+\caption{Settings for the Optimal Design (Case 2.3)}
+\label{tab:settings2.3}
+\end{table}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{8pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+\textbf{Div.} & \(\boldsymbol{\xi^*}\) & \(C^* (\hat{C})\) & \(\boldsymbol{\hat{\theta}(\xi^*)}\) & \textbf{Eqv.} & \textbf{Opt?} & \textbf{CPU time} \\
+\hline
+KL & \(\left\{\begin{array}{ccc}
+25.576 & 55.791 & 80 \\
+0.441 & 0.359 & 0.200
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.00489 \\
+(0.00489)
+\end{array}\) & 
+\((-67.083, 2.028)\) & 
+Figure \ref{fig:s=1.47,3,kl,ww} & $\surd$ & 68090.5 \\
+\hline
+LW & \(\left\{\begin{array}{ccc}
+58.379 & 59.356 & 80 \\
+0.001 & 0.989 & 0.010
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.693 \\
+(-8.07\times 10^{-6})
+\end{array}\) & 
+\((-62.162, 1.883)\) & 
+Figure \ref{fig:s=1.47,3,lw,ww} & $\times$ & 5287.5 \\
+\hline
+B & \(\left\{\begin{array}{ccc}
+11.236 & 16.331 & 51.198 \\
+0.127 & 0.102 & 0.771
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0 \\
+(0)
+\end{array}\) & 
+\((-60.391, 0.729)\) & 
+Figure \ref{fig:s=1.47,3,bhattacharyya,ww} & $\triangle$ & 442.61 \\
+\hline
+\(\chi^2\) & \(\left\{\begin{array}{ccc}
+41.883 & 80 & 80 \\
+0.001 & 0.443 & 0.556
+\end{array}\right\}\) &
+\(\begin{array}{c}
+5.223 \\
+(4.552)
+\end{array}\) & 
+\((-61.532, 1.969)\) & 
+Figure \ref{fig:s=1.47,3,chi2,ww} & $\times$ & 34133.66 \\
+\hline
+\end{tabular}
+\caption{Summary of Divergence and Optimal Design Results (Case 2.3)}
+\label{tab:results2.3}
+\end{table}
+
+
+
+
+
+
+
+% ------------------------------------------------
+% Case 2.4
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{12pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\multicolumn{5}{|c|}{\textbf{Settings}} \\ 
+\hline
+\((\theta_{11}, \theta_{12}, \theta_{13})\) & \(s\) & \(\theta_{21} \text{ bound}\) & \(\theta_{22} \text{ bound}\) & \(\text{Distribution}\) \\
+\hline
+\((-5, -1.5, 0.05)\) & \(1.9780103\) & \([-100, -10]\) & \([0.1, 5]\) & \(\text{Weibull}\)\\
+\hline
+\end{tabular}
+\caption{Settings for the Optimal Design (Case 2.4)}
+\label{tab:settings2.4}
+\end{table}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{8pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+\textbf{Div.} & \(\boldsymbol{\xi^*}\) & \(C^* (\hat{C})\) & \(\boldsymbol{\hat{\theta}(\xi^*)}\) & \textbf{Eqv.} & \textbf{Opt?} & \textbf{CPU time} \\
+\hline
+KL & \(\left\{\begin{array}{ccc}
+18.386 & 53.83 & 80 \\
+0.484 & 0.325 & 0.191
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.00386 \\
+(0.00386)
+\end{array}\) & 
+\((-63.987, 1.944)\) & 
+Figure \ref{fig:s=1.97,4,kl,ww} & $\times$ & 62044.81 \\
+\hline
+LW & \(\left\{\begin{array}{ccc}
+16.897 & 53.487 & 80 \\
+0.482 & 0.311 & 0.207
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.00107 \\
+(-0.000827)
+\end{array}\) & 
+\((-62.796, 1.907)\) & 
+Figure \ref{fig:s=1.97,4,lw,ww} & $\surd$ & 32163.27 \\
+\hline
+B & \(\left\{\begin{array}{ccc}
+11.969 & 22.932 & 40.06 \\
+0.432 & 0.001 & 0.567
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0 \\
+(0)
+\end{array}\) & 
+\((-77.064, 1.004)\) & 
+Figure \ref{fig:s=1.97,4,bhattacharyya,ww} & $\triangle$ & 1871.22 \\
+\hline
+\(\chi^2\) & \(\left\{\begin{array}{ccc}
+23.72 & 80 & 80 \\
+0.000 & 0.000 & 1.000
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.622 \\
+(0.937)
+\end{array}\) & 
+\((-60.233, 1.895)\) & 
+Figure \ref{fig:s=1.97,4,chi2,ww} & $\triangle$ & 13498.58 \\
+\hline
+\end{tabular}
+\caption{Summary of Divergence and Optimal Design Results (Case 2.4)}
+\label{tab:results2.4}
+\end{table}
+
+
+
+
+
+
+
+% ------------------------------------------------
+% Case 2.5
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{12pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\multicolumn{5}{|c|}{\textbf{Settings}} \\ 
+\hline
+\((\theta_{11}, \theta_{12}, \theta_{13})\) & \(s\) & \(\theta_{21} \text{ bound}\) & \(\theta_{22} \text{ bound}\) & \(\text{Distribution}\) \\
+\hline
+\((-5, -1.5, 0.05)\) & \(5.9780103\) & \([-100, -10]\) & \([0.1, 5]\) & \(\text{Weibull}\)\\
+\hline
+\end{tabular}
+\caption{Settings for the Optimal Design (Case 2.5)}
+\label{tab:settings2.5}
+\end{table}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{8pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+\textbf{Div.} & \(\boldsymbol{\xi^*}\) & \(C^* (\hat{C})\) & \(\boldsymbol{\hat{\theta}(\xi^*)}\) & \textbf{Eqv.} & \textbf{Opt?} & \textbf{CPU time} \\
+\hline
+KL & \(\left\{\begin{array}{ccc}
+10 & 47.388 & 80 \\
+0.338 & 0.441 & 0.221
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.00128 \\
+(0.00128)
+\end{array}\) & 
+\((-71.168, 2.147)\) & 
+Figure \ref{fig:s=5.97,5,kl,ww} & $\times$ & 74854.66 \\
+\hline
+LW & \(\left\{\begin{array}{ccc}
+10 & 47.578 & 80 \\
+0.327 & 0.442 & 0.232
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.000321 \\
+(-0.00571)
+\end{array}\) & 
+\((-55.085, 1.705)\) & 
+Figure \ref{fig:s=5.97,5,lw,ww} & $\times$ & 102255.6 \\
+\hline
+B & \(\left\{\begin{array}{ccc}
+19.892 & 36.302 & 58.222 \\
+0.102 & 0.699 & 0.199
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0 \\
+(0)
+\end{array}\) & 
+\((-90.104, 1.258)\) & 
+Figure \ref{fig:s=5.97,5,bhattacharyya,ww} & $\triangle$ & 6781.37 \\
+\hline
+\(\chi^2\) & \(\left\{\begin{array}{ccc}
+10 & 47.431 & 80 \\
+0.343 & 0.444 & 0.213
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.00254 \\
+(0.00254)
+\end{array}\) & 
+\((-71.125, 2.146)\) & 
+Figure \ref{fig:s=5.97,5,chi2,ww} & $\surd$ & 77981.76 \\
+\hline
+\end{tabular}
+\caption{Summary of Divergence and Optimal Design Results (Case 2.5)}
+\label{tab:results2.5}
+\end{table}
+
+
+
+
+% ------------------------------------------------
+% Case 2.6
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{12pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\multicolumn{5}{|c|}{\textbf{Settings}} \\ 
+\hline
+\((\theta_{11}, \theta_{12}, \theta_{13})\) & \(s\) & \(\theta_{21} \text{ bound}\) & \(\theta_{22} \text{ bound}\) & \(\text{Distribution}\) \\
+\hline
+\((-5, -1.5, 0.05)\) & \(10.9780103\) & \([-100, -10]\) & \([0.1, 5]\) & \(\text{Weibull}\)\\
+\hline
+\end{tabular}
+\caption{Settings for the Optimal Design (Case 2.6)}
+\label{tab:settings2.6}
+\end{table}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{8pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+\textbf{Div.} & \(\boldsymbol{\xi^*}\) & \(C^* (\hat{C})\) & \(\boldsymbol{\hat{\theta}(\xi^*)}\) & \textbf{Eqv.} & \textbf{Opt?} & \textbf{CPU time} \\
+\hline
+KL & \(\left\{\begin{array}{ccc}
+10 & 57.279 & 63.436 \\
+0.373 & 0.354 & 0.273
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.000934 \\
+(0.000329)
+\end{array}\) & 
+\((-70.398, 2.130)\) & 
+Figure \ref{fig:s=10.97,6,kl,ww} & $\times$ & 6165.62 \\
+\hline
+LW & \(\left\{\begin{array}{ccc}
+?? & ?? & ?? \\
+0.327 & 0.442 & 0.232
+\end{array}\right\}\) &
+\(\begin{array}{c}
+?? \\
+(??)
+\end{array}\) & 
+\((??, ??)\) & 
+Figure \ref{fig:s=10.97,6,lw,ww} & ?? & ?? \\
+\hline
+B & \(\left\{\begin{array}{ccc}
+28.098 & 40.154 & 74.554 \\
+0.106 & 0.354 & 0.264
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0 \\
+(0)
+\end{array}\) & 
+\((-93.131, 0.190)\) & 
+Figure \ref{fig:s=10.97,6,bhattacharyya,ww} & $\times$ & 10143.59 \\
+\hline
+\(\chi^2\) & \(\left\{\begin{array}{ccc}
+?? & ?? & ?? \\
+0.000 & 0.000 & 1.000
+\end{array}\right\}\) &
+\(\begin{array}{c}
+?? \\
+(??)
+\end{array}\) & 
+\((??, ??)\) & 
+Figure \ref{fig:s=10.97,6,chi2,ww} & ?? & ?? \\
+\hline
+\end{tabular}
+\caption{Summary of Divergence and Optimal Design Results (Case 2.6)}
+\label{tab:results2.6}
+\end{table}
+
+
+
+
+
+
+% ------------------------------------------------
+% Case 2.7
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{12pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\multicolumn{6}{|c|}{\textbf{Settings}} \\ 
+\hline
+\((\theta_{11}, \theta_{12}, \theta_{13})\) & \(s_1\) & \(s_2\) & \(\theta_{21} \text{ bound}\) & \(\theta_{22} \text{ bound}\) & \(\text{Distribution}\) \\
+\hline
+\((-5, -1.5, 0.05)\) & \(0.9780103\) & \(10.9780103\) & \([-100, -10]\) & \([0.1, 5]\) & \(\text{Weibull}\)\\
+\hline
+\end{tabular}
+\caption{Settings for the Optimal Design (Case 2.7)}
+\label{tab:settings2.7}
+\end{table}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{8pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+\textbf{Div.} & \(\boldsymbol{\xi^*}\) & \(C^* (\hat{C})\) & \(\boldsymbol{\hat{\theta}(\xi^*)}\) & \textbf{Eqv.} & \textbf{Opt?} & \textbf{CPU time} \\
+\hline
+KL & \(\left\{\begin{array}{ccc}
+48.575 & 65.755 & 79.232 \\
+0.029 & 0.049 & 0.922
+\end{array}\right\}\) &
+\(\begin{array}{c}
+1.847 \\
+(1.847)
+\end{array}\) & 
+\((-64.241, 1.928)\) & 
+Figure \ref{fig:s1=0.97,s2=10.97,7,kl,ww} & $\times$ & 47657.92 \\
+\hline
+LW & \(\left\{\begin{array}{ccc}
+49.129 & 63.96 & 80 \\
+0.229 & 0.513 & 0.257
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.496 \\
+(0.496)
+\end{array}\) & 
+\((-65.354, 1.945)\) & 
+Figure \ref{fig:s1=0.97,s2=10.97,7,lw,ww} & $\surd$ & 64849.07 \\
+\hline
+B & \(\left\{\begin{array}{ccc}
+31.577 & 59.569 & 65.736 \\
+0.000 & 0.000 & 1.000
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0 \\
+(0)
+\end{array}\) & 
+\((-92.502, 0.394)\) & 
+Figure \ref{fig:s1=0.97,s2=10.97,7,bhattacharyya,ww} & $\triangle$ & 8407.22 \\
+\hline
+\(\chi^2\) & \(\left\{\begin{array}{ccc}
+46.156 & 62.431 & 80 \\
+0.232 & 0.510 & 0.257
+\end{array}\right\}\) &
+\(\begin{array}{c}
+6.648 \\
+(6.648)
+\end{array}\) & 
+\((-64.973, 1.959)\) & 
+Figure \ref{fig:s1=0.97,s2=10.97,7,chi2,ww} & $\surd$ & 58180.3 \\
+\hline
+\end{tabular}
+\caption{Summary of Divergence and Optimal Design Results (Case 2.7)}
+\label{tab:results2.7}
+\end{table}
+
+
+
+
+% ------------------------------------------------
+% Case 2.8
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{12pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\multicolumn{6}{|c|}{\textbf{Settings}} \\ 
+\hline
+\((\theta_{11}, \theta_{12}, \theta_{13})\) & \(s_1\) & \(s_2\) & \(\theta_{21} \text{ bound}\) & \(\theta_{22} \text{ bound}\) & \(\text{Distribution}\) \\
+\hline
+\((-5, -1.5, 0.05)\) & \(5.9780103\) & \(0.9780103\) & \([-100, -10]\) & \([0.1, 5]\) & \(\text{Weibull}\)\\
+\hline
+\end{tabular}
+\caption{Settings for the Optimal Design (Case 2.8)}
+\label{tab:settings2.8}
+\end{table}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{8pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+\textbf{Div.} & \(\boldsymbol{\xi^*}\) & \(C^* (\hat{C})\) & \(\boldsymbol{\hat{\theta}(\xi^*)}\) & \textbf{Eqv.} & \textbf{Opt?} & \textbf{CPU time} \\
+\hline
+KL & \(\left\{\begin{array}{ccc}
+28.376 & 31.415 & 72.735 \\
+0.636 & 0.323 & 0.041
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0 \\
+(2.063)
+\end{array}\) & 
+\((-21.197, 0.779)\) & 
+Figure \ref{fig:s1=5.97,s2=0.97,8,kl,ww} & $\times$ & 12526.37 \\
+\hline
+LW & \(\left\{\begin{array}{ccc}
+51.869 & 54.036 & 57.307 \\
+0.278 & 0.497 & 0.225
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.269 \\
+(0.265)
+\end{array}\) & 
+\((-80.151, 2.404)\) & 
+Figure \ref{fig:s1=5.97,s2=0.97,8,lw,ww} & $\times$ & 25479.19 \\
+\hline
+B & \(\left\{\begin{array}{ccc}
+31.364 & 76.21 & 77.366 \\
+0.132 & 0.453 & 0.415
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0 \\
+(0)
+\end{array}\) & 
+\((-76.381, 1.119)\) & 
+Figure \ref{fig:s1=5.97,s2=0.97,8,bhattacharyya,ww} & $\triangle$ & 918.64 \\
+\hline
+\(\chi^2\) & \(\left\{\begin{array}{ccc}
+?? & ?? & ?? \\
+0.000 & 0.000 & 1.000
+\end{array}\right\}\) &
+\(\begin{array}{c}
+?? \\
+(??)
+\end{array}\) & 
+\((??, ??)\) & 
+Figure \ref{fig:s1=5.97,s2=0.97,8,chi2,ww} & $\times$ & ?? \\
+\hline
+\end{tabular}
+\caption{Summary of Divergence and Optimal Design Results (Case 2.8)}
+\label{tab:results2.8}
+\end{table}
+
+
+
+
+
+
+% ------------------------------------------------
+% Case 2.9
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{12pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\multicolumn{6}{|c|}{\textbf{Settings}} \\ 
+\hline
+\((\theta_{11}, \theta_{12}, \theta_{13})\) & \(s_1\) & \(s_2\) & \(\theta_{21} \text{ bound}\) & \(\theta_{22} \text{ bound}\) & \(\text{Distribution}\) \\
+\hline
+\((-5, -1.5, 0.05)\) & \(1.9780103\) & \(0.9780103\) & \([-100, -10]\) & \([0.1, 5]\) & \(\text{Weibull}\)\\
+\hline
+\end{tabular}
+\caption{Settings for the Optimal Design (Case 2.9)}
+\label{tab:settings2.9}
+\end{table}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{8pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+\textbf{Div.} & \(\boldsymbol{\xi^*}\) & \(C^* (\hat{C})\) & \(\boldsymbol{\hat{\theta}(\xi^*)}\) & \textbf{Eqv.} & \textbf{Opt?} & \textbf{CPU time} \\
+\hline
+KL & \(\left\{\begin{array}{ccc}
+58.678 & 69.702 & 80 \\
+0.154 & 0.551 & 0.295
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.600 \\
+(0.600)
+\end{array}\) & 
+\((-61.542, 1.884)\) & 
+Figure \ref{fig:s1=1.97,s2=0.97,9,kl,ww} & $\surd$ & 109771.9 \\
+\hline
+LW & \(\left\{\begin{array}{ccc}
+76.217 & 80 & 80 \\
+1.000 & 0.000 & 0.000
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.693 \\
+(0.0664)
+\end{array}\) & 
+\((-66.549, 2.020)\) & 
+Figure \ref{fig:s1=1.97,s2=0.97,9,lw,ww} & $\triangle$ & 2496.7 \\
+\hline
+B & \(\left\{\begin{array}{ccc}
+34.337 & 71.517 & 79.083 \\
+0.118 & 0.545 & 0.338
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0 \\
+(0)
+\end{array}\) & 
+\((-78.484, 1.190)\) & 
+Figure \ref{fig:s1=1.97,s2=0.97,9,bhattacharyya,ww} & $\triangle$ & 1120.22 \\
+\hline
+\(\chi^2\) & \(\left\{\begin{array}{ccc}
+10 & 10 & 10 \\
+0.000 & 0.000 & 1.000
+\end{array}\right\}\) &
+\(\begin{array}{c}
+-29481.35 \\
+(-252143.8)
+\end{array}\) & 
+\((-54.241, 1.728)\) & 
+Figure \ref{fig:s1=1.97,s2=0.97,9,chi2,ww} & $\times$ & 63941.9 \\
+\hline
+\end{tabular}
+\caption{Summary of Divergence and Optimal Design Results (Case 2.9)}
+\label{tab:results2.9}
+\end{table}
+
+
+
+
+% ------------------------------------------------
+% Case 2.10
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{12pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\multicolumn{6}{|c|}{\textbf{Settings}} \\ 
+\hline
+\((\theta_{11}, \theta_{12}, \theta_{13})\) & \(s_1\) & \(s_2\) & \(\theta_{21} \text{ bound}\) & \(\theta_{22} \text{ bound}\) & \(\text{Distribution}\) \\
+\hline
+\((-5, -1.5, 0.05)\) & \(0.9780103\) & \(1.9780103\) & \([-100, -10]\) & \([0.1, 5]\) & \(\text{Weibull}\)\\
+\hline
+\end{tabular}
+\caption{Settings for the Optimal Design (Case 2.10)}
+\label{tab:settings2.10}
+\end{table}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{8pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+\textbf{Div.} & \(\boldsymbol{\xi^*}\) & \(C^* (\hat{C})\) & \(\boldsymbol{\hat{\theta}(\xi^*)}\) & \textbf{Eqv.} & \textbf{Opt?} & \textbf{CPU time} \\
+\hline
+KL & \(\left\{\begin{array}{ccc}
+46.469 & 62.717 & 80 \\
+0.215 & 0.525 & 0.261
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.292 \\
+(0.292)
+\end{array}\) & 
+\((-64.861, 1.955)\) & 
+Figure \ref{fig:s1=0.97,s2=1.97,10,kl,ww} & $\surd$ & 76696.06 \\
+\hline
+LW & \(\left\{\begin{array}{ccc}
+49.129 & 63.954 & 80 \\
+0.230 & 0.513 & 0.257
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.496 \\
+(0.496)
+\end{array}\) & 
+\((-65.295, 1.943)\) & 
+Figure \ref{fig:s1=0.97,s2=1.97,10,lw,ww} & $\times$ & 666111.29 \\
+\hline
+B & \(\left\{\begin{array}{ccc}
+25.219 & 33.485 & 72.658 \\
+0.127 & 0.763 & 0.110
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0 \\
+(0)
+\end{array}\) & 
+\((-63.610, 0.858)\) & 
+Figure \ref{fig:s1=0.97,s2=1.97,10,bhattacharyya,ww} & $\triangle$ & 1452.48 \\
+\hline
+\(\chi^2\) & \(\left\{\begin{array}{ccc}
+19.485 & 24.361 & 43.384 \\
+0.000 & 0.000 & 1.000
+\end{array}\right\}\) &
+\(\begin{array}{c}
+2.529 \\
+(3406.157)
+\end{array}\) & 
+\((-54.424, 2.145)\) & 
+Figure \ref{fig:s1=0.97,s2=1.97,10,chi2,ww} & $\times$ & 8684.23 \\
+\hline
+\end{tabular}
+\caption{Summary of Divergence and Optimal Design Results (Case 2.10)}
+\label{tab:results2.10}
+\end{table}
+
+
+
+
+
+
+% ------------------------------------------------
+% Case 2.11
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{12pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\multicolumn{6}{|c|}{\textbf{Settings}} \\ 
+\hline
+\((\theta_{11}, \theta_{12}, \theta_{13})\) & \(s_1\) & \(s_2\) & \(\theta_{21} \text{ bound}\) & \(\theta_{22} \text{ bound}\) & \(\text{Distribution}\) \\
+\hline
+\((-5, -1.5, 0.05)\) & \(0.9780103\) & \(1.4780103\) & \([-100, -10]\) & \([0.1, 5]\) & \(\text{Weibull}\)\\
+\hline
+\end{tabular}
+\caption{Settings for the Optimal Design (Case 2.11)}
+\label{tab:settings2.11}
+\end{table}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{8pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+\textbf{Div.} & \(\boldsymbol{\xi^*}\) & \(C^* (\hat{C})\) & \(\boldsymbol{\hat{\theta}(\xi^*)}\) & \textbf{Eqv.} & \textbf{Opt?} & \textbf{CPU time} \\
+\hline
+KL & \(\left\{\begin{array}{ccc}
+32.393 & 59.119 & 80 \\
+0.064 & 0.597 & 0.339
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.117 \\
+(0.117)
+\end{array}\) & 
+\((-66.032, 1.992)\) & 
+Figure \ref{fig:s1=0.97,s2=1.47,11,kl,ww} & $\surd$ & 79644.19 \\
+\hline
+LW & \(\left\{\begin{array}{ccc}
+31.711 & 59.803 & 80 \\
+0.203 & 0.533 & 0.265
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.0386 \\
+(0.0366)
+\end{array}\) & 
+\((-70.211, 2.114)\) & 
+Figure \ref{fig:s1=0.97,s2=1.47,11,lw,ww} & $\triangle$ & 5096.6 \\
+\hline
+B & \(\left\{\begin{array}{ccc}
+22.499 & 23.034 & 43.321 \\
+0.144 & 0.322 & 0.534
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0 \\
+(0)
+\end{array}\) & 
+\((-67.238, 0.887)\) & 
+Figure \ref{fig:s1=0.97,s2=1.47,11,bhattacharyya,ww} & $\triangle$ & 444.93 \\
+\hline
+\(\chi^2\) & \(\left\{\begin{array}{ccc}
+58.644 & 80 & 80 \\
+0.000 & 0.000 & 1.000
+\end{array}\right\}\) &
+\(\begin{array}{c}
+5.396 \\
+(5.020)
+\end{array}\) & 
+\((-61.575, 1.971)\) & 
+Figure \ref{fig:s1=0.97,s2=1.47,11,chi2,ww} & $\times$ & 30782.3 \\
+\hline
+\end{tabular}
+\caption{Summary of Divergence and Optimal Design Results (Case 2.11)}
+\label{tab:results2.11}
+\end{table}
+
+
+
+
+
+
+% ------------------------------------------------
+% Case 2.12
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{12pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\multicolumn{6}{|c|}{\textbf{Settings}} \\ 
+\hline
+\((\theta_{11}, \theta_{12}, \theta_{13})\) & \(s_1\) & \(s_2\) & \(\theta_{21} \text{ bound}\) & \(\theta_{22} \text{ bound}\) & \(\text{Distribution}\) \\
+\hline
+\((-5, -1.5, 0.05)\) & \(1.4780103\) & \(0.9780103\) & \([-100, -10]\) & \([0.1, 5]\) & \(\text{Weibull}\)\\
+\hline
+\end{tabular}
+\caption{Settings for the Optimal Design (Case 2.12)}
+\label{tab:settings2.12}
+\end{table}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{8pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+\textbf{Div.} & \(\boldsymbol{\xi^*}\) & \(C^* (\hat{C})\) & \(\boldsymbol{\hat{\theta}(\xi^*)}\) & \textbf{Eqv.} & \textbf{Opt?} & \textbf{CPU time} \\
+\hline
+KL & \(\left\{\begin{array}{ccc}
+49.573 & 64.735 & 80 \\
+0.181 & 0.549 & 0.270
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.230 \\
+(0.230)
+\end{array}\) & 
+\((0.176, 0.600)\) & 
+Figure \ref{fig:s1=1.47,s2=0.97,12,kl,ww} & $\surd$ & 102226.3 \\
+\hline
+LW & \(\left\{\begin{array}{ccc}
+62.798 & 65.451 & 80 \\
+0.583 & 0.330 & 0.087
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.0284 \\
+(0.693)
+\end{array}\) & 
+\((-59.234, 2.380)\) & 
+Figure \ref{fig:s1=1.47,s2=0.97,12,lw,ww} & $\surd$ & 4658.52 \\
+\hline
+B & \(\left\{\begin{array}{ccc}
+10 & 10 & 10 \\
+0.057 & 0.419 & 0.524
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.999 \\
+(0.999)
+\end{array}\) & 
+\((-58.774, 3.780)\) & 
+Figure \ref{fig:s1=1.47,s2=0.97,12,bhattacharyya,ww} & $\triangle$ & 705.6 \\
+\hline
+\(\chi^2\) & \(\left\{\begin{array}{ccc}
+80 & 80 & 80 \\
+0.000 & 0.000 & 1.000
+\end{array}\right\}\) &
+\(\begin{array}{c}
+197.506 \\
+(197.239)
+\end{array}\) & 
+\((-58.084, 1.921)\) & 
+Figure \ref{fig:s1=1.47,s2=0.97,12,chi2,ww} & $\times$ & 20068.95 \\
+\hline
+\end{tabular}
+\caption{Summary of Divergence and Optimal Design Results (Case 2.12)}
+\label{tab:results2.12}
+\end{table}
+
+
+
+
+% ------------------------------------------------
+% Case 2.13
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{12pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\multicolumn{6}{|c|}{\textbf{Settings}} \\ 
+\hline
+\((\theta_{11}, \theta_{12}, \theta_{13})\) & \(s_1\) & \(s_2\) & \(\theta_{21} \text{ bound}\) & \(\theta_{22} \text{ bound}\) & \(\text{Distribution}\) \\
+\hline
+\((-5, -1.5, 0.05)\) & \(0.4780103\) & \(0.9780103\) & \([-100, -10]\) & \([0.1, 5]\) & \(\text{Weibull}\)\\
+\hline
+\end{tabular}
+\caption{Settings for the Optimal Design (Case 2.13)}
+\label{tab:settings2.13}
+\end{table}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{8pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+\textbf{Div.} & \(\boldsymbol{\xi^*}\) & \(C^* (\hat{C})\) & \(\boldsymbol{\hat{\theta}(\xi^*)}\) & \textbf{Eqv.} & \textbf{Opt?} & \textbf{CPU time} \\
+\hline
+KL & \(\left\{\begin{array}{ccc}
+41.993 & 58.347 & 76.142 \\
+0.231 & 0.526 & 0.244
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.303 \\
+(0.227)
+\end{array}\) & 
+\((-70.313, 2.112)\) & 
+Figure \ref{fig:s1=0.47,s2=0.97,13,kl,ww} & $\times$ & 62835.54 \\
+\hline
+LW & \(\left\{\begin{array}{ccc}
+74.778 & 75.283 & 75.604 \\
+0.030 & 0.477 & 0.493
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.351 \\
+(0.693)
+\end{array}\) & 
+\((-40.068, 1.937)\) & 
+Figure \ref{fig:s1=0.47,s2=0.97,13,lw,ww} & $\triangle$ & 3694.3 \\
+\hline
+B & \(\left\{\begin{array}{ccc}
+48.499 & 55.901 & 62.657 \\
+0.007 & 0.823 & 0.170
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0 \\
+(2.87\times 10^{-17})
+\end{array}\) & 
+\((-43.884, 3.505)\) & 
+Figure \ref{fig:s1=0.47,s2=0.97,13,bhattacharyya,ww} & $\triangle$ & 517.81 \\
+\hline
+\(\chi^2\) & \(\left\{\begin{array}{ccc}
+65.965 & 79.806 & 79.966 \\
+1.000 & 0.000 & 0.000
+\end{array}\right\}\) &
+\(\begin{array}{c}
+167.956 \\
+(164.134)
+\end{array}\) & 
+\((-56.397, 1.872)\) & 
+Figure \ref{fig:s1=0.47,s2=0.97,13,chi2,ww} & $\triangle$ & 5205.58 \\
+\hline
+\end{tabular}
+\caption{Summary of Divergence and Optimal Design Results (Case 2.13)}
+\label{tab:results2.13}
+\end{table}
+
+
+
+
+% ------------------------------------------------
+% Case 2.14
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{12pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\multicolumn{6}{|c|}{\textbf{Settings}} \\ 
+\hline
+\((\theta_{11}, \theta_{12}, \theta_{13})\) & \(s_1\) & \(s_2\) & \(\theta_{21} \text{ bound}\) & \(\theta_{22} \text{ bound}\) & \(\text{Distribution}\) \\
+\hline
+\((-5, -1.5, 0.05)\) & \(0.9780103\) & \(0.4780103\) & \([-100, -10]\) & \([0.1, 5]\) & \(\text{Weibull}\)\\
+\hline
+\end{tabular}
+\caption{Settings for the Optimal Design (Case 2.14)}
+\label{tab:settings2.14}
+\end{table}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{8pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+\textbf{Div.} & \(\boldsymbol{\xi^*}\) & \(C^* (\hat{C})\) & \(\boldsymbol{\hat{\theta}(\xi^*)}\) & \textbf{Eqv.} & \textbf{Opt?} & \textbf{CPU time} \\
+\hline
+KL & \(\left\{\begin{array}{ccc}
+45.473 & 62.576 & 80 \\
+0.189 & 0.551 & 0.260
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.635 \\
+(0.635)
+\end{array}\) & 
+\((-64.316, 1.957)\) & 
+Figure \ref{fig:s1=0.97,s2=0.47,14,kl,ww} & $\surd$ & 81337.01 \\
+\hline
+LW & \(\left\{\begin{array}{ccc}
+41.785 & 60.771 & 80 \\
+0.462 & 0.538 & 0.000
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.0703 \\
+(0.596)
+\end{array}\) & 
+\((-73.372, 2.611)\) & 
+Figure \ref{fig:s1=0.97,s2=0.47,14,lw,ww} & $\times$ & 4720.86 \\
+\hline
+B & \(\left\{\begin{array}{ccc}
+10 & 46.047 & 70.919 \\
+1.000 & 0.000 & 0.000
+\end{array}\right\}\) &
+\(\begin{array}{c}
+1.000 \\
+(1.000)
+\end{array}\) & 
+\((-52.593, 3.173)\) & 
+Figure \ref{fig:s1=0.97,s2=0.47,14,bhattacharyya,ww} & $\triangle$ & 551.11 \\
+\hline
+\(\chi^2\) & \(\left\{\begin{array}{ccc}
+71.02 & 79.262 & 80 \\
+1.000 & 0.000 & 0.000
+\end{array}\right\}\) &
+\(\begin{array}{c}
+34504337 \\
+(20297455)
+\end{array}\) & 
+\((-50.265, 1.740)\) & 
+Figure \ref{fig:s1=0.97,s2=0.47,14,chi2,ww} & $\triangle$ & 6022.38 \\
+\hline
+\end{tabular}
+\caption{Summary of Divergence and Optimal Design Results (Case 2.14)}
+\label{tab:results2.14}
+\end{table}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\begin{figure}[H]
+\centering
+\subfloat[KL divergence\label{fig:s=0.97,1,kl,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ll_1.png}}
+\subfloat[LW divergence\label{fig:s=0.97,1,lw,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ll_1.png}}\\
+\subfloat[Bhattacharyya distance measure\label{fig:s=0.97,1,bhattacharyya,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ll_1.png}}
+\subfloat[$\chi^2$ distance measure\label{fig:s=0.97,1,chi2,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ll_1.png}}
+\caption{The variation for both models is 0.9780103. Results are shown in Table \ref{tab:results1.1}}
+\label{fig:s=0.97,1,ll}
+\end{figure}
+
+    
+\begin{figure}[H]
+\centering
+\subfloat[KL divergence\label{fig:s=0.97,2,kl,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ll_2.png}}
+\subfloat[LW divergence\label{fig:s=0.97,2,lw,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ll_2.png}}\\
+\subfloat[Bhattacharyya distance measure\label{fig:s=0.97,2,bhattacharyya,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ll_2.png}}
+\subfloat[$\chi^2$ distance measure\label{fig:s=0.97,2,chi2,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ll_2.png}}
+\caption{The variation for both models is 0.9780103. Results are shown in Table \ref{tab:results1.2}}
+\label{fig:s=0.97,2,ll}
+\end{figure}
+
+
+\begin{figure}[H]
+\centering
+\subfloat[KL divergence\label{fig:s=1.47,3,kl,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ll_3.png}}
+\subfloat[LW divergence\label{fig:s=1.47,3,lw,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ll_3.png}}\\
+\subfloat[Bhattacharyya distance measure\label{fig:s=1.47,3,bhattacharyya,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ll_3.png}}
+\subfloat[$\chi^2$ distance measure\label{fig:s=1.47,3,chi2,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ll_3.png}}
+\caption{The variation for both models is 1.4780103. Results are shown in Table \ref{tab:results1.3}}
+\label{fig:s=1.47,3,ll}
+\end{figure}
+
+
+
+
+\begin{figure}[H]
+\centering
+\subfloat[KL divergence\label{fig:s=1.97,4,kl,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ll_4.png}}
+\subfloat[LW divergence\label{fig:s=1.97,4,lw,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ll_4.png}}\\
+\subfloat[Bhattacharyya distance measure\label{fig:s=1.97,4,bhattacharyya,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ll_4.png}}
+\subfloat[$\chi^2$ distance measure\label{fig:s=1.97,4,chi2,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ll_4.png}}
+\caption{The variation for both models is 1.9780103. Results are shown in Table \ref{tab:results1.4}}
+\label{fig:s=1.97,4,ll}
+\end{figure}
+
+
+
+
+
+
+\begin{figure}[H]
+\centering
+\subfloat[KL divergence\label{fig:s=5.97,5,kl,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir white.png}}
+\subfloat[LW divergence\label{fig:s=5.97,5,lw,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ll_5.png}}\\
+\subfloat[Bhattacharyya distance measure\label{fig:s=5.97,5,bhattacharyya,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ll_5.png}}
+\subfloat[$\chi^2$ distance measure\label{fig:s=5.97,5,chi2,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ll_5.png}}
+\caption{The variation for both models is 5.9780103. Results are shown in Table \ref{tab:results1.5}}
+\label{fig:s=5.97,5,ll}
+\end{figure}
+
+
+
+
+\begin{figure}[H]
+\centering
+\subfloat[KL divergence\label{fig:s=10.97,6,kl,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir white.png}}
+\subfloat[LW divergence\label{fig:s=10.97,6,lw,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ll_6.png}}\\
+\subfloat[Bhattacharyya distance measure\label{fig:s=10.97,6,bhattacharyya,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ll_6.png}}
+\subfloat[$\chi^2$ distance measure\label{fig:s=10.97,6,chi2,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir white.png}}
+\caption{The variation for both models is 10.9780103. Results are shown in Table \ref{tab:results1.6}}
+\label{fig:s=10.97,6,ll}
+\end{figure}
+
+
+
+
+\begin{figure}[H]
+\centering
+\subfloat[KL divergence\label{fig:s1=0.97,s2=10.97,7,kl,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ll_7.png}}
+\subfloat[LW divergence\label{fig:s1=0.97,s2=10.97,7,lw,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ll_7.png}}\\
+\subfloat[Bhattacharyya distance measure\label{fig:s1=0.97,s2=10.97,7,bhattacharyya,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ll_7.png}}
+\subfloat[$\chi^2$ distance measure\label{fig:s1=0.97,s2=10.97,7,chi2,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ll_7.png}}
+\caption{The variants of the two models are 0.9780103 and 10.9780103, respectively. Results are shown in Table \ref{tab:results1.7}}
+\label{fig:s1=0.97,s2=10.97,7,ll}
+\end{figure}
+
+
+
+
+\begin{figure}[H]
+\centering
+\subfloat[KL divergence\label{fig:s1=5.97,s2=0.97,8,kl,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ll_8.png}}
+\subfloat[LW divergence\label{fig:s1=5.97,s2=0.97,8,lw,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ll_8.png}}\\
+\subfloat[Bhattacharyya distance measure\label{fig:s1=5.97,s2=0.97,8,bhattacharyya,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ll_8.png}}
+\subfloat[$\chi^2$ distance measure\label{fig:s1=5.97,s2=0.97,8,chi2,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ll_8.png}}
+\caption{The variants of the two models are 5.9780103 and 0.9780103, respectively. Results are shown in Table \ref{tab:results1.8}}
+\label{fig:s1=5.97,s2=0.97,8,ll}
+\end{figure}
+
+
+
+
+
+
+\begin{figure}[H]
+\centering
+\subfloat[KL divergence\label{fig:s1=1.97,s2=0.97,9,kl,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ll_9.png}}
+\subfloat[LW divergence\label{fig:s1=1.97,s2=0.97,9,lw,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ll_9.png}}\\
+\subfloat[Bhattacharyya distance measure\label{fig:s1=1.97,s2=0.97,9,bhattacharyya,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ll_9.png}}
+\subfloat[$\chi^2$ distance measure\label{fig:s1=1.97,s2=0.97,9,chi2,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ll_9.png}}
+\caption{The variants of the two models are 1.9780103 and 0.9780103, respectively. Results are shown in Table \ref{tab:results1.9}}
+\label{fig:s1=1.97,s2=0.97,9,ll}
+\end{figure}
+
+
+
+
+
+
+\begin{figure}[H]
+\centering
+\subfloat[KL divergence\label{fig:s1=0.97,s2=1.97,10,kl,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ll_10.png}}
+\subfloat[LW divergence\label{fig:s1=0.97,s2=1.97,10,lw,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ll_10.png}}\\
+\subfloat[Bhattacharyya distance measure\label{fig:s1=0.97,s2=1.97,10,bhattacharyya,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ll_10.png}}
+\subfloat[$\chi^2$ distance measure\label{fig:s1=0.97,s2=1.97,10,chi2,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ll_10.png}}
+\caption{The variants of the two models are 0.9780103 and 1.9780103, respectively. Results are shown in Table \ref{tab:results1.10}}
+\label{fig:s1=0.97,s2=1.97,10,ll}
+\end{figure}
+
+
+
+
+
+\begin{figure}[H]
+\centering
+\subfloat[KL divergence\label{fig:s1=0.97,s2=1.47,11,kl,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ll_11.png}}
+\subfloat[LW divergence\label{fig:s1=0.97,s2=1.47,11,lw,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ll_11.png}}\\
+\subfloat[Bhattacharyya distance measure\label{fig:s1=0.97,s2=1.47,11,bhattacharyya,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ll_11.png}}
+\subfloat[$\chi^2$ distance measure\label{fig:s1=0.97,s2=1.47,11,chi2,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ll_11.png}}
+\caption{The variants of the two models are 0.9780103 and 1.4780103, respectively. Results are shown in Table \ref{tab:results1.11}}
+\label{fig:s1=0.97,s2=1.47,11,ll}
+\end{figure}
+
+
+
+
+\begin{figure}[H]
+\centering
+\subfloat[KL divergence\label{fig:s1=1.47,s2=0.97,12,kl,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ll_12.png}}
+\subfloat[LW divergence\label{fig:s1=1.47,s2=0.97,12,lw,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ll_12.png}}\\
+\subfloat[Bhattacharyya distance measure\label{fig:s1=1.47,s2=0.97,12,bhattacharyya,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ll_12.png}}
+\subfloat[$\chi^2$ distance measure\label{fig:s1=1.47,s2=0.97,12,chi2,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ll_12.png}}
+\caption{The variants of the two models are 1.4780103 and 0.9780103, respectively. Results are shown in Table \ref{tab:results1.12}}
+\label{fig:s1=1.47,s2=0.97,12,ll}
+\end{figure}
+
+
+
+
+
+
+\begin{figure}[H]
+\centering
+\subfloat[KL divergence\label{fig:s1=0.47,s2=0.97,13,kl,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ll_13.png}}
+\subfloat[LW divergence\label{fig:s1=0.47,s2=0.97,13,lw,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ll_13.png}}\\
+\subfloat[Bhattacharyya distance measure\label{fig:s1=0.47,s2=0.97,13,bhattacharyya,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ll_13.png}}
+\subfloat[$\chi^2$ distance measure\label{fig:s1=0.47,s2=0.97,13,chi2,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ll_13.png}}
+\caption{The variants of the two models are 0.4780103 and 0.9780103, respectively. Results are shown in Table \ref{tab:results1.13}}
+\label{fig:s1=0.47,s2=0.97,13,ll}
+\end{figure}
+
+
+
+
+\begin{figure}[H]
+\centering
+\subfloat[KL divergence\label{fig:s1=0.97,s2=0.47,14,kl,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ll_14.png}}
+\subfloat[LW divergence\label{fig:s1=0.97,s2=0.47,14,lw,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ll_14.png}}\\
+\subfloat[Bhattacharyya distance measure\label{fig:s1=0.97,s2=0.47,14,bhattacharyya,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ll_14.png}}
+\subfloat[$\chi^2$ distance measure\label{fig:s1=0.97,s2=0.47,14,chi2,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ll_14.png}}
+\caption{The variants of the two models are 0.9780103 and 0.4780103, respectively. Results are shown in Table \ref{tab:results1.14}}
+\label{fig:s1=0.97,s2=0.47,14,ll}
+\end{figure}
+
+
+
+
+
+%-----------------------------------------------
+
+
+\begin{figure}[H]
+\centering
+\subfloat[KL divergence\label{fig:s=0.97,1,kl,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ww_1.png}}
+\subfloat[LW divergence\label{fig:s=0.97,1,lw,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ww_1.png}}\\
+\subfloat[Bhattacharyya distance measure\label{fig:s=0.97,1,bhattacharyya,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ww_1.png}}
+\subfloat[$\chi^2$ distance measure\label{fig:s=0.97,1,chi2,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ww_1.png}}
+\caption{The variation for both models is 0.9780103. Results are shown in Table \ref{tab:results2.1}}
+\label{fig:s=0.97,1,ww}
+\end{figure}
+
+    
+    
+    
+\begin{figure}[H]
+\centering
+\subfloat[KL divergence\label{fig:s=0.97,2,kl,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ww_2.png}}
+\subfloat[LW divergence\label{fig:s=0.97,2,lw,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ww_2.png}}\\
+\subfloat[Bhattacharyya distance measure\label{fig:s=0.97,2,bhattacharyya,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ww_2.png}}
+\subfloat[$\chi^2$ distance measure\label{fig:s=0.97,2,chi2,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ww_2.png}}
+\caption{The variation for both models is 0.9780103. Results are shown in Table \ref{tab:results2.2}}
+\label{fig:s=0.97,2,ww}
+\end{figure}
+
+
+
+
+\begin{figure}[H]
+\centering
+\subfloat[KL divergence\label{fig:s=1.47,3,kl,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ww_3.png}}
+\subfloat[LW divergence\label{fig:s=1.47,3,lw,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ww_3.png}}\\
+\subfloat[Bhattacharyya distance measure\label{fig:s=1.47,3,bhattacharyya,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ww_3.png}}
+\subfloat[$\chi^2$ distance measure\label{fig:s=1.47,3,chi2,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ww_3.png}}
+\caption{The variation for both models is 1.4780103. Results are shown in Table \ref{tab:results2.3}}
+\label{fig:s=1.47,3,ww}
+\end{figure}
+
+
+
+
+
+
+
+\begin{figure}[H]
+\centering
+\subfloat[KL divergence\label{fig:s=1.97,4,kl,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ww_4.png}}
+\subfloat[LW divergence\label{fig:s=1.97,4,lw,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ww_4.png}}\\
+\subfloat[Bhattacharyya distance measure\label{fig:s=1.97,4,bhattacharyya,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ww_4.png}}
+\subfloat[$\chi^2$ distance measure\label{fig:s=1.97,4,chi2,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ww_4.png}}
+\caption{The variation for both models is 1.9780103. Results are shown in Table \ref{tab:results2.4}}
+\label{fig:s=1.97,4,ww}
+\end{figure}
+
+
+
+
+
+
+\begin{figure}[H]
+\centering
+\subfloat[KL divergence\label{fig:s=5.97,5,kl,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ww_5.png}}
+\subfloat[LW divergence\label{fig:s=5.97,5,lw,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ww_5.png}}\\
+\subfloat[Bhattacharyya distance measure\label{fig:s=5.97,5,bhattacharyya,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ww_5.png}}
+\subfloat[$\chi^2$ distance measure\label{fig:s=5.97,5,chi2,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ww_5.png}}
+\caption{The variation for both models is 5.9780103. Results are shown in Table \ref{tab:results2.5}}
+\label{fig:s=5.97,5,w}
+\end{figure}
+
+
+
+
+\begin{figure}[H]
+\centering
+\subfloat[KL divergence\label{fig:s=10.97,6,kl,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ww_6.png}}
+\subfloat[LW divergence\label{fig:s=10.97,6,lw,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir white.png}}\\
+\subfloat[Bhattacharyya distance measure\label{fig:s=10.97,6,bhattacharyya,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ww_6.png}}
+\subfloat[$\chi^2$ distance measure\label{fig:s=10.97,6,chi2,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir white.png}}
+\caption{The variation for both models is 10.9780103. Results are shown in Table \ref{tab:results2.6}}
+\label{fig:s=10.97,6,ww}
+\end{figure}
+
+
+
+
+\begin{figure}[H]
+\centering
+\subfloat[KL divergence\label{fig:s1=0.97,s2=10.97,7,kl,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ww_7.png}}
+\subfloat[LW divergence\label{fig:s1=0.97,s2=10.97,7,lw,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ww_7.png}}\\
+\subfloat[Bhattacharyya distance measure\label{fig:s1=0.97,s2=10.97,7,bhattacharyya,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ww_7.png}}
+\subfloat[$\chi^2$ distance measure\label{fig:s1=0.97,s2=10.97,7,chi2,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ww_7.png}}
+\caption{The variants of the two models are 0.9780103 and 10.9780103, respectively. Results are shown in Table \ref{tab:results2.7}}
+\label{fig:s1=0.97,s2=10.97,7,ww}
+\end{figure}
+
+
+
+
+\begin{figure}[H]
+\centering
+\subfloat[KL divergence\label{fig:s1=5.97,s2=0.97,8,kl,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ww_8.png}}
+\subfloat[LW divergence\label{fig:s1=5.97,s2=0.97,8,lw,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ww_8.png}}\\
+\subfloat[Bhattacharyya distance measure\label{fig:s1=5.97,s2=0.97,8,bhattacharyya,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ww_8.png}}
+\subfloat[$\chi^2$ distance measure\label{fig:s1=5.97,s2=0.97,8,chi2,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ww_8.png}}
+\caption{The variants of the two models are 5.9780103 and 0.9780103, respectively. Results are shown in Table \ref{tab:results2.8}}
+\label{fig:s1=5.97,s2=0.97,8,ww}
+\end{figure}
+
+
+
+
+
+
+\begin{figure}[H]
+\centering
+\subfloat[KL divergence\label{fig:s1=1.97,s2=0.97,9,kl,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ww_9.png}}
+\subfloat[LW divergence\label{fig:s1=1.97,s2=0.97,9,lw,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ww_9.png}}\\
+\subfloat[Bhattacharyya distance measure\label{fig:s1=1.97,s2=0.97,9,bhattacharyya,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ww_9.png}}
+\subfloat[$\chi^2$ distance measure\label{fig:s1=1.97,s2=0.97,9,chi2,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ww_9.png}}
+\caption{The variants of the two models are 1.9780103 and 0.9780103, respectively. Results are shown in Table \ref{tab:results2.9}}
+\label{fig:s1=1.97,s2=0.97,9,ww}
+\end{figure}
+
+
+
+
+
+
+\begin{figure}[H]
+\centering
+\subfloat[KL divergence\label{fig:s1=0.97,s2=1.97,10,kl,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ww_10.png}}
+\subfloat[LW divergence\label{fig:s1=0.97,s2=1.97,10,lw,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ww_10.png}}\\
+\subfloat[Bhattacharyya distance measure\label{fig:s1=0.97,s2=1.97,10,bhattacharyya,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ww_10.png}}
+\subfloat[$\chi^2$ distance measure\label{fig:s1=0.97,s2=1.97,10,chi2,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ww_10.png}}
+\caption{The variants of the two models are 0.9780103 and 1.9780103, respectively. Results are shown in Table \ref{tab:results2.10}}
+\label{fig:s1=0.97,s2=1.97,10,ww}
+\end{figure}
+
+
+
+
+
+\begin{figure}[H]
+\centering
+\subfloat[KL divergence\label{fig:s1=0.97,s2=1.47,11,kl,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ww_11.png}}
+\subfloat[LW divergence\label{fig:s1=0.97,s2=1.47,11,lw,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ww_11.png}}\\
+\subfloat[Bhattacharyya distance measure\label{fig:s1=0.97,s2=1.47,11,bhattacharyya,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ww_11.png}}
+\subfloat[$\chi^2$ distance measure\label{fig:s1=0.97,s2=1.47,11,chi2,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ww_11.png}}
+\caption{The variants of the two models are 0.9780103 and 1.4780103, respectively. Results are shown in Table \ref{tab:results2.11}}
+\label{fig:s1=0.97,s2=1.47,11,ww}
+\end{figure}
+
+
+
+
+\begin{figure}[H]
+\centering
+\subfloat[KL divergence\label{fig:s1=1.47,s2=0.97,12,kl,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ww_12.png}}
+\subfloat[LW divergence\label{fig:s1=1.47,s2=0.97,12,lw,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ww_12.png}}\\
+\subfloat[Bhattacharyya distance measure\label{fig:s1=1.47,s2=0.97,12,bhattacharyya,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ww_12.png}}
+\subfloat[$\chi^2$ distance measure\label{fig:s1=1.47,s2=0.97,12,chi2,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ww_12.png}}
+\caption{The variants of the two models are 1.4780103 and 0.9780103, respectively. Results are shown in Table \ref{tab:results2.12}}
+\label{fig:s1=1.47,s2=0.97,12,ww}
+\end{figure}
+
+
+
+
+
+
+\begin{figure}[H]
+\centering
+\subfloat[KL divergence\label{fig:s1=0.47,s2=0.97,13,kl,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ww_13.png}}
+\subfloat[LW divergence\label{fig:s1=0.47,s2=0.97,13,lw,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ww_13.png}}\\
+\subfloat[Bhattacharyya distance measure\label{fig:s1=0.47,s2=0.97,13,bhattacharyya,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ww_13.png}}
+\subfloat[$\chi^2$ distance measure\label{fig:s1=0.47,s2=0.97,13,chi2,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ww_13.png}}
+\caption{The variants of the two models are 0.4780103 and 0.9780103, respectively. Results are shown in Table \ref{tab:results2.13}}
+\label{fig:s1=0.47,s2=0.97,13,ww}
+\end{figure}
+
+
+
+
+\begin{figure}[H]
+\centering
+\subfloat[KL divergence\label{fig:s1=0.97,s2=0.47,14,kl,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ww_14.png}}
+\subfloat[LW divergence\label{fig:s1=0.97,s2=0.47,14,lw,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ww_14.png}}\\
+\subfloat[Bhattacharyya distance measure\label{fig:s1=0.97,s2=0.47,14,bhattacharyya,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ww_14.png}}
+\subfloat[$\chi^2$ distance measure\label{fig:s1=0.97,s2=0.47,14,chi2,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ww_14.png}}
+\caption{The variants of the two models are 0.9780103 and 0.4780103, respectively. Results are shown in Table \ref{tab:results2.14}}
+\label{fig:s1=0.97,s2=0.47,14,ww}
+\end{figure}
+
+
+
+\newpage
+
+
+
+
+
+
+
+% ------------------------------------------------
+% double PSO
+
+In the initial design, we utilized the BFGS optimization method in the Inner Loop. However, the results revealed instability under certain conditions. To address this, we further attempted to use PSO for both the Outer Loop and the Inner Loop. KL Divergence, known for its better performance, was selected as the evaluation metric, and two variance parameters are 0.9780103 and 5.9780103, were tested. Nevertheless, the results showed that replacing BFGS with the global optimization method PSO did not improve the performance. In some cases, the outcomes were even worse. The PSO details are:
+\begin{itemize}
+\item Inner Loop : 32 particles and 100 iterations.
+\item Outer Loop : 64 particles and 200 iterations.
+\end{itemize}
+
+
+
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{12pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\multicolumn{6}{|c|}{\textbf{Settings}} \\ 
+\hline
+\((\theta_{11}, \theta_{12}, \theta_{13})\) & \(s\) & \(\theta_{21} \text{ bound}\) & \(\theta_{22} \text{ bound}\) & \(\text{Distribution}\) & Divergence \\
+\hline
+\((-5, -1.5, 0.05)\) & \(0.9780103\) & \([-100, -10]\) & \([0.1, 5]\) & \(\text{Log-normal}\) & KL\\
+\hline
+\end{tabular}
+\caption{Settings for the Optimal Design (Bonus)}
+\label{tab:Bonus1}
+\end{table}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{8pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+\textbf{Atp.} & \(\boldsymbol{\xi^*}\) & \(C^* (\hat{C})\) & \(\boldsymbol{\hat{\theta}(\xi^*)}\) & \textbf{Eqv.} & \textbf{Opt?} & \textbf{CPU time} \\
+\hline
+1st & \(\left\{\begin{array}{ccc}
+58.383 & 80 & 80 \\
+0.171 & 0.034 & 0.794
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.851 \\
+(1.50\times 10^{-5})
+\end{array}\) & 
+\((-62.178, 1.883)\) & 
+Figure \ref{fig:s=0.97,2,kl,bonus1.1} & $\times$ & 29901.81 \\
+\hline
+2nd & \(\left\{\begin{array}{ccc}
+16.641 & 43.618 & 62.812 \\
+0.000 & 0.071 & 0.929
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.424 \\
+(2.59\times 10^{-5})
+\end{array}\) & 
+\((-68.732, 2.072)\) & 
+Figure \ref{fig:s=0.97,2,kl,bonus1.2} & $\times$ & 9054.87 \\
+\hline
+\end{tabular}
+\caption{Summary of Divergence and Optimal Design Results (Bonus 1)}
+\label{tab:bonus_results1}
+\end{table}
+
+
+
+% -----------------------------
+
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{12pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\multicolumn{6}{|c|}{\textbf{Settings}} \\ 
+\hline
+\((\theta_{11}, \theta_{12}, \theta_{13})\) & \(s\) & \(\theta_{21} \text{ bound}\) & \(\theta_{22} \text{ bound}\) & \(\text{Distribution}\) & Divergence \\
+\hline
+\((-5, -1.5, 0.05)\) & \(5.9780103\) & \([-100, -10]\) & \([0.1, 5]\) & \(\text{Log-normal}\) & KL\\
+\hline
+\end{tabular}
+\caption{Settings for the Optimal Design (Bonus)}
+\label{tab:Bonus2}
+\end{table}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{8pt} % 調整列間距
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+\textbf{Atp.} & \(\boldsymbol{\xi^*}\) & \(C^* (\hat{C})\) & \(\boldsymbol{\hat{\theta}(\xi^*)}\) & \textbf{Eqv.} & \textbf{Opt?} & \textbf{CPU time} \\
+\hline
+1st & \(\left\{\begin{array}{ccc}
+10 & 47.498 & 80 \\
+0.356 & 0.465 & 0.179
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.00979 \\
+(0.00148)
+\end{array}\) & 
+\((-72.567, 2.185)\) & 
+Figure \ref{fig:s=5.97,5,kl,bonus2.1} & $\triangle$ & 35511.32 \\
+\hline
+2nd & \(\left\{\begin{array}{ccc}
+35.628 & 41.688 & 50.322 \\
+0.536 & 0.224 & 0.241
+\end{array}\right\}\) &
+\(\begin{array}{c}
+0.0170 \\
+(-1.62\times 10^{-5})
+\end{array}\) & 
+\((-72.694, 2.180)\) & 
+Figure \ref{fig:s=5.97,5,kl,bonus2.2} & $\times$ & 48212.33 \\
+\hline
+\end{tabular}
+\caption{Summary of Divergence and Optimal Design Results (Bonus 2)}
+\label{tab:bonus_results2}
+\end{table}
+
+
+
+
+
+
+\begin{figure}[H]
+\centering
+\subfloat[First attempt with The variants are 0.9780103 \label{fig:s=0.97,2,kl,bonus1.1}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ll_2_2PSO.png}}
+\subfloat[Second attempt with The variants are 0.9780103\label{fig:s=0.97,2,kl,bonus1.2}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ll_2_2PSO_2.png}}\\
+\subfloat[First attempt with The variants are 5.9780103\label{fig:s=5.97,5,kl,bonus2.1}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ll_5_2PSO.png}}
+\subfloat[Second attempt with The variants are 5.9780103\label{fig:s=5.97,5,kl,bonus2.2}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ll_5_2PSO_2.png}}
+\caption{The variants are the same for both models. Results are shown in Table \ref{tab:bonus_results2}}
+\label{fig:s=0.97,s=5.47,KL,Bonus}
+\end{figure}
+
+
+
+
+
+
+
+
+
+
+\end{document}

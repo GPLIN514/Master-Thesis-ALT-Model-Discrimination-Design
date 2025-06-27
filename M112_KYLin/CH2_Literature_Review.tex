@@ -1,0 +1,327 @@
+\chapter{Literature Review \label{CH: review}}
+
+%\section{Reliability}
+\section{Accelerated Life Testing}
+
+\hspace*{8mm} Producing high-reliability products has always been a critical goal in the manufacturing industry. During the initial stages of product development, it is essential to determine whether the product's lifespan meets established standards. However, when the expected lifespan significantly exceeds the feasible testing duration, a common approach is to conduct Accelerated Life Testing (ALT). This method accelerates the aging process by altering environmental conditions, such as increasing temperature or vibration frequency, and collects data under various stress conditions. These data are then combined with mathematical models to extrapolate the product's lifespan under normal usage conditions. For example, pharmaceutical stability testing often needs to be completed within weeks. According to the \cite{guideline2003stability}, accelerated tests are recommended under high-temperature and high-humidity conditions. Pfizer, for instance, employs accelerated stability testing during drug development to simulate 2 to 5 years of storage conditions. Similarly, the target lifespan of electric vehicle (EV) batteries is typically 8 to 10 years or over 100,000 kilometers. Since actual testing cannot span such long durations, researchers estimate the degradation curve of battery capacity over time to further extrapolate the lifespan under real-world conditions. \cite{uddin2017possibility} used accelerated testing results under different temperatures and charge-discharge rates to simulate long-term usage scenarios for predicting lithium-ion battery performance degradation under real-world driving conditions.
+
+\hspace*{8mm} \cite{arrhenius1889reaktionsgeschwindigkeit} proposed the Arrhenius model, which laid the theoretical foundation for chemical reaction kinetics and has been widely applied in reliability analysis and ALT. It describes the effect of temperature on reaction rates or product lifespan and assumes that the failure process follows the Arrhenius equation, which is expressed as:
+\begin{equation} \label{Arrhenius model}
+t(T) = A \cdot \exp\left( \frac{E_a}{K \cdot Temp} \right),
+\end{equation}
+
+where: 
+\begin{itemize}
+\item $t(T)$：The product's lifespan at temperature $Temp$. 
+\item $A$：The pre-exponential factor, a constant related to the intrinsic properties of the product.
+
+\item $E_a$：The activation energy, which represents the energy required to drive the failure process, typically measured in electron volts ($eV$).
+
+\item $K$：The Boltzmann constant ($8.617 \times 10^{-5} \, eV/K$).
+\item $Temp$：Absolute temperature in Kelvin (K), where  $Temp=$$^\circ\text{C}+273.15$.
+\end{itemize}
+
+\hspace*{8mm} The model assumes an exponential relationship between failure rate and temperature, indicating that the failure rate accelerates significantly at higher temperatures. This characteristic makes the Arrhenius model a fundamental tool in ALT, where high-temperature data are collected to extrapolate the product's lifespan under normal operating conditions. However, in practical applications, the accuracy of the model is influenced by multiple factors, particularly in experimental design, parameter estimation, and model discrimination.
+
+\hspace*{8mm} First, the selection of temperature points is a critical factor affecting the accuracy of results in ALT. If the chosen test temperature is too low, it requires a significant amount of time and cost to observe product failures, making it difficult to effectively shorten the testing cycle. On the other hand, excessively high temperatures, while accelerating failures, may create conditions that deviate too far from actual usage environments, thereby reducing the relevance and applicability of the extrapolated results. Therefore, determining the optimal selection of temperature points within a limited number of tests is an important challenge.
+
+\hspace*{8mm} Second, in parameter estimation, the accuracy of activation energy ($E_a$) and the pre-exponential factor ($A$) is crucial for lifespan prediction.  Traditionally, parameters are estimated using Least Squares Estimation (LSE) or Maximum Likelihood Estimation (MLE). However, in ALT, Type I censored data is inevitable, as some products will not fail within the test duration due to time constraints. As a result, standard estimation methods may not be applicable. Instead, a modified likelihood function that accounts for Type I censored data must be used to ensure statistical validity under the ALT framework.
+
+\hspace*{8mm} Under the MLE framework, consider that we conduct tests at $j$ different temperature levels ($T_j$), each with $n$ individual samples, we record the lifespan of the $i$-th sample at temperature $T_j$ as $t_{ij}$. We assume that the lifespan ($t_{ij}$) follows $Weibull(\lambda, \beta)$, where $\lambda_j$ is the scale parameter corresponding to temperature $T_j$, determined via the Arrhenius model, and $\beta$ is the shape parameter (often assumed to be constant across different temperature conditions):
+\begin{equation} \notag
+f(t_{ij}; \lambda_j, \beta) = \beta \lambda_j t_{ij}^{\beta - 1} \exp(-\lambda_j t_{ij}^\beta),
+\end{equation}
+
+where:
+\begin{enumerate}
+\item $\lambda_j$  is determined by the Arrhenius model:
+\begin{equation} \notag
+\lambda_j = A^{-1} \exp\left(-\frac{E_a}{K T_j}\right).
+\end{equation}
+\item $\beta$ is the Weibull shape parameter (typically known or estimated separately).
+\end{enumerate}
+
+If all tested samples fail (i.e., no Type I censored data), the likelihood function is:
+\begin{equation} \notag
+L(A, E_a, \beta) = \prod_{j} \prod_{i=1}^{n_j} f(t_{ij}; \lambda_j, \beta).
+\end{equation}
+
+Taking the logarithm, the log-likelihood function becomes:
+\begin{equation} \notag
+\ell(A, E_a, \beta) = \sum_j \sum_{i=1}^{n_j} \left[ \ln \beta + (\beta - 1) \ln t_{ij} - \ln A - \frac{E_a}{K T_j} - A^{-1} e^{-\frac{E_a}{K T_j}} t_{ij}^\beta \right].
+\end{equation}
+
+\hspace*{8mm} However, in ALT, due to limited test time, some samples may not fail by the end of the experiment, resulting in Type I censored data. In such cases, the survival function must be incorporated:
+\begin{equation} \notag
+S(t; \lambda_j, \beta) = \exp(-\lambda_j t^\beta).
+\end{equation}
+
+\hspace*{8mm} Thus, the modified likelihood function considering both failures and Type I censored observations is:
+\begin{align}
+L(A, E_a, \beta) &= \prod_{j} \prod_{i \in \text{failures}} f(t_{ij}; \lambda_j, \beta) \times \prod_{i \in \text{censored}} S(t_{ij}; \lambda_j, \beta) \notag \\
+&= \prod_{j} \prod_{i \in \text{failures}} \beta \lambda_j t_{ij}^{\beta - 1} \exp(-\lambda_j t_{ij}^\beta) \times \prod_{i \in \text{censored}} \exp(-\lambda_j t_{ij}^\beta). \notag
+\end{align}
+
+Taking the logarithm, the modified log-likelihood function becomes:
+\begin{align}
+\ell(A, E_a, \beta) = &\sum_j \sum_{i \in \text{failures}} \left[ \ln \beta + (\beta - 1) \ln t_{ij} - \ln A - \frac{E_a}{K T_j} - A^{-1} e^{-\frac{E_a}{K T_j}} t_{ij}^\beta \right]  \notag \\
+&- \sum_j \sum_{i \in \text{censored}} A^{-1} e^{-\frac{E_a}{K T_j}} t_{ij}^\beta.  \notag
+\end{align}
+
+\hspace*{8mm} In other words, parameter estimation in ALT must be adjusted in accordance with the likelihood function that accounts for Type I censored data to obtain robust results. The objective is to estimate the key parameters affecting product lifespan, namely $A$, $E_a$, and $\beta$. We seek the parameter estimates $\hat{A}, \hat{E}_a, \hat{\beta}$ that maximize the modified log-likelihood function.
+
+\hspace*{8mm} To obtain the most suitable parameter estimates for the ALT data, we solve the following system of equations:
+\begin{align*}
+    \frac{\partial \ell}{\partial A} = 0, \quad \frac{\partial \ell}{\partial E_a} = 0, \quad \frac{\partial \ell}{\partial \beta} = 0.
+\end{align*}
+
+\hspace*{8mm} The parameters $\hat{A}$, $\hat{E}_a$, $\hat{\beta}$, obtained through the MLE method, ensure the accuracy of the ALT model and enable effective prediction of product lifespan under normal operating conditions.
+
+\hspace*{8mm} In previous studies, $c$-optimal design has been widely applied to minimize the variance of key parameter estimates by selecting optimal experimental conditions (e.g., temperature levels). Particularly in ALT, $c$-optimal design is frequently used to improve the estimation accuracy of activation energy $E_a $, ensuring the reliability of the lifespan model.
+
+For example:
+\begin{enumerate}
+
+\item \cite{lu2019bayesian} proposed a Bayesian sequential design approach based on dual objectives, integrating both D-optimality and $c$-optimality criteria. The former is utilized in the early phase of experimentation to rapidly improve the precision of model parameter estimation, while the latter is applied in later stages to minimize the variance of specific lifespan quantiles (e.g., the $p$-th percentile lifespan), ensuring robust and accurate lifespan prediction.
+
+\item \cite{abd2020optimal} investigated the application of $c$-optimal design in Multiple Accelerated Life Tests (Multiple ALT) and compared the efficiency of different optimality criteria (D-, $c$-, and A-optimality) through experimental design evaluation and sensitivity analysis.
+
+\item \cite{newer2024optimal} explored the use of $c$-optimal design in ALT, particularly under Progressive Type-I Censoring (PTIC) conditions. They compared multiple optimality criteria (D-, E-, T-, $c$-, R-, and P-optimality) and found that $c$-optimality effectively minimizes the variance in estimating specific lifespan distribution parameters, such as the scale parameter $\lambda_0$ in the Weibull distribution. Their results indicate that in Step-stress Accelerated Life Testing (SALT), $c$-optimal design enhances the estimation accuracy of critical lifespan distribution parameters, even under limited testing resources.
+
+\end{enumerate}
+
+\hspace*{8mm} Finally, in ALT research, model discrimination has often been overlooked. Although the Arrhenius model is widely used in temperature-accelerated testing, its applicability should be validated based on real-world data. While it assumes a specific exponential relationship between temperature and failure rate, whether this relationship accurately captures product behavior in a given application must be carefully examined. As such, experimental design should not only aim to estimate parameters efficiently but also evaluate whether the Arrhenius model remains appropriate, or if alternative models are needed.
+
+\hspace*{8mm} However, existing research has predominantly focused on improving parameter estimation accuracy, often through techniques such as $c$-optimal design to enhance the efficiency of parameter estimation. Comparatively, less attention has been given to how to effectively design experiments to distinguish between competing models, particularly when both models are based on the Arrhenius framework but differ in their structural formulations. This raises an important question: can an experimental design be structured so that future data can effectively discriminate between competing models? This approach, known as model discrimination design, aims to identify optimal experimental conditions that induce noticeable differences in model behavior within the observed data. By doing so, it enhances the accuracy of model selection, ensuring both the reliability and applicability of lifespan predictions.
+
+\section{Model Discrimination Design}
+
+\hspace*{8mm} In practical applications, whether in the technology industry, manufacturing, or other rapidly evolving fields, the pace of change often exhibits exponential growth. In this context, previously adopted models may gradually lose their applicability due to environmental changes, leading to a decline in predictive accuracy and, in some cases, reduced decision-making effectiveness. As a result, determining whether to continue using an existing model or transition to a new one that better reflects the current conditions becomes a critical issue. To make optimal decisions, model discrimination design can be employed to assess the applicability of different models. When adapting to new environmental challenges, decision-makers should not blindly discard old models or fully adopt new ones. Instead, a rigorous statistical approach should be used to objectively evaluate the suitability of various models, ensuring that the chosen model accurately represents the current context and enhances decision-making accuracy and reliability.
+
+\hspace*{8mm} \cite{atkinson1975design,atkinson1975optimal} proposed an experimental design method for distinguishing between two rival models, assuming that the models follow a Normal distribution. They introduced the T-optimal design, which is specifically aimed at optimizing model discrimination. Consider two Gaussian models with the same variance $\sigma^2$ but different mean response functions, denoted as $\eta_1(x, \theta_1)$ and $\eta_2(x, \theta_2)$, respectively. The objective is to compare these two models. In practice, the first model is often assumed to be known, as it may be based on expert opinions or prior experiences reflecting the current state of knowledge. Therefore, we assume the first model to be the true model, with known parameters $\theta_1 = \theta_{tr}$, such that $\eta_{tr}(x) = \eta_1(x, \theta_{tr})$. The second model, on the other hand, is a rival model, represented as $\eta_r(x, \theta_2) = \eta_2(x, \theta_2)$, where $\theta_2 \in \Theta_2$ is unknown.
+
+\hspace*{8mm} To conduct model discrimination in the absence of prior data, the T-optimal design criterion is employed, with its objective function defined as shown in Equation \eqref{eq:T-optimal-1}:
+\begin{equation}\label{eq:T-optimal-1}
+T_{2,tr}(\xi) = \min_{\substack{\theta_2 \in \Theta_2}} \int_{X} \Delta_{2,tr}(x, \theta_2) \xi(dx),
+\end{equation}
+
+where $\Delta_{2,tr}(x, \theta_2) = \left[\eta_{tr}(x) - \eta_r(x, \theta_2)\right]^2$, and $\xi$ is the experimental design distribution. Our goal is to select a design distribution $\xi$ such that the difference between the two models, after minimizing with respect to $\theta_2$, remains sufficiently large to clearly discriminate between the two models in subsequent data analysis.
+
+\hspace*{8mm} However, the T-optimal criterion focuses solely on minimizing the difference between the two models with respect to $\theta_2$. We aim to ensure that the selected design further amplifies the difference between the two models after data is collected. Thus, we propose a maximization-based design approach, which leads to the adjustment of the objective function, as described in the equation \eqref{eq:T-optimal-2}:
+\begin{equation}\label{eq:T-optimal-2}
+\max_{\xi \in \Xi} T_{2,tr}(\xi) = \max_{\xi \in \Xi} \min_{\substack{\theta_2 \in \Theta_2}} \int_{X} \Delta_{2,tr}(x, \theta_2) \xi(dx).
+\end{equation}
+
+\hspace*{8mm} The core idea of this approach is to select a design distribution $\xi$ such that, for every possible $\theta_2$, the minimum difference between the models is maximized across all designs. This ensures that regardless of how future data may influence the estimation of $\theta_2$, the actual difference between the models will always be greater than the minimum difference considered during the design phase. Therefore, this design approach not only addresses the current model discrimination problem but also enhances the efficiency of future experimental data, providing stronger support for model selection.
+
+\begin{theorem}
+To verify whether the selected design $\xi_T^\ast$ is optimal, we apply the Equivalence Theorem \citep{atkinson1975design,atkinson1975optimal} . As shown in Equation \eqref{eq:T-optimal-3}:
+\begin{equation}\label{eq:T-optimal-3}
+\psi_T(x, \xi_T^\ast) = \Delta_{2,tr}(x, \hat{\theta}_2(\xi_T^\ast)) - T_{2,tr}(\xi_T^\ast) \leq 0,
+\end{equation}
+
+where:
+\begin{itemize}
+\item The first term $\Delta_{2,tr}(x, \hat{\theta}_2(\xi_T^\ast))$ represents the minimum model difference across all possible $\theta_2 \in \Theta_2$ for each point $x$ in the design space $\mathcal{X}$.
+
+\item The second term $T_{2,tr}(\xi_T^\ast)$ represents the minimum model discrepancy calculated based on the selected design $\xi_T^\ast$, which is determined as the global optimal criterion through the max-min optimization process.
+
+\end{itemize}
+\end{theorem}
+
+\hspace*{8mm} If the inequality $\psi_T(x, \xi_T^\ast) \leq 0$ holds for all $x \in \mathcal{X}$, then $\xi_T^\ast$ can be confirmed as the T-optimal design. This indicates that, at any design point, the maximum local model difference does not exceed the globally minimized model difference, thereby ensuring the optimality of the design.
+
+\hspace*{8mm} However, the T-optimal design, proposed by \cite{atkinson1975design,atkinson1975optimal}, aims to achieve effective model discrimination by maximizing the sum of the squared differences between competing models. Nevertheless, this method has certain limitations in specific application scenarios. For instance, when models do not have homoscedastic or the error terms deviate from normality, merely considering the sum of squared differences may not sufficiently capture the disparity between models. In such cases, the overall shape of the distributions should be accounted for, which can be measured using the Kullback-Leibler (KL) divergence to quantify the information loss between models. \cite{lopez2007optimal} addressed these scenarios by proposing KL-optimal designs and conducted simulations under various conditions to identify effective designs for model discrimination.
+
+\section{Numerical Methods in Finding Model Discrimination Designs}
+
+\hspace*{8mm} In the process of optimization, \cite{atkinson1975design,atkinson1975optimal} adopted an incremental design approach similar to the exchange algorithm. However, when applied to continuous design spaces, this method typically starts by specifying a baseline design—such as randomly selecting three initial support points. It then iteratively explores candidate points from a discretized version of the design space (e.g., using intervals of 50 or 100 units), testing whether adding each point improves the design criterion. If improvement is observed, the candidate point is incorporated into the design. Over multiple iterations, this can lead to a final design with more support points than originally intended, often clustered in specific regions. For example, nearby points like 99, 100, and 101 may all carry small weights, creating the appearance of multiple points within a narrow stress region. Such characteristics reduce interpretability and make it difficult to control the number of support points.
+
+\hspace*{8mm} Moreover, building upon the findings and analyses of previous studies, both T-optimal and KL-optimal designs often involve computationally intensive optimization processes, posing significant challenges to efficiency. Adopting more efficient continuous optimization algorithms presents a promising direction. Over the past decade, research has shown that Particle Swarm Optimization (PSO) demonstrates significant advantages in addressing experimental design problems, effectively overcoming limitations that traditional theories or algorithms have struggled to resolve. Therefore, this study will employ PSO as a solution method to enhance computational efficiency and accuracy. Notably, \cite{chen2020hybrid} successfully applied PSO to model discrimination problems, inspiring this study to explore the potential of applying this approach to the Arrhenius model, one of the most commonly used models in the field of reliability.
+
+\hspace*{8mm} \cite{eberhart1995new} first introduced the PSO method, a heuristic optimization algorithm inspired by the collective behavior of bird flocks and fish schools in nature. In PSO, each bird or fish is treated as a particle, representing a candidate solution. By combining information from its own historical best solution (Local Best) and the swarm-wide best solution (Global Best), by continuously updating its velocity and position, eventually converging to the global optimal solution. Numerous studies have applied PSO to solve various types of optimal design problems. For example, \cite{chen2011optimal} explored A-optimal, D-optimal, and Minimax designs; \cite{lukemire2016using} applied PSO to search for D-optimal designs; and \cite{walsh2022fast} investigated G-optimal designs.
+
+\hspace*{8mm} The iterative process of PSO consists of two main steps. First, initializing the velocity and position of the particles, and then calculating the particle velocities using Equation \eqref{eq:PSO_1} and updating their positions with Equation \eqref{eq:PSO_2}. During this process, the motion of a particle is governed by three key components, as shown in the Figure \ref{fig:PSO velocity} :
+
+\begin{itemize}
+\item $\textcolor{PowerPointGreen}{(A)}$: The inertia term, which represents the particle's momentum and influences its current velocity by continuing its previous velocity.
+
+\item $\textcolor{blue}{(B)}$: The cognitive learning term, which guides the particle toward its personal best position ($\xi_L^{t}$, LBest), encouraging individual exploration.
+
+\item $\textcolor{red}{(C)}$: The social learning term, which directs the particle toward the global best position ($\xi_G^{t}$, GBest), leveraging the collective knowledge of the swarm to approach the global optimum.
+
+\end{itemize}
+
+The motion of particle $i$ at time $t$ and $t+1$ is controlled by the following equations:
+\begin{equation}\label{eq:PSO_1}
+v_i^{t+1} = \underbrace{\varphi_{t} v_i^{t}}_{\textcolor{PowerPointGreen}{\text{(A)}}} + \underbrace{\gamma_1 \beta_1 \otimes \left[ \xi_{L}^{t} - \xi_i^{t} \right]}_{\textcolor{blue}{\text{(B)}}} + \underbrace{\gamma_2 \beta_2 \otimes \left[ \xi_G^{t} - \xi_i^{t} \right]}_{\textcolor{red}{\text{(C)}}},
+\end{equation}
+and
+\begin{equation}\label{eq:PSO_2}
+\xi_i^{t+1} = \xi_i^{t} + v_i^{t+1}, \quad \text{for } i = 1, \dots, N.
+\end{equation}
+
+\hspace*{8mm} In Equation \eqref{eq:PSO_1}, $v_i^{t}$ and $v_i^{t+1}$ represent the velocity of particle $i$ at time $t$ and $t+1$, respectively. The parameter $\varphi_{t}$, known as the inertia weight, ranges between 0 and 1. It can either be a constant or a time-decreasing function. Typically, a larger inertia weight is used in the early stages of the algorithm to enhance global exploration and prevent premature convergence to local optima. In contrast, a smaller inertia weight is employed in the later stages to refine local searches, improve solution precision, and accelerate convergence. The learning factors $\gamma_1$ and $\gamma_2$ correspond to cognitive and social learning, respectively, and determine the weight of the particle's movement toward LBest and GBest. Both are typically constants. The random numbers $\beta_1$ and $\beta_2$, sampled from a uniform distribution $U(0,1)$, are introduced to add stochasticity to the search process, thereby enhancing the diversity of the particles exploration.
+
+\begin{figure}[H]
+    \centering{
+        \includegraphics[scale=0.3]{\imgdir PSO detail.png}}
+    \caption{PSO velocity components visualization}
+\label{fig:PSO velocity}
+\end{figure}
+
+PSO Algorithm Process:(Refer to Figure \ref{fig:PSO concept})
+
+\begin{enumerate}
+\item Initialization of particles:
+\begin{enumerate}[→]
+    \item Generate a swarm of $n$ particles.
+    \item Initialize the position $\xi_i$ and velocity $v_i$ of each particle, where $i = 1, \dots, n$.
+    \item Identify each particle's local best solution ($\xi_L^{t}$, LBest) and the global best solution of the swarm ($\xi_G^{t}$, GBest).
+\end{enumerate}
+
+\item Iterative process:
+\begin{enumerate}[→]
+    \item Calculate each particle's velocity using Equation \eqref{eq:PSO_1}.
+    \item Update each particle's position using Equation \eqref{eq:PSO_2}.
+    \item Evaluate the fitness value of each particle based on the optimization objective function, and update its LBest and the GBest.
+    \item Check if the stopping criteria are met (e.g., reaching the maximum number of iterations or convergence of the fitness value). If not, repeat the above steps.
+\end{enumerate}
+
+\item Output results:
+\begin{enumerate}[→]
+    \item Return the global best solution (GBest) as the final result.
+\end{enumerate}
+\end{enumerate}
+
+\begin{figure}[H]
+    \centering{
+        \includegraphics[scale=0.4]{\imgdir PSO concept.png}}
+    \caption{PSO concept diagram}
+\label{fig:PSO concept}
+\end{figure}
+
+\section{Existing Approach of Model Discrimination Design for ALT}
+
+\hspace*{8mm} In ALT research, the issue of model discrimination has been relatively underexplored, and \cite{nasir2015simulation} is one of the more representative studies in this area. This study addresses model discrimination in ALT by proposing an optimal experimental design strategy based on the Bayesian approach, focusing on how to distinguish between competing models through experimental design, particularly in scenarios where the relationship between lifespan and stress variables may be linear or nonlinear, and the model structure remains uncertain. They employ Hellinger distance to measure the differences between the predictive distributions of competing models and validate the effectiveness of their design through numerical simulations.
+
+\hspace*{8mm} To illustrate the concept of ALT, we refer to Figure \ref{fig:ALT concept}. Suppose we have two models, $M_1$ and $M_2$, and our objective is to predict the $p$-th quantile of product lifespan ($\tau_p$). However, when the actual product takes an extended period to fail under normal usage conditions, the best approach is to increase stress levels to accelerate failure and reduce testing time.   
+
+\hspace*{8mm} In the experiment, two stress levels are defined: low stress ($S_{Low}$) and high stress ($S_{High}$), and failure data distributions are obtained under these conditions. Using an extrapolation method, the failure distribution under actual usage stress ($S_{UC}$) is then estimated to predict product lifespan.
+
+\hspace*{8mm} In the figure, the x-axis represents stress, and the y-axis represents product lifespan, with both being log-transformed primarily because many lifespan models, such as the Arrhenius model, exhibit a nonlinear relationship. Taking the logarithm transforms this into a linear form, facilitating statistical inference. Additionally, under high-stress conditions, product lifespan tends to have high variability, often resulting in a skewed distribution. Log transformation helps normalize the data, making it more compatible with statistical models and improving estimation stability. Consequently, the same ALT procedure is applied to both $M_1$ and $M_2$ to examine their $p$-th quantile of lifespan ($\tau_p$) under different stress conditions. The log-transformed lifespan distribution shift ($\Delta\hat{\tau_p}$) across different stress levels provides a clearer view of model behavior, facilitating model discrimination. The following will sequentially describe the details of the simulation steps in this study.
+
+\begin{figure}
+    \centering{
+        \includegraphics[scale=0.6]{\imgdir ALT concept.png}}
+    \caption{Conceptual diagram of Accelerated Life Testing \citep{nasir2015simulation}
+}
+\label{fig:ALT concept}
+\end{figure}
+
+\hspace*{8mm} In this context, a reliability engineer is interested in studying the growth of Intermetallic Compounds (IMC) at the Au-Al interface in semiconductor assemblies. It is known that the failure mechanism is influenced by temperature stress, necessitating an Accelerated Life Testing to estimate the device's operational lifespan. The objective is to design an experimental plan capable of distinguishing between linear acceleration model $M_1$ and quadratic acceleration model $M_2$ under temperature stress, with parameters $\theta_1$ and $\theta_2$ , respectively. The experimental setup and testing conditions are as follows:
+
+\begin{itemize}
+\item Baking Chamber Duration: The maximum test time is 42 days, equivalent to 1008 hours.
+
+\item Two Types of Ovens Available:
+
+\begin{itemize}
+\item Low-Stress Oven: Temperature range from $60^\circ\text{C}$ to $115^\circ\text{C}$.
+\item High-Stress Oven: Temperature range from $100^\circ\text{C}$ to $250^\circ\text{C}$.
+\end{itemize}
+
+\item Experimental Cost Constraint: A maximum of 20 tests can be conducted.
+
+\end{itemize}
+
+\hspace*{8mm} This study is based on a real industrial example from their paper and provides a detailed simulation setup, which includes all the following aspects.
+
+\begin{enumerate}
+\renewcommand{\labelenumi}{\Roman{enumi}.}
+
+\item Model Adjustment and Definition of Models for Comparison:
+
+We begin by linearizing the Arrhenius model (Equation \eqref{Arrhenius model}) to define the model:
+\begin{align}
+&t(T)=Aexp\left( \frac{E_a}{K \times Temp} \right)\notag \\ 
+\Rightarrow&\log(t(T))=\log(A)+\frac{E_a}{K \times Temp}\notag \\ 
+\Rightarrow&\underbrace{\log(t(T))}_{\mu}=\underbrace{\log(A)}_{\beta_0}+\underbrace{\frac{E_a}{K}}_{\beta_1} \times \underbrace{\frac{1}{Temp}}_x. \label{M2 linearized}
+\end{align}
+
+Next, by standardizing the accelerating variable, Equation \eqref{M2 linearized} can be expanded as:
+\begin{align}
+\overbrace{\log(t(T))}^{\mu}&=\overbrace{(\beta_0+\beta_1 x_{low})}^{\gamma_0}+\overbrace{\left[\beta_1(x_{high}-x_{low})\right]}^{\gamma_1}\overbrace{\left( \frac{x-x_{low}}{x_{high}-x_{low}}\right)}^{\xi}. \label{M2 normalized}
+\end{align}
+
+Adding a quadratic term to capture potential nonlinear acceleration effects:
+\begin{equation} \label{M1 linearized}
+\mu =\beta_0+\beta_1x+\beta_2x^2.
+\end{equation}
+
+After standardizing the accelerating variable in Equation \eqref{M1 linearized}, it expands to:
+\begin{align}
+\overbrace{\log(t(T))}^{\mu}=&\overbrace{(\beta_0+\beta_1 x_{low})}^{\gamma_0}+\overbrace{\left[\beta_1(x_{high}-x_{low})\right]}^{\gamma_1}\overbrace{\left( \frac{x-x_{low}}{x_{high}-x_{low}}\right)}^{\xi} \notag \\
+&+\underbrace{\left[\beta_2 (x_{high}^2-x_{low}^2) \right]}_{\gamma_2}\underbrace{\left( \frac{x-x_{low}}{x_{high}-x_{low}}\right)^2}_{\xi^2}. \label{M1 normalized}
+\end{align}
+
+Based on the above derivation, Equation \eqref{M2 normalized} is embedded within Equation \eqref{M1 normalized}, meaning that $M_2$ is a special case of $M_1$. Thus, we define $M_1$ and $M_2$ as follows:
+\begin{align}
+M_1:\mu_1&=\gamma_0+\gamma_1 \xi +\gamma_2 \xi^2,   \label{Final M1 normalized} \\
+M_2:\mu_2&=\gamma_0+\gamma_1 \xi.   \label{Final M2 normalized}
+\end{align}
+
+Additionally, the reliability engineer believes that the Weibull distribution adequately describes the growth life and failure mechanism of Au-Al intermetallic compounds in semiconductor packaging. Therefore, it is assumed that the lifespan $T$ follows a Weibull distribution, $T\sim Weibull(\alpha,\beta)$, where $\alpha$ is the scale parameter and $\beta$ is the shape parameter. A logarithmic transformation is then applied, resulting in a Smallest Extreme Value (SEV) distribution,$\log(t)\sim SEV(\mu,\sigma)$, where $\sigma=\frac{1}{\beta}$ and $\mu=\log(\alpha)$.
+
+For both models, when handling Type I censored data, the survival probability beyond time $t_c$ is given by:
+\begin{equation} \notag
+Pr(t>t_c)=exp\left[-\left(\frac{t_c}{\alpha}\right)^\beta\right],t_c>0. 
+\end{equation}
+
+\item Distance Measure Between Probability Distributions: This study uses the Hellinger distance to measure the differences between $\Delta\hat{\tau_p}(S_{Low})$ and $\Delta\hat{\tau_p}(S_{High})$ as illustrated in Figure \ref{fig:ALT concept}. Suppose the lifespan data from two models are given by $Y_1=(y_{11}, y_{21}, \dots, y_{N1})$ and $Y_2=(y_{12}, y_{22}, \dots, y_{N2})$, each with $N$ observations. The Hellinger distance is defined as:
+\begin{equation} \notag
+D_H(Y_1,Y_2)=\frac{1}{\sqrt{2}}\sqrt{\sum_{i=1}^N(\sqrt{y_{i1}}-\sqrt{y_{i2}})^2}.
+\end{equation}
+
+\item Utility Function Definition: The utility function to be maximized considers the scenarios under both low and high-stress conditions, using data from both models $Y_1$ and $Y_2$:
+\begin{equation} \notag
+u_{2|1}=D_{S_{Low}}(\hat{\tau}_{p,(M_2|Y_1)},\hat{\tau}_{p,(M_1|Y_1)}) +D_{S_{High}}(\hat{\tau}_{p,(M_2|Y_1)},\hat{\tau}_{p,(M_1|Y_1)}),
+\end{equation}
+\begin{equation} \notag
+u_{1|2}=D_{S_{Low}}(\hat{\tau}_{p,(M_1|Y_2)},\hat{\tau}_{p,(M_2|Y_2)}) +D_{S_{High}}(\hat{\tau}_{p,(M_1|Y_2)},\hat{\tau}_{p,(M_2|Y_2)}).
+\end{equation}
+
+\item Expectation of the Utility Function: Since the actual data has not yet been observed during the experimental design stage, the study computes the expected utility by integrating over the data sampling distributions $p(y_1|\theta_1)$ and $p(y_2|\theta_2)$, along with the prior distributions of the parameters $\pi(\theta_1)$ and $\pi(\theta_2)$:
+\begin{equation} \notag
+E(u_{2|1})=\int\int u_{2|1}p(y_1|\theta_1)\pi(\theta_1)d_{y_1}d_{\theta_1},
+\end{equation}
+\begin{equation} \notag
+E(u_{2|1})=\int\int u_{2|1}p(y_1|\theta_1)\pi(\theta_1)d_{y_1}d_{\theta_1}.
+\end{equation}
+
+\item Model Weights and Final Utility Function: Since the true underlying model is unknown, prior probabilities $\tau(M_1)$ and $\tau(M_2)$ are assigned to each model. The overall utility function $U(\xi)$ is defined as:
+\begin{equation}
+U(\xi)=\tau(M_1)E(u_{2|1})+\tau(M_2)E(u_{1|2})
+\end{equation}
+
+Maximizing $U(\xi)$ ensures that the experimental design maximizes the distinguishability between the two competing models.
+
+\item Given Prior Distributions:
+
+\begin{itemize}
+
+\item Both models are initially considered equally likely, with $\tau(M_1) = \tau(M_2) = 0.5$.
+\item The activation energy is assumed to follow a uniform distribution, $E_a \sim U(1.0, 1.05)$, indicating equal probability across the range 1.0 to 1.05 $eV$.
+\item The intercept term is assumed to follow a normal distribution with mean 0 and a large variance, $\beta_0 \sim N(0, 1000^2)$, reflecting high uncertainty about its value.
+\item Similarly, the quadratic term in model $M_2$ is assumed to follow $\beta_2 \sim N(0, 1000^2)$, allowing for a wide range of potential values.
+\item The lifespan data are assumed to follow a Weibull distribution with the shape parameter $\beta$ drawn from a Gamma distribution, $\beta \sim Gamma(1,2)$.
+
+\end{itemize}
+
+\end{enumerate}
+
+\hspace*{8mm} They adopted a Bayesian simulation approach, where data were repeatedly sampled to estimate the shape of the empirical distribution and calculate the differences between various distributions. In this process, they utilized Gibbs sampling—a technique within the Markov Chain Monte Carlo (MCMC) framework—and employed WinBUGS software to compute $\hat{\tau}_p$ , while also simulating the maximization of the utility function to identify the optimal design $\xi^*$ .
+
+\hspace*{8mm} However, this method presents two major drawbacks. First, the computational process is highly time-consuming, especially when dealing with high-dimensional data or large sample sizes, which significantly increases computational costs. Second, due to the stochastic nature of the method, each simulation run may yield different results, leading to challenges in reproducing previous outcomes. This further limits the method's practical applicability.
+
+\hspace*{8mm} \cite{nasir2015simulation} explored the application of model discrimination design in reliability testing. However, as outlined above, their approach still leaves considerable room for improvement. Therefore, this study will build upon the gaps identified in their work to conduct further in-depth investigations.

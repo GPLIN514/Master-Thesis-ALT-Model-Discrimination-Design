@@ -1,0 +1,1635 @@
+\chapter{Numerical Studies\label{CH: simulation}}
+
+%\section{Validation of Method Stability through Literature Case Studies}
+\section{The Comparison of Integration Methods via non-Censored Example} \label{SEC:Fidalgo}
+
+\hspace*{8mm} Before proceeding to the main objectives of this study, we begin by validating the stability of our numerical integration approach through a benchmark example with a known closed-form expression of the objective function. Specifically, we reproduce the KL-optimal design example proposed by \cite{lopez2007optimal}, in which the authors derived an explicit analytical expression to guide model discrimination. By applying our numerical integration framework under the same conditions, we aim to confirm whether our method can recover consistent results. This verification serves as a foundational check to ensure computational reliability for subsequent simulation studies. The following introduces the experimental background and model specifications of that example.
+
+\hspace*{8mm} In practical applications, the errors in pharmacokinetic models are often assumed to follow a Log-Normal distribution. The study considers two competing models: the classical Michaelis–Menten (MM) model and a Modified Michaelis–Menten (MMM) model, which has been adjusted for specific application scenarios. Their definitions are given as follows:
+\begin{align} \notag
+\begin{cases}
+\textsc{MMM：}y=\frac{Vx}{K+x}+Fx+\epsilon \\
+\textsc{MM：}\ \ \ y=\frac{Vx}{K+x}+\epsilon \end{cases},x \in X=[aK,bK].
+\end{align}
+
+where: 
+\begin{itemize}
+\item $x$ represents the substrate concentration, such as drug concentration in plasma or drug dosage.
+
+\item $y$ represents the rate of product formation in the chemical reaction.
+
+\item $V$ denotes the maximum reaction rate.
+
+\item $K$ represents the Michaelis constant (Km), which is the value of $x$ when the reaction rate reaches half of the maximum rate.
+
+\item $\epsilon$ is the error term, which is assumed to follow a Log-Normal distribution in this context.
+
+\end{itemize}
+
+\hspace*{8mm} \cite{lopez2002design} suggested setting $b=5$, and under this condition, $a=0.1$ is typically considered the minimum concentration value. Since the original study used a closed-form expression of the objective function to compute the KL divergence, we first conduct a mathematical derivation using the most fundamental notation to establish a general formula, ensuring that key steps are clearly understood. Then, to better align with the application context of this study, we adapt the formula to the model discrimination framework. For instance, $\sigma_1$ is further specified as $\sigma_1(x,\theta_1)$. This approach maintains the readability of the mathematical derivation while making its subsequent application more intuitive.
+
+\hspace*{8mm} Suppose we have two random variables, $P$ and $Q$, which follow Log-Normal distributions with means $\mu_1$ and $\mu_2$ and standard deviations $\sigma_1$ and $\sigma_2$, respectively. Their probability density functions (PDF) are given as:
+\begin{equation} \notag
+p(y) = \frac{1}{y \sigma_1 \sqrt{2\pi}} e^{-\frac{(\log y - \mu_1)^2}{2\sigma_1^2}},
+\end{equation}
+\begin{equation} \notag
+q(y) = \frac{1}{y \sigma_2 \sqrt{2\pi}} e^{-\frac{(\log y - \mu_2)^2}{2\sigma_2^2}}.
+\end{equation}
+
+The Kullback–Leibler (KL) divergence can be written as:
+\begin{align}
+&D_{KL}(P\parallel Q)=\int_{-\infty}^{\infty}p(y)\log\left(\frac{p(y)}{q(y)}\right)dy \notag\\
+&=\int_{0}^{\infty}\frac{1}{y \sigma_1 \sqrt{2\pi}} e^{-\frac{(\log y - \mu_1)^2}{2\sigma_1^2}}\log\left(\frac{\frac{1}{y \sigma_1 \sqrt{2\pi}} e^{-\frac{(\log y - \mu_1)^2}{2\sigma_1^2}}}{\frac{1}{y \sigma_2 \sqrt{2\pi}} e^{-\frac{(\log y - \mu_2)^2}{2\sigma_2^2}}}\right)dy \label{eq:lognormal-KLdivergence} \\
+&=\int_{0}^{\infty}\frac{1}{y \sigma_1 \sqrt{2\pi}} e^{-\frac{(\log y - \mu_1)^2}{2\sigma_1^2}}\left(\log\left(\frac{\sigma_2}{\sigma_1}\right)+\frac{(\log y - \mu_2)^2}{2\sigma_2^2}-\frac{(\log y - \mu_1)^2}{2\sigma_1^2}\right)dy \notag \\
+&=\log\left(\frac{\sigma_2}{\sigma_1}\right)\underbrace{\textcolor{red}{\int_{0}^{\infty}\frac{1}{y \sigma_1 \sqrt{2\pi}} e^{-\frac{(\log y - \mu_1)^2}{2\sigma_1^2}}dy}}_{\textcolor{red}{1}}+\frac{1}{2\sigma_2^2}\underbrace{\textcolor{PowerPointGreen}{\int_{0}^{\infty}\frac{1}{y \sigma_1 \sqrt{2\pi}} e^{-\frac{(\log y - \mu_1)^2}{2\sigma_1^2}}\left(\log y - \mu_2\right)^2dy}}_{\textcolor{PowerPointGreen}{\sigma_1^2+\left(\mu_1-\mu_2\right)^2}} \notag\\
+&-\frac{1}{2\sigma_1^2}\underbrace{\textcolor{blue}{\int_{0}^{\infty}\frac{1}{y \sigma_1 \sqrt{2\pi}} e^{-\frac{(\log y - \mu_1)^2}{2\sigma_1^2}}\left(\log y - \mu_1\right)^2dy}}_{\textcolor{blue}{\sigma_1^2}} \notag\\ 
+&=\log \left(\frac{\sigma_2}{\sigma_1}\right)+\frac{\sigma_1^2+\left(\mu_1-\mu_2\right)^2}{2\sigma_2^2}-\frac{1}{2} \notag\\
+&=\log \left(\frac{\sigma_2}{\sigma_1}\right)+\frac{\sigma_1^2-\sigma_2^2+\left(\mu_1-\mu_2\right)^2}{2\sigma_2^2} \notag\\
+&=\log \left(\frac{\sigma_2}{\sigma_1}\right)-\frac{\sigma_2^2-\sigma_1^2+\left(\mu_2-\mu_1\right)^2}{2\sigma_2^2}. \notag
+\end{align}
+
+For the first term of the integral evaluates to:
+\begin{equation}\notag
+\int_{0}^{\infty}\frac{1}{y \sigma_1 \sqrt{2\pi}} e^{-\frac{(\log y - \mu_1)^2}{2\sigma_1^2}}dy=1,
+\end{equation}
+
+which follows from the fact that the probability density function of a Log-Normal distribution integrates to 1. 
+
+For the second term of the integral evaluates to:
+\begin{equation}\notag
+\begin{aligned}
+&\int_{0}^{\infty}\frac{1}{y \sigma_1 \sqrt{2\pi}} e^{-\frac{(\log y - \mu_1)^2}{2\sigma_1^2}}\left(\log y - \mu_2\right)^2dy\\
+&=E\left[\left(\log y - \mu_2\right)^2\right]\\
+&=E\left[\left(\log y -\mu_1 + \mu_1 - \mu_2\right)^2\right]\\
+&=E\left(\log y - \mu_1\right)^2+2E\left[\left(\log y -\mu_1 \right)\left( \mu_1 - \mu_2\right)\right]+E\left[\left(\mu_1 - \mu_2\right)^2\right]\\
+&=\sigma_1^2+2\left(\mu_1-\mu_2\right)E\left(\log y -\mu_1 \right)+\left(\mu_1 - \mu_2\right)^2\\
+&=\sigma_1^2+2\left(\mu_1-\mu_2\right)\underbrace{\left[E\left(\log y\right) -\mu_1\right]}_{=\mu_1-\mu_1=0} +\left(\mu_1 - \mu_2\right)^2\\
+&=\sigma_1^2+\left(\mu_1 - \mu_2\right)^2.
+\end{aligned}
+\end{equation}
+
+\hspace*{8mm} Finally, we apply the derived results to the original model discrimination setting, comparing the discriminative ability of two competing models, MMM and MM, at different design points $x$. Let $\eta_j(x,\theta_j)$ and $v^2_j(x,\theta_j)$ be the means and variances of the two competing Log-Normal models, and let $\mu_j(x,\theta_j)$ and $\sigma^2_j(x,\theta_j)$ be the mean and variance of the Normal distributions of the logarithm of the observations, where $j=1,2$. These quantities are defined as:
+\begin{align}
+E(y)&=\eta_j(x,\theta_j)=exp{\left\{\frac{\sigma^2_j(x,\theta_j)}{2}+\mu_j(x,\theta_j)\right\}},  \notag\\
+Var(y)&=v^2_j(x,\theta_j)=\eta^2_j(x,\theta_j)\left[ exp\lbrace \sigma^2_j(x,\theta_j) \rbrace -1 \right]. \notag
+\end{align}
+
+Thus, we can further express $\mu_j(x,\theta_j)$ and $\sigma^2_j(x,\theta_j)$ as:
+\begin{align}
+\mu_j(x,\theta_j)&=\log \left[ \frac{\eta_j(x,\theta_j)}{\left\{ 1+v^2_j(x,\theta_j)\eta_j(x,\theta_j)^{-2} \right\}^{1/2}}\right],  \notag\\
+\sigma^2_j(x,\theta_j)&=\log \left\{ 1+v^2_j(x,\theta_j)\eta_j(x,\theta_j)^{-2}\right\}. \notag
+\end{align}
+
+Following the previous derivation, the KL divergence can be expressed as:
+{\small
+\begin{align*}
+D_{KL}(M_1,M_2,x,\theta_1,\theta_2)=\log \left(\frac{\sigma_2(x,\theta_2)}{\sigma_1(x,\theta_1)}\right)-\frac{\sigma_2^2(x,\theta_2)-\sigma_1^2(x,\theta_1)+\left(\mu_2(x,\theta_2)-\mu_1(x,\theta_1)\right)^2}{2\sigma_2(x,\theta_2)^2}.
+\end{align*}
+}
+
+\hspace*{8mm} Since the MM model is a nested version of the MMM model, in this study, the true model is assumed to be the MMM model with known parameters. For example, let $\theta_1=(V_1,K_1,F_1)=(1,1,1)$, and assume that both models share the same variance, i.e., $v^2_1(x)=v^2_2(x,\theta_2)=1$. However, the literature does not specify the range of $\theta_2$, so we set $\theta_2=(V_2,K_2) \in [0.1,100] \times [0.1,100]$. In this setting, the KL-optimal design is constructed under the constraint of using three support points, which defines the number of design locations to be allocated. Using the closed-form expression of the objective function derived earlier for computation, the resulting KL-optimal design is:
+\begin{align*}
+\xi^*_{KL-c} = \left\{\begin{array}{ccc}
+0.1 & 2.5 & 5 \\
+0.538 & 0.329 & 0.133
+\end{array}\right\}.
+\end{align*}
+
+\hspace*{8mm} The corresponding criterion value is 0.0149, with the parameter combination that minimizes the divergence criterion is identified as $\hat{\theta}_2(\xi^*_{KL-c})=(18.200,11.053)$. Additionally, the equivalence theorem is applied to verify whether this design is indeed optimal (Figure \ref{fig:ex.lognormal.closeform}), and the results confirm that it satisfies the optimality conditions, closely matching those reported in the literature. The specific settings for PSO-QN are as follows: PSO is run with 64 particles over 200 iterations, while L-BFGS is executed for 2 iterations. The total computation time is 39 seconds.
+
+\hspace*{8mm} From the above example, it is evident that deriving a closed-form expression of the objective function for the KL-optimal design is highly complex, and in many cases, obtaining a closed-form solution may not be feasible, leading to several limitations. Therefore, we aim to perform numerical integration directly for computation. We apply the integration method described in Section \ref{SEC: Numerical Integration} to directly evaluate the KL objective function given in Equation \eqref{eq:lognormal-KLdivergence}. The advantage of this approach is its ability to accommodate various model assumptions and distributions without being restricted by closed-form derivations. However, its main drawback is that numerical integration requires significantly longer computation time compared to closed-form solutions. To address this, the following presents results obtained using numerical integration under the same scenario. The resulting KL-optimal design is:
+\begin{align*}
+\xi^*_{KL-n} = \left\{\begin{array}{ccc}
+0.1 & 2.5 & 5 \\
+0.538 & 0.329 & 0.133
+\end{array}\right\}.
+\end{align*}
+
+\hspace*{8mm} The corresponding criterion value is 0.0149, with the parameter combination that minimizes the divergence criterion is identified as $\hat{\theta}_2(\xi^*_{KL-n})=(18.200,11.053)$. Additionally, the equivalence theorem is applied to verify whether this design is indeed optimal (Figure \ref{fig:ex.lognormal.integral}). The results confirm that it satisfies the optimality conditions and the outcome closely aligns with the results obtained from the closed-form objective function. This demonstrates the feasibility and reliability of the numerical integration method adopted in this study. The specific settings for PSO-QN are as follows: PSO is run with 64 particles over 200 iterations, while L-BFGS is executed for 2 iterations. The total computation time is 5165 seconds.
+
+\begin{figure}[H]
+\centering
+\subfloat[Closed-Form ($\xi^*_{KL-c}$)\label{fig:ex.lognormal.closeform}]{\includegraphics[width=0.425\linewidth]{\imgdir ex-lognormal-closeform.png}}
+\subfloat[Numerical Integration ($\xi^*_{KL-n}$)\label{fig:ex.lognormal.integral}]{\includegraphics[width=0.425\linewidth]{\imgdir ex-lognormal-integral.png}} \\
+\caption{The directional derivative plots of the resulting designs discriminating for the MMM vs. MM case assuming Log-Normal response.}
+\label{fig:Fidalgo-lognormal}
+\end{figure}
+
+\hspace*{8mm} \cite{lopez2007optimal} explored the computation of KL-optimal design using the Log-Normal distribution and applied a closed-form solution for optimization. Their study primarily focused on pharmacokinetic models, where the error structure is well-suited for modeling with a Log-Normal distribution. However, in reliability testing, the Weibull distribution is widely used for modeling product lifespans, particularly in failure-time modeling within ALT. To extend the model discrimination design to the reliability domain, this study further investigates KL-optimal design under the same context but with a Weibull-distributed error structure. Following the same approach, we first derive a general KL divergence formula using fundamental mathematical notation and attempt to find the optimal design using its closed-form objective function.  
+
+\hspace*{8mm} Suppose that we have two random variables $P$ and $Q$, which follow Weibull distributions with shape parameters $k_1$ and $k_2$ , and scale parameters $\lambda_1$ and $\lambda_2$ , respectively. Their probability density functions (PDF) are given by:
+\begin{equation} \notag
+p(y) = \frac{k_1}{\lambda_1} \left(\frac{y}{\lambda_1}\right)^{k_1-1} e^{-(\frac{y}{\lambda_1})^{k_1}}, 
+\end{equation}
+
+\begin{equation} \notag
+q(y) = \frac{k_2}{\lambda_2} \left(\frac{y}{\lambda_2}\right)^{k_2-1} e^{-(\frac{y}{\lambda_2})^{k_2}}. 
+\end{equation}
+
+\hspace*{8mm} For the following integral calculations, $\gamma$ represents the Euler-Mascheroni constant, and we define the transformation:
+\begin{align*}
+u=\left(\frac{y}{\lambda_1}\right)^{k_1}\Rightarrow y=\lambda_1u^{\frac{1}{k_1}}\Rightarrow du=\frac{k_1}{\lambda_1} \left(\frac{y}{\lambda_1}\right)^{k_1-1}dy.
+\end{align*}
+
+Then, the Kullback–Leibler (KL) divergence can be expressed as:
+{\small
+\begin{align*}
+&D_{KL}(P\parallel Q)=\int_{-\infty}^{\infty}p(y)\log\left(\frac{p(y)}{q(y)}\right)dy\\
+&=\int_{0}^{\infty}\frac{k_1}{\lambda_1} \left(\frac{y}{\lambda_1}\right)^{k_1-1} e^{-(\frac{y}{\lambda_1})^{k_1}} \log\left(\frac{\frac{k_1}{\lambda_1} \left(\frac{y}{\lambda_1}\right)^{k_1-1} e^{-(\frac{y}{\lambda_1})^{k_1}}}{\frac{k_2}{\lambda_2} \left(\frac{y}{\lambda_2}\right)^{k_2-1} e^{-(\frac{y}{\lambda_2})^{k_2}}}\right)dy\\
+&=\log\left(\frac{k_1}{k_2}\right)\underbrace{\textcolor{red}{\int_{0}^{\infty}\frac{k_1}{\lambda_1} \left(\frac{y}{\lambda_1}\right)^{k_1-1} e^{-(\frac{y}{\lambda_1})^{k_1}}dy}}_{\textcolor{red}{1}}+\log\left(\frac{\lambda_2}{\lambda_1}\right)\underbrace{\textcolor{red}{\int_{0}^{\infty}\frac{k_1}{\lambda_1} \left(\frac{y}{\lambda_1}\right)^{k_1-1} e^{-(\frac{y}{\lambda_1})^{k_1}}dy}}_{\textcolor{red}{1}}\\
+&+(k_1-1)\underbrace{\textcolor{PowerPointGreen}{\int_{0}^{\infty}\frac{k_1}{\lambda_1} \left(\frac{y}{\lambda_1}\right)^{k_1-1} e^{-(\frac{y}{\lambda_1})^{k_1}}\log\left(\frac{y}{\lambda_1}\right) dy}}_{\textcolor{PowerPointGreen}{-\frac{\gamma}{k_1}}}-\underbrace{\textcolor{blue}{\int_{0}^{\infty}\frac{k_1}{\lambda_1} \left(\frac{y}{\lambda_1}\right)^{k_1-1} e^{-(\frac{y}{\lambda_1})^{k_1}}\left(\frac{y}{\lambda_1}\right)^{k_1} dy}}_{\textcolor{blue}{1}}\\
+&-(k_2-1)\underbrace{\textcolor{PowerPointGreen}{\int_{0}^{\infty}\frac{k_1}{\lambda_1} \left(\frac{y}{\lambda_1}\right)^{k_1-1} e^{-(\frac{y}{\lambda_1})^{k_1}}\log\left(\frac{y}{\lambda_2}\right) dy}}_{\textcolor{PowerPointGreen}{\log\left(\frac{\lambda_1}{\lambda_2}\right)-\frac{\gamma}{k_1}}}+\underbrace{\textcolor{blue}{\int_{0}^{\infty}\frac{k_1}{\lambda_1} \left(\frac{y}{\lambda_1}\right)^{k_1-1} e^{-(\frac{y}{\lambda_1})^{k_1}}\left(\frac{y}{\lambda_2}\right)^{k_2} dy}}_{\textcolor{blue}{\left(\frac{\lambda_1}{\lambda_2}\right)^{k_2}\Gamma\left(\frac{k_2}{k_1}+1\right)}}\\
+&=\log\left(\frac{k_1}{k_2}\right)+\log\left(\frac{\lambda_2}{\lambda_1}\right)-\frac{k_1-1}{k_1}\gamma-1-(k_2-1)\log\left(\frac{\lambda_1}{\lambda_2}\right)+\frac{k_2-1}{k_1}\gamma+\left(\frac{\lambda_1}{\lambda_2}\right)^{k_2}\Gamma\left(\frac{k_2}{k_1}+1\right).
+\end{align*}
+}
+
+For the first and second terms of the integral evaluates to:
+\begin{equation}\notag
+\int_{0}^{\infty}\frac{k_1}{\lambda_1} \left(\frac{y}{\lambda_1}\right)^{k_1-1} e^{-(\frac{y}{\lambda_1})^{k_1}}dy=1,
+\end{equation}
+
+which follows from the fact that the probability density function of a Weibull distribution integrates to 1. 
+
+For the third term of the integral evaluates to:
+\begin{align*}
+&\int_{0}^{\infty}\textcolor{red}{\frac{k_1}{\lambda_1} \left(\frac{y}{\lambda_1}\right)^{k_1-1}} e^{-\textcolor{blue}{(\frac{y}{\lambda_1})^{k_1}}}\log\left(\textcolor{PowerPointGreen}{\frac{y}{\lambda_1}}\right) \textcolor{red}{dy}\\
+=&\int_{0}^{\infty}e^{-\textcolor{blue}{u}}\log\left(\textcolor{PowerPointGreen}{u^{\frac{1}{k_1}}}\right)\textcolor{red}{du}\\
+=&\frac{1}{k_1}\int_{0}^{\infty}e^{-u}\log (u)du\\
+=&\frac{1}{k_1}\textcolor{red}{-\gamma}.
+\end{align*}
+
+For the fourth term of the integral evaluates to:
+\begin{align*}
+&\int_{0}^{\infty}\textcolor{red}{\frac{k_1}{\lambda_1} \left(\frac{y}{\lambda_1}\right)^{k_1-1}} e^{-\textcolor{blue}{(\frac{y}{\lambda_1})^{k_1}}}\textcolor{blue}{\left(\frac{y}{\lambda_1}\right)^{k_2}} \textcolor{red}{dy}\\
+=&\int_{0}^{\infty}\textcolor{blue}{u}e^{-\textcolor{blue}{u}}\textcolor{red}{du}\\
+=&\int_{0}^{\infty}u^{\textcolor{red}{2}-1}e^{-u}du\\
+=&\Gamma(2)\\
+=&1.
+\end{align*}
+
+For the fifth term of the integral evaluates to:
+\begin{align*}
+&\int_{0}^{\infty}\textcolor{red}{\frac{k_1}{\lambda_1} \left(\frac{y}{\lambda_1}\right)^{k_1-1}} e^{-\textcolor{blue}{(\frac{y}{\lambda_1})^{k_1}}}\log\left(\frac{\textcolor{PowerPointGreen}{y}}{\lambda_2}\right) dy\\
+=&\int_{0}^{\infty}e^{-\textcolor{blue}{u}}\log \left(\frac{\textcolor{PowerPointGreen}{\lambda_1u^{\frac{1}{k_1}}}}{\lambda_2}\right)\textcolor{red}{du}\\
+=&\int_{0}^{\infty}e^{-u}\log \lambda_1du+\int_{0}^{\infty}e^{-u}\log \left(u^{\frac{1}{k_1}}\right)du-\int_{0}^{\infty}e^{-u}\log \lambda_2du\\
+=&\log \lambda_1\left(-e^{-u}\mid^\infty_0\right)+\frac{1}{k_1}\int_{0}^{\infty}e^{-u}\log u du-\log \lambda_2\left(-e^{-u}\mid^\infty_0\right)\\
+=&\log \lambda_1+\frac{1}{k_1}\textcolor{red}{-\gamma}-\log \lambda_2\\
+=&\log\left(\frac{\lambda_1}{\lambda_2}\right)-\frac{\gamma}{k_1}.
+\end{align*}
+
+For the sixth term of the integral evaluates to:
+\begin{align*}
+&\int_{0}^{\infty}\textcolor{red}{\frac{k_1}{\lambda_1} \left(\frac{y}{\lambda_1}\right)^{k_1-1}} e^{-\textcolor{blue}{(\frac{y}{\lambda_1})^{k_1}}}\left(\frac{\textcolor{PowerPointGreen}{y}}{\lambda_2}\right)^{k_2} \textcolor{red}{dy}\\
+=&\int_{0}^{\infty}e^{-\textcolor{blue}{u}}\left(\frac{\textcolor{PowerPointGreen}{\lambda_1u^{\frac{1}{k_1}}}}{\lambda_2}\right)^{k_2} \textcolor{red}{du}\\
+=&\left(\frac{\lambda_1}{\lambda_2}\right)^{k_2}\int_{0}^{\infty}u^{\textcolor{red}{\frac{k_2}{k_1}+1}-1}e^{-u} du\\
+=&\left(\frac{\lambda_1}{\lambda_2}\right)^{k_2}\Gamma\left(\frac{k_2}{k_1}+1\right).
+\end{align*}
+
+Suppose $\eta_j(x,\theta_j)$ represents the mean of two competing Weibull distribution models, where $j=1,2$. It is defined as follows:
+\begin{align}
+E(y)&=\eta_j(x,\theta_j),\notag \\
+Var(y)&=v^2_j(x,\theta_j).\notag
+\end{align}
+
+\hspace*{8mm} Let $\theta_1=(V_1,K_1,F_1)=(1,1,1)$,  and assume that both models share the same variance, i.e., $v^2_1(x)=v^2_2(x,\theta_2)=1$. Additionally, we assume that $\theta_2=(V_2,K_2) \in [0.1,100] \times [0.1,100]$. We adopt a reparameterized form of the Weibull distribution, where the scale parameter is defined as $\lambda=exp(\mu)$, and the shape parameter is specified as $k=1/\sigma$, such that $\mu$ and $\sigma$ approximately represent the log-mean and log-dispersion, respectively. This parameterization improves interpretability and numerical stability, and is conceptually related to the log-Weibull structure frequently used in extreme value theory \citep{coles2001introduction}. In this setting, we restrict the optimal design to consist of three support points, which defines the number of experimental conditions to be allocated. Using the previously derived closed-form objective function for computation, the resulting KL-optimal design is:
+\begin{align*}
+\xi^*_{KL-c} = \left\{\begin{array}{ccc}
+0.504 & 2.989 & 5 \\
+0.570 & 0.310 & 0.120
+\end{array}\right\}.
+\end{align*}
+
+\hspace*{8mm} The corresponding criterion value is 0.00392, with the parameter combination that minimizes the divergence criterion is identified as $\hat{\theta}_2(\xi^*_{KL-c})=(22.502,14.580)$. Furthermore, the equivalence theorem was applied to verify whether this design is indeed optimal (Figure \ref{fig:ex.weibull.closeform}). The results confirm that it satisfies the optimality conditions. The specific settings for PSO-QN are as follows: PSO was run with 64 particles over 200 iterations, while L-BFGS was executed for 5 iterations. The total computation time was 40 seconds.
+
+\hspace*{8mm} Compared to the first example, deriving a closed-form solution in this case is even more complex. To address this, we also provide results obtained via numerical integration under the same scenario and compare them with the closed-form expression of the objective function.
+
+The resulting KL-optimal design is:
+\begin{align*}
+\xi^*_{KL-n} = \left\{\begin{array}{ccc}
+0.507 & 2.991 & 5 \\
+0.570 & 0.310 & 0.120
+\end{array}\right\}.
+\end{align*}
+
+\hspace*{8mm} The corresponding criterion value is 0.00389, with the parameter combination that minimizes the divergence criterion is identified as $\hat{\theta}_2(\xi^*_{KL-n})=(22.548, 14.622)$. Additionally, the equivalence theorem was applied to verify whether this design is optimal (Figure \ref{fig:ex.weibull.integral}). The results confirm that it meets the optimality conditions and closely matches the results obtained using the closed-form objective function, further demonstrating the feasibility of our proposed approach. The specific settings for PSO-QN are as follows: PSO was run with 64 particles over 200 iterations, while L-BFGS was executed for 5 iterations. The total computation time was 102768 seconds.
+
+\begin{figure}[H]
+\centering
+\subfloat[Closed-Form ($\xi^*_{KL-c}$) \label{fig:ex.weibull.closeform}]{\includegraphics[width=0.45\linewidth]{\imgdir ex-weibull-closeform.png}}
+\subfloat[Numerical Integration ($\xi^*_{KL-n}$)\label{fig:ex.weibull.integral}]{\includegraphics[width=0.45\linewidth]{\imgdir ex-weibull-integral.png}} \\
+\caption{The directional derivative plots of the resulting designs discriminating for the MMM vs. MM case assuming Weibull response.}
+\label{fig:Fidalgo-weibull}
+\end{figure}
+
+\hspace*{8mm} Through the two preceding examples, we have demonstrated the feasibility of using numerical integration in place of closed-form solutions for computing model discrimination criteria. By comparing the outcomes of our numerical approach with those derived from the closed-form expressions in the literature, we found that both methods yield highly consistent design points and criterion values. Additionally, since our computational approach may differ in certain details from the original authors, we conducted verification tests to ensure that our implementation could reliably reproduce published results. The experimental results confirm that our approach successfully replicates the KL-optimal design presented in the literature while exhibiting strong stability and applicability under different distributional assumptions. This suggests that our method is robust enough to handle a wide range of model discrimination problems and is suitable for most practical scenarios.
+
+\hspace*{8mm} Having established the feasibility and stability of our approach, we now proceed to the core focus of this study: applying model discrimination design in Accelerated Life Testing (ALT) and optimizing experimental designs using different divergence measures.
+
+%\section{Optimal Design for Competing Model Discrimination Using the PSO-QN Algorithm under Known Variance} 
+\section{Type I Censoring Model Discrimination Designs with Fixed Variance for Rival Model}\label{SEC:DeviceA-fixed variance}
+
+\hspace*{8mm} Building upon the results validated in the previous section, we confirm the robustness and feasibility of the proposed method. In this section, we shift our focus to the core objective of this study: using the commonly adopted Arrhenius model in the field of reliability, together with Type I censored data- a typical feature in ALT, where the product has not failed at the end of the experiment- to compare the performance of four proposed optimal design strategies for discriminating between two competing models. The two competing models considered in this section are defined as follows:
+
+\begin{itemize}
+\item The true model $M_1$ is a quadratic form:
+\begin{equation}\label{DeviceA_truemodel}
+\eta_{tr}(x,\theta_1)=\zeta_1+\zeta_2x+\zeta_3x^2.
+\end{equation}
+
+\item The rival model $M_2$ is a linear form: 
+\begin{equation}\label{DeviceA_rivalmodel}
+\eta_{2}(x,\theta_2)=\delta_1+\delta_2x.
+\end{equation}
+
+\end{itemize}
+
+\hspace*{8mm} Here, $\eta(x,\theta)$ represents the mean response function of the model, specifically the expected value of the transformed response variable $\log(t)$. This transformation follows from the Arrhenius model, where the original exponential relationship between lifespan $t$ and temperature is linearized by taking the logarithm of $t$ (see Equation \ref{M2 linearized}). The error term $\epsilon$ is assumed to follow a log-location-scale distribution. Since the two models are nested, the true model is assumed to be $M_1$, with the parameter vector $\theta$ corresponding to $(\zeta_1, \zeta_2, \zeta_3)$ for $M_1$ and $(\delta_1, \delta_2)$ for $M_2$.
+
+\hspace*{8mm} To transform temperature into an accelerating variable suitable for modeling, we adopt the following link function based on the Arrhenius relationship:
+\begin{equation}\label{link_function}
+x = \frac{11605}{\text{Temp}_C + 273.15},
+\end{equation}
+
+where $\text{Temp}_C$ is temperature in degrees Celsius. This transformation reflects the physical principle that higher temperatures accelerate the failure process and reduce product lifespan.
+
+\hspace*{8mm} Based on this foundation, we assume that the product lifespan $t$ follows a Log-Normal distribution. Using maximum likelihood estimation and external real-world data (with a censoring time of 5000), the estimated standard deviation is obtained as $\hat{\sigma} = 0.9780103$. Therefore, the following simulation scenarios will be based on this estimated parameter. The true model parameters are set as $\theta_{tr} = (\zeta_1, \zeta_2, \zeta_3) = (-5.0, -1.5, 0.05)$. The parameter space of the rival model is defined as $\theta_2 = (\delta_1, \delta_2) \in [-100, -10] \times [0.1, 5.0]$. The design space is set to $x \in [10, 80]$.
+
+\hspace*{8mm} In the following simulations, the standard deviation parameter is based on the maximum likelihood estimate $\hat{\sigma} = 0.9780103$ , with extended scenarios explored for comparative analysis. For simplicity of presentation, the values are referred to using their leading digits (e.g., 0.98, 1.48, 1.98), while the actual values used in computation retain full precision (e.g., 0.9780103, 1.4780103, 1.9780103). The specific settings for PSO-QN are as follows: PSO was run with 64 particles over 200 iterations, while L-BFGS was executed for 50 iterations.
+
+\hspace*{8mm} In the following table \ref{tab:CKL-results-DeviceA-sameV} through \ref{tab:Cchi2-results-DeviceA-DiffV}, the column Dis. denotes the assumed model distribution type, including Log-Normal (LN) and Weibull (WB). Under four different divergence measures criteria, this study identifies the optimal experimental design for model discrimination, the parameter combination that minimizes the divergence criterion is identified as $\hat{\theta}$, and calculates the criterion value $C^*$ to evaluate design performance. To assess the stability of the optimization process, the obtained design and the parameter combination are fed back into the algorithm to recompute the criterion value $\hat{C}$ for consistency verification. The column Time records the CPU computation time for each scenario, measured in seconds, providing a basis for comparing computational efficiency across different designs.
+
+\hspace*{8mm} Finally, the column Eqv. records the results of the equivalence theorem verification. To determine whether the design satisfies the optimality condition, we assess the following characteristics:
+
+\begin{enumerate} 
+\item All support points in the approximate design have non-zero weights.
+\item In the directional derivative plot, the blue function should lie entirely below zero, indicating that no other design point would improve the criterion.
+\item The marked design points (black dots) must coincide exactly with the local maxima of the directional derivative function, and these maxima must equal zero—this is the key condition for confirming optimality.
+\item The overall shape of the curve should be smooth and approximately parabolic, consistent with traditional optimal design geometry.
+\end{enumerate}
+
+The optimality check results are classified into three levels:
+
+\begin{itemize}
+\item $\surd$ indicates full satisfaction of the optimality conditions:
+
+All four conditions are met, including: each support point has a non-zero weight; the directional derivative function lies entirely below zero; the design points correspond to local maxima of the function with value exactly zero; and the curve is smooth and continuous in shape.
+
+\item $\triangle$ indicates partial satisfaction, typically arising in the following scenarios:
+
+\begin{itemize} 
+\item Although the function remains entirely below zero and the design points align with the local maxima of the directional derivative, only one point has non-zero weight.
+
+\item A small portion of the directional derivative slightly exceeds zero, but the overall curve remains near zero, suggesting potential for achieving optimality.
+
+\item The function lies entirely below zero, but the local maxima do not coincide with the support points.
+
+\item The directional derivative curve is not clearly displayed due to extremely small variation, making optimality difficult to assess visually; however, the structure suggests potential fulfillment of the conditions.
+\end{itemize}
+
+\item $\times$ indicates that the optimality conditions are not satisfied:
+
+None of the above conditions are met.
+\end{itemize}
+
+\hspace*{8mm} Tables \ref{tab:CKL-results-DeviceA-sameV}, \ref{tab:CLW-results-DeviceA-sameV}, \ref{tab:CB-results-DeviceA-sameV}, and \ref{tab:Cchi2-results-DeviceA-sameV} summarize the performance of four divergence measures (CKL, CLW, CB, and C$\chi^2$) under the scenario where both competing models assume equal variance. In contrast, Tables \ref{tab:CKL-results-DeviceA-DiffV}, \ref{tab:CLW-results-DeviceA-DiffV}, \ref{tab:CB-results-DeviceA-DiffV}, and \ref{tab:Cchi2-results-DeviceA-DiffV} report the results when the models assume unequal variances.
+
+\begin{enumerate}
+\item CKL-optimal design (Tables \ref{tab:CKL-results-DeviceA-sameV} \& \ref{tab:CKL-results-DeviceA-DiffV}): 18 simulation cases were conducted, with 12 fully satisfying optimality conditions ($\surd$), 3 partially satisfying ($\triangle$), and 3 not satisfying ($\times$).
+
+\item CLW-optimal design (Tables \ref{tab:CLW-results-DeviceA-sameV} \& \ref{tab:CLW-results-DeviceA-DiffV}): Among 18 cases, only 4 achieved full optimality($\surd$), 6 were partial($\triangle$), and 8 failed($\times$).
+
+\item CB-optimal design (Tables \ref{tab:CB-results-DeviceA-sameV} \& \ref{tab:CB-results-DeviceA-DiffV}): None of the 18 designs fully satisfied the conditions($\surd$); 14 were partial($\triangle$) and 4 failed($\times$).
+
+\item C$\chi^2$-optimal design (Tables \ref{tab:Cchi2-results-DeviceA-sameV} \& \ref{tab:Cchi2-results-DeviceA-DiffV}): Among 18 cases, 2 cases met full optimality($\surd$), 7 were partial($\triangle$), and 9 failed($\times$).
+\end{enumerate}
+
+\hspace*{8mm} Notably, when a design fully satisfies the optimality conditions, the computed criterion value $C^*$ is nearly identical to the re-evaluated value $\hat{C}$ using the derived design and identified parameter combination—indicating algorithmic stability and robustness. It is worth emphasizing that the CB-optimal designs, due to the nature of their divergence formula, often yield results where the criterion value $C^*$ is either 1, 0, or an extremely small value. These results tend to be computed in very short time—suggesting that the optimization algorithm may have converged prematurely to an incorrect or suboptimal region, rather than locating a truly optimal design. Thus, although the computational time appears efficient, such rapid convergence often leads to designs that fail to satisfy optimality conditions and should be interpreted with caution.
+
+\hspace*{8mm} As for the designs that partially or completely fail to meet optimality conditions, several possible explanations arise. The first relates to numerical instability during integration. While earlier validation confirmed the feasibility of the integration routine, the increased complexity introduced by Type I censored data and more intricate model structures may lead to localized numerical errors that distort the criterion evaluation. Another important consideration lies in the nature of the inner-loop optimization. Although the objective function is theoretically differentiable, it may not be sufficiently smooth in practice. In particular, if the function surface contains multiple local extrema—such as wave-like patterns—then quasi-Newton methods like L-BFGS, which rely on consistent curvature and a single basin of attraction, may perform poorly. This mismatch can lead to inaccurate gradients and hinder convergence, ultimately degrading design quality.
+
+\hspace*{8mm} In conclusion, even under uniform initialization, the design outcomes remain sensitive to model assumptions, objective function properties, and numerical stability. Thus, each solution should be assessed not only by its computed criterion value but also through equivalence checks and the directional derivative plots, ensuring a more reliable and interpretable design process.
+
+\newpage
+
+\begin{table}[H]\scriptsize
+\caption{Summary of CKL-optimal design results for cases of Quadratic vs. Linear means under with equal variance}
+\label{tab:CKL-results-DeviceA-sameV}
+\begin{adjustwidth}{-2.5cm}{-2.5cm} 
+\makebox[\linewidth][c]{%
+\renewcommand{\arraystretch}{1.402} % 調整行間距
+\setlength{\tabcolsep}{3pt} 
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+Dis. & $\sigma$ & $\boldsymbol{\xi^*_{CKL}}$ & $C^* (\hat{C})$ & $\boldsymbol{\hat{\theta}_2(\xi^*_{CKL})}$ & \textbf{Eqv.} & \textbf{Opt?} & \textbf{Time} \\
+\hline
+LN & 0.98 & $\left\{\begin{array}{ccc}
+33.557 & 56.829 & 80 \\
+0.330 & 0.436 & 0.234
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.00927 \\
+(0.00927)
+\end{array}$ & 
+$(-66.712, 2.017)$ & 
+\ref{fig:s=0.98,2,kl,ll} & $\surd$ & 18386 \\
+\hline
+LN & 1.48 & $\left\{\begin{array}{ccc}
+29.699 & 55.482 & 80 \\
+0.360 & 0.413 & 0.227
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.00517 \\
+(0.00517)
+\end{array}$ & 
+$(-67.204, 2.031)$ & 
+\ref{fig:s=1.48,3,kl,ll} & $\surd$ & 58458 \\
+\hline
+LN & 1.98 & $\left\{\begin{array}{ccc}
+25.854 & 55.196 & 80 \\
+0.366 & 0.407 & 0.227
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.00385 \\
+(0.00380)
+\end{array}$ & 
+$(-66.268, 2.006)$ & 
+\ref{fig:s=1.98,4,kl,ll} & $\triangle$ & 49577 \\
+\hline
+WB & 0.98 & $\left\{\begin{array}{ccc}
+32.545 & 57.686 & 80 \\
+0.368 & 0.415 & 0.217
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.00822 \\
+(0.00822)
+\end{array}$ & 
+$(-66.459, 2.010)$ & 
+\ref{fig:s=0.98,2,kl,ww} & $\triangle$ & 59919 \\
+\hline
+WB & 1.48 & $\left\{\begin{array}{ccc}
+25.576 & 55.791 & 80 \\
+0.441 & 0.359 & 0.200
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.00489 \\
+(0.00489)
+\end{array}$ & 
+$(-67.083, 2.028)$ & 
+\ref{fig:s=1.48,3,kl,ww} & $\surd$ & 68091 \\
+\hline
+WB & 1.98 & $\left\{\begin{array}{ccc}
+18.386 & 53.830 & 80 \\
+0.484 & 0.325 & 0.191
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.00386 \\
+(0.00386)
+\end{array}$ & 
+$(-63.987, 1.944)$ & 
+\ref{fig:s=1.98,4,kl,ww} & $\times$ & 62045 \\
+\hline
+\end{tabular}
+}
+\end{adjustwidth}
+\end{table}
+
+\begin{table}[H]\scriptsize
+\caption{Summary of CKL-optimal design results for cases of Quadratic vs. Linear means under with unequal variance}
+\label{tab:CKL-results-DeviceA-DiffV}
+\begin{adjustwidth}{-2.5cm}{-2.5cm} 
+\makebox[\linewidth][c]{%
+\renewcommand{\arraystretch}{1.402} % 調整行間距
+\setlength{\tabcolsep}{3pt} 
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+\hline
+Dis. & $\sigma_1$ & $\sigma_2$ & $\boldsymbol{\xi^*_{CKL}}$ & $C^* (\hat{C})$ & $\boldsymbol{\hat{\theta}_2(\xi^*_{CKL})}$ & \textbf{Eqv.} & \textbf{Opt?} & \textbf{Time} \\
+\hline
+LN & 1.98 & 0.98 & $\left\{\begin{array}{ccc}
+76.132 & 80 & 80 \\
+0.000 & 0.000 & 1.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.841 \\
+(0.841)
+\end{array}$ & 
+$(-52.575, 1.591)$ & 
+\ref{fig:s1=1.98,s2=0.98,9,kl,ll} & $\triangle$ & 62666 \\
+\hline
+LN & 0.98 & 1.98 & $\left\{\begin{array}{ccc}
+50.868 & 65.674 & 80 \\
+0.167 & 0.545 & 0.289
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.327 \\
+(0.327)
+\end{array}$ & 
+$(-63.613, 1.925)$ & 
+\ref{fig:s1=0.98,s2=1.98,10,kl,ll} & $\surd$ & 53043 \\
+\hline
+LN & 0.98 & 1.48 & $\left\{\begin{array}{ccc}
+33.417 & 62.084 & 80 \\
+0.032 & 0.587 & 0.381
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.133 \\
+(0.133)
+\end{array}$ & 
+$(-64.846, 1.962)$ & 
+\ref{fig:s1=0.98,s2=1.48,11,kl,ll} & $\surd$ & 54685 \\
+\hline
+LN & 1.48 & 0.98 & $\left\{\begin{array}{ccc}
+52.007 & 67.791 & 80 \\
+0.085 & 0.577 & 0.338
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.230 \\
+(0.230)
+\end{array}$ & 
+$(-62.900, 1.904)$ & 
+\ref{fig:s1=1.48,s2=0.98,12,kl,ll} & $\surd$ & 65978 \\
+\hline
+LN & 0.48 & 0.98 & $\left\{\begin{array}{ccc}
+43.412 & 61.109 & 80 \\
+0.213 & 0.521 & 0.266
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.339 \\
+(0.339)
+\end{array}$ & 
+$(-65.183, 1.972)$ & 
+\ref{fig:s1=0.48,s2=0.98,13,kl,ll} & $\times$ & 23744 \\
+\hline
+LN & 0.98 & 0.48 & $\left\{\begin{array}{ccc}
+47.75 & 64.187 & 80 \\
+0.161 & 0.547 & 0.292
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.885 \\
+(0.885)
+\end{array}$ & 
+$(-64.115, 1.940)$ & 
+\ref{fig:s1=0.98,s2=0.48,14,kl,ll} & $\surd$ & 30497 \\
+\hline
+WB & 1.98 & 0.98 & $\left\{\begin{array}{ccc}
+58.678 & 69.702 & 80 \\
+0.154 & 0.551 & 0.295
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.600 \\
+(0.600)
+\end{array}$ & 
+$(-61.542, 1.884)$ & 
+\ref{fig:s1=1.98,s2=0.98,9,kl,ww} & $\surd$ & 109772 \\
+\hline
+WB & 0.98 & 1.98 & $\left\{\begin{array}{ccc}
+46.469 & 62.717 & 80 \\
+0.215 & 0.525 & 0.261
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.292 \\
+(0.292)
+\end{array}$ & 
+$(-64.861, 1.955)$ & 
+\ref{fig:s1=0.98,s2=1.98,10,kl,ww} & $\surd$ & 76696 \\
+\hline
+WB & 0.98 & 1.48 & $\left\{\begin{array}{ccc}
+32.393 & 59.119 & 80 \\
+0.064 & 0.597 & 0.339
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.117 \\
+(0.117)
+\end{array}$ & 
+$(-66.032, 1.992)$ & 
+\ref{fig:s1=0.98,s2=1.48,11,kl,ww} & $\surd$ & 79644 \\
+\hline
+WB & 1.48 & 0.98 & $\left\{\begin{array}{ccc}
+49.573 & 64.735 & 80 \\
+0.181 & 0.549 & 0.270
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.176 \\
+(0.600)
+\end{array}$ & 
+$(-63.807, 1.939)$ & 
+\ref{fig:s1=1.48,s2=0.98,12,kl,ww} & $\surd$ & 102226 \\
+\hline
+WB & 0.48 & 0.98 & $\left\{\begin{array}{ccc}
+41.993 & 58.347 & 76.142 \\
+0.231 & 0.526 & 0.244
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.303 \\
+(0.227)
+\end{array}$ & 
+$(-70.313, 2.112)$ & 
+\ref{fig:s1=0.48,s2=0.98,13,kl,ww} & $\times$ & 62836 \\
+\hline
+WB & 0.98 & 0.48 & $\left\{\begin{array}{ccc}
+45.473 & 62.576 & 80 \\
+0.189 & 0.551 & 0.260
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.635 \\
+(0.635)
+\end{array}$ & 
+$(-64.316, 1.957)$ & 
+\ref{fig:s1=0.98,s2=0.48,14,kl,ww} & $\surd$ & 81337 \\
+\hline
+\end{tabular}
+}
+\end{adjustwidth}
+\end{table}
+
+\begin{table}[H]\scriptsize
+\caption{Summary of CLW-optimal design results for cases of Quadratic vs. Linear means under with equal variance}
+\label{tab:CLW-results-DeviceA-sameV}
+\begin{adjustwidth}{-2.5cm}{-2.5cm} 
+\makebox[\linewidth][c]{%
+\renewcommand{\arraystretch}{1.402} % 調整行間距
+\setlength{\tabcolsep}{3pt} 
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+Dis. & $\sigma$ & $\boldsymbol{\xi^*_{CLW}}$ & $C^* (\hat{C})$ & $\boldsymbol{\hat{\theta}_2(\xi^*_{CLW})}$ & \textbf{Eqv.} & \textbf{Opt?} & \textbf{Time} \\
+\hline
+LN & 0.98 & $\left\{\begin{array}{ccc}
+10 & 31.597 & 31.714 \\
+0.000 & 0.999 & 0.001
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.00551 \\
+(0.00551)
+\end{array}$ & 
+$(-94.530, 3.277)$ & 
+\ref{fig:s=0.98,2,lw,ll} & $\times$ & 793 \\
+\hline
+LN & 1.48 & $\left\{\begin{array}{ccc}
+79.410 & 80 & 80 \\
+1.000 & 0.000 & 0.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.693 \\
+(-2.675\times 10^{-6})
+\end{array}$ & 
+$(-86.830, 2.632)$ & 
+\ref{fig:s=1.48,3,lw,ll} & $\times$ & 3239 \\
+\hline
+LN & 1.98 & $\left\{\begin{array}{ccc}
+80 & 80 & 80 \\
+0.066 & 0.143 & 0.791
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.693 \\
+(-7.356\times 10^{-6})
+\end{array}$ & 
+$(-73.661, 2.232)$ & 
+\ref{fig:s=1.98,4,lw,ll} & $\times$ & 3299 \\
+\hline
+WB & 0.98 & $\left\{\begin{array}{ccc}
+66.764 & 69.61 & 80 \\
+0.001 & 0.998 & 0.001
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.694 \\
+(0.694)
+\end{array}$ & 
+$(-67.984, 2.751)$ & 
+\ref{fig:s=0.98,2,lw,ww} & $\triangle$ & 3175 \\
+\hline
+WB & 1.48 & $\left\{\begin{array}{ccc}
+58.379 & 59.356 & 80 \\
+0.001 & 0.989 & 0.010
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.693 \\
+(-8.071\times 10^{-6})
+\end{array}$ & 
+$(-62.162, 1.883)$ & 
+\ref{fig:s=1.48,3,lw,ww} & $\times$ & 5288 \\
+\hline
+WB & 1.98 & $\left\{\begin{array}{ccc}
+16.897 & 53.487 & 80 \\
+0.482 & 0.311 & 0.207
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.00107 \\
+(-0.000827)
+\end{array}$ & 
+$(-62.796, 1.907)$ & 
+\ref{fig:s=1.98,4,lw,ww} & $\surd$ & 32163 \\
+\hline
+\end{tabular}
+}
+\end{adjustwidth}
+\end{table}
+
+\begin{table}[H]\scriptsize
+\caption{Summary of CLW-optimal design results for cases of Quadratic vs. Linear means under with unequal variance}
+\label{tab:CLW-results-DeviceA-DiffV}
+\begin{adjustwidth}{-2.5cm}{-2.5cm} 
+\makebox[\linewidth][c]{%
+\renewcommand{\arraystretch}{1.402} % 調整行間距
+\setlength{\tabcolsep}{3pt} 
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+\hline
+Dis. & $\sigma_1$ & $\sigma_2$ & $\boldsymbol{\xi^*_{CLW}}$ & $C^* (\hat{C})$ & $\boldsymbol{\hat{\theta}_2(\xi^*_{CLW})}$ & \textbf{Eqv.} & \textbf{Opt?} & \textbf{Time} \\
+\hline
+LN & 1.98 & 0.98 & $\left\{\begin{array}{ccc}
+52.005 & 57.073 & 80 \\
+0.000 & 1.000 & 0.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.0751 \\
+(0.0732)
+\end{array}$ & 
+$(-66.588, 2.010)$ & 
+\ref{fig:s1=1.98,s2=0.98,9,lw,ll} & $\times$ & 4343 \\
+\hline
+LN & 0.98 & 1.98 & $\left\{\begin{array}{ccc}
+57.022 & 68.893 & 72.433 \\
+0.000 & 0.000 & 1.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.705 \\
+(0.705)
+\end{array}$ & 
+$(-82.884, 4.692)$ & 
+\ref{fig:s1=0.98,s2=1.98,10,lw,ll} & $\triangle$ & 2592 \\
+\hline
+LN & 0.98 & 1.48 & $\left\{\begin{array}{ccc}
+61.118 & 62.214 & 80 \\
+0.726 & 0.126 & 0.148
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.0475 \\
+(0.0451)
+\end{array}$ & 
+$(-62.081, 1.880)$ & 
+\ref{fig:s1=0.98,s2=1.48,11,lw,ll} & $\surd$ & 3316 \\
+\hline
+LN & 1.48 & 0.98 & $\left\{\begin{array}{ccc}
+57.404 & 61.771 & 80 \\
+0.288 & 0.217 & 0.495
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.0315 \\
+(0.0307)
+\end{array}$ & 
+$(-62.481, 1.892)$ & 
+\ref{fig:s1=1.48,s2=0.98,12,lw,ll} & $\surd$ & 3583 \\
+\hline
+LN & 0.48 & 0.98 & $\left\{\begin{array}{ccc}
+69.351 & 76.607 & 80 \\
+0.856 & 0.031 & 0.113
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.695 \\
+(0.131)
+\end{array}$ & 
+$(-84.952, 2.556)$ & 
+\ref{fig:s1=0.48,s2=0.98,13,lw,ll} & $\times$ & 2608 \\
+\hline
+LN & 0.98 & 0.48 & $\left\{\begin{array}{ccc}
+45.006 & 50.316 & 80 \\
+0.436 & 0.000 & 0.564
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.0858 \\
+(0.686)
+\end{array}$ & 
+$(-71.609, 2.537)$ & 
+\ref{fig:s1=0.98,s2=0.48,14,lw,ll} & $\triangle$ & 3455 \\
+\hline
+WB & 1.98 & 0.98 & $\left\{\begin{array}{ccc}
+76.217 & 80 & 80 \\
+1.000 & 0.000 & 0.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.693 \\
+(0.0664)
+\end{array}$ & 
+$(-66.549, 2.020)$ & 
+\ref{fig:s1=1.98,s2=0.98,9,lw,ww} & $\triangle$ & 2497 \\
+\hline
+WB & 0.98 & 1.98 & $\left\{\begin{array}{ccc}
+49.129 & 63.954 & 80 \\
+0.230 & 0.513 & 0.257
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.496 \\
+(0.496)
+\end{array}$ & 
+$(-65.295, 1.943)$ & 
+\ref{fig:s1=0.98,s2=1.98,10,lw,ww} & $\times$ & 666111 \\
+\hline
+WB & 0.98 & 1.48 & $\left\{\begin{array}{ccc}
+31.711 & 59.803 & 80 \\
+0.203 & 0.533 & 0.265
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.0386 \\
+(0.0366)
+\end{array}$ & 
+$(-70.211, 2.114)$ & 
+\ref{fig:s1=0.98,s2=1.48,11,lw,ww} & $\triangle$ & 5097 \\
+\hline
+WB & 1.48 & 0.98 & $\left\{\begin{array}{ccc}
+62.798 & 65.451 & 80 \\
+0.583 & 0.330 & 0.087
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.0284 \\
+(0.693)
+\end{array}$ & 
+$(-59.234, 2.380)$ & 
+\ref{fig:s1=1.48,s2=0.98,12,lw,ww} & $\surd$ & 4659 \\
+\hline
+WB & 0.48 & 0.98 & $\left\{\begin{array}{ccc}
+74.778 & 75.283 & 75.604 \\
+0.030 & 0.477 & 0.493
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.351 \\
+(0.693)
+\end{array}$ & 
+$(-40.068, 1.937)$ & 
+\ref{fig:s1=0.48,s2=0.98,13,lw,ww} & $\triangle$ & 3694 \\
+\hline
+WB & 0.98 & 0.48 & $\left\{\begin{array}{ccc}
+41.785 & 60.771 & 80 \\
+0.462 & 0.538 & 0.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.0703 \\
+(0.596)
+\end{array}$ & 
+$(-73.372, 2.611)$ & 
+\ref{fig:s1=0.98,s2=0.48,14,lw,ww} & $\times$ & 4721 \\
+\hline
+\end{tabular}
+}
+\end{adjustwidth}
+\end{table}
+
+\begin{table}[H]\scriptsize
+\caption{Summary of CB-optimal design results for cases of Quadratic vs. Linear means under with equal variance}
+\label{tab:CB-results-DeviceA-sameV}
+\begin{adjustwidth}{-2.5cm}{-2.5cm} 
+\makebox[\linewidth][c]{%
+\renewcommand{\arraystretch}{1.402} % 調整行間距
+\setlength{\tabcolsep}{3pt} 
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+Dis. & $\sigma$ & $\boldsymbol{\xi^*_{CB}}$ & $C^* (\hat{C})$ & $\boldsymbol{\hat{\theta}_2(\xi^*_{CB})}$ & \textbf{Eqv.} & \textbf{Opt?} & \textbf{Time} \\
+\hline
+LN & 0.98 & $\left\{\begin{array}{ccc}
+10 & 10 & 10 \\
+0.001 & 0.210 & 0.789
+\end{array}\right\}$ &
+$\begin{array}{c}
+1 \\
+(1)
+\end{array}$ & 
+$(-83.787, 3.896)$ & 
+\ref{fig:s=0.98,2,B,ll} & $\triangle$ & 319 \\
+\hline
+LN & 1.48 & $\left\{\begin{array}{ccc}
+21.036 & 37.942 & 43.839 \\
+1.000 & 0.000 & 0.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+4.661\times 10^{-75} \\
+(1.000)
+\end{array}$ & 
+$(-50.864, 2.922)$ & 
+\ref{fig:s=1.48,3,B,ll} & $\triangle$ & 336 \\
+\hline
+LN & 1.98 & $\left\{\begin{array}{ccc}
+10 & 10 & 10 \\
+0.037 & 0.225 & 0.738
+\end{array}\right\}$ &
+$\begin{array}{c}
+1.000 \\
+(1.807\times 10^{-43})
+\end{array}$ & 
+$(-65.133, 0.757)$ & 
+\ref{fig:s=1.98,4,B,ll} & $\times$ & 308 \\
+\hline
+WB & 0.98 & $\left\{\begin{array}{ccc}
+13.011 & 31.319 & 72.62 \\
+0.715 & 0.020 & 0.265
+\end{array}\right\}$ &
+$\begin{array}{c}
+0 \\
+(0)
+\end{array}$ & 
+$(-98.112, 1.771)$ & 
+\ref{fig:s=0.98,2,B,ww} & $\triangle$ & 549 \\
+\hline
+WB & 1.48 & $\left\{\begin{array}{ccc}
+11.236 & 16.331 & 51.198 \\
+0.127 & 0.102 & 0.771
+\end{array}\right\}$ &
+$\begin{array}{c}
+0 \\
+(0)
+\end{array}$ & 
+$(-60.391, 0.729)$ & 
+\ref{fig:s=1.48,3,B,ww} & $\triangle$ & 443 \\
+\hline
+WB & 1.98 & $\left\{\begin{array}{ccc}
+11.969 & 22.932 & 40.06 \\
+0.432 & 0.001 & 0.567
+\end{array}\right\}$ &
+$\begin{array}{c}
+0 \\
+(0)
+\end{array}$ & 
+$(-77.064, 1.004)$ & 
+\ref{fig:s=1.98,4,B,ww} & $\triangle$ & 1871 \\
+\hline
+\end{tabular}
+}
+\end{adjustwidth}
+\end{table}
+
+\begin{table}[H]\scriptsize
+\caption{Summary of CB-optimal design results for cases of Quadratic vs. Linear means under with unequal variance}
+\label{tab:CB-results-DeviceA-DiffV}
+\begin{adjustwidth}{-2.5cm}{-2.5cm} 
+\makebox[\linewidth][c]{%
+\renewcommand{\arraystretch}{1.402} % 調整行間距
+\setlength{\tabcolsep}{3pt} 
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+\hline
+Dis. & $\sigma_1$ & $\sigma_2$ & $\boldsymbol{\xi^*_{CB}}$ & $C^* (\hat{C})$ & $\boldsymbol{\hat{\theta}_2(\xi^*_{CB})}$ & \textbf{Eqv.} & \textbf{Opt?} & \textbf{Time} \\
+\hline
+LN & 1.98 & 0.98 & $\left\{\begin{array}{ccc}
+10 & 10 & 10 \\
+0.018 & 0.328 & 0.654
+\end{array}\right\}$ &
+$\begin{array}{c}
+1.000 \\
+(9.038\times 10^{-60})
+\end{array}$ & 
+$(-80.856, 1.492)$ & 
+\ref{fig:s1=1.98,s2=0.98,9,B,ll} & $\triangle$ & 320 \\
+\hline
+LN & 0.98 & 1.98 & $\left\{\begin{array}{ccc}
+10 & 10 & 10 \\
+0.042 & 0.058 & 0.900
+\end{array}\right\}$ &
+$\begin{array}{c}
+1 \\
+(1)
+\end{array}$ & 
+$(-62.980, 3.691)$ & 
+\ref{fig:s1=0.98,s2=1.98,10,B,ll} & $\times$ & 2592 \\
+\hline
+LN & 0.98 & 1.48 & $\left\{\begin{array}{ccc}
+10 & 10 & 10 \\
+0.004 & 0.355 & 0.641
+\end{array}\right\}$ &
+$\begin{array}{c}
+1 \\
+(1.761\times 10^{-116})
+\end{array}$ & 
+$(-77.233, 0.903)$ & 
+\ref{fig:s1=0.98,s2=1.48,11,B,ll} & $\times$ & 333 \\
+\hline
+LN & 1.48 & 0.98 & $\left\{\begin{array}{ccc}
+15.502 & 40.168 & 76.326 \\
+0.088 & 0.276 & 0.637
+\end{array}\right\}$ &
+$\begin{array}{c}
+0 \\
+(0.256)
+\end{array}$ & 
+$(-43.561, 2.292)$ & 
+\ref{fig:s1=1.48,s2=0.98,12,B,ll} & $\times$ & 443 \\
+\hline
+LN & 0.48 & 0.98 & $\left\{\begin{array}{ccc}
+10 & 10 & 13.664 \\
+0.336 & 0.527 & 0.137
+\end{array}\right\}$ &
+$\begin{array}{c}
+1 \\
+(1)
+\end{array}$ & 
+$(-12.408, 4.678)$ & 
+\ref{fig:s1=0.48,s2=0.98,13,B,ll} & $\triangle$ & 333 \\
+\hline
+LN & 0.98 & 0.48 & $\left\{\begin{array}{ccc}
+29.672 & 67.096 & 74.092 \\
+0.621 & 0.198 & 0.180
+\end{array}\right\}$ &
+$\begin{array}{c}
+0 \\
+(2.069\times 10^{-20})
+\end{array}$ & 
+$(-88.604, 2.237)$ & 
+\ref{fig:s1=0.98,s2=0.48,14,B,ll} & $\triangle$ & 316 \\
+\hline
+WB & 1.98 & 0.98 & $\left\{\begin{array}{ccc}
+34.337 & 71.517 & 79.083 \\
+0.118 & 0.545 & 0.338
+\end{array}\right\}$ &
+$\begin{array}{c}
+0 \\
+(0)
+\end{array}$ & 
+$(-78.484, 1.190)$ & 
+\ref{fig:s1=1.98,s2=0.98,9,B,ww} & $\triangle$ & 1120 \\
+\hline
+WB & 0.98 & 1.98 & $\left\{\begin{array}{ccc}
+25.219 & 33.485 & 72.658 \\
+0.127 & 0.763 & 0.110
+\end{array}\right\}$ &
+$\begin{array}{c}
+0 \\
+(0)
+\end{array}$ & 
+$(-63.610, 0.858)$ & 
+\ref{fig:s1=0.98,s2=1.98,10,B,ww} & $\triangle$ & 1452 \\
+\hline
+WB & 0.98 & 1.48 & $\left\{\begin{array}{ccc}
+22.499 & 23.034 & 43.321 \\
+0.144 & 0.322 & 0.534
+\end{array}\right\}$ &
+$\begin{array}{c}
+0 \\
+(0)
+\end{array}$ & 
+$(-67.238, 0.887)$ & 
+\ref{fig:s1=0.98,s2=1.48,11,B,ww} & $\triangle$ & 445 \\
+\hline
+WB & 1.48 & 0.98 & $\left\{\begin{array}{ccc}
+10 & 10 & 10 \\
+0.057 & 0.419 & 0.524
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.999 \\
+(0.999)
+\end{array}$ & 
+$(-58.774, 3.780)$ & 
+\ref{fig:s1=1.48,s2=0.98,12,B,ww} & $\triangle$ & 706 \\
+\hline
+WB & 0.48 & 0.98 & $\left\{\begin{array}{ccc}
+48.499 & 55.901 & 62.657 \\
+0.007 & 0.823 & 0.170
+\end{array}\right\}$ &
+$\begin{array}{c}
+0 \\
+(2.870\times 10^{-17})
+\end{array}$ & 
+$(-43.884, 3.505)$ & 
+\ref{fig:s1=0.48,s2=0.98,13,B,ww} & $\triangle$ & 518 \\
+\hline
+WB & 0.98 & 0.48 & $\left\{\begin{array}{ccc}
+10 & 46.047 & 70.919 \\
+1.000 & 0.000 & 0.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+1.000 \\
+(1.000)
+\end{array}$ & 
+$(-52.593, 3.173)$ & 
+\ref{fig:s1=0.98,s2=0.48,14,B,ww} & $\triangle$ & 551 \\
+\hline
+\end{tabular}
+}
+\end{adjustwidth}
+\end{table}
+
+\begin{table}[H]\scriptsize
+\caption{Summary of C$\chi^2$-optimal design results for cases of Quadratic vs. Linear means under with equal variance}
+\label{tab:Cchi2-results-DeviceA-sameV}
+\begin{adjustwidth}{-2.5cm}{-2.5cm} 
+\makebox[\linewidth][c]{%
+\renewcommand{\arraystretch}{1.402} % 調整行間距
+\setlength{\tabcolsep}{3pt} 
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+Dis. & $\sigma$ & $\boldsymbol{\xi^*_{C\chi^2}}$ & $C^* (\hat{C})$ & $\boldsymbol{\hat{\theta}_2(\xi^*_{C\chi^2})}$ & \textbf{Eqv.} & \textbf{Opt?} & \textbf{Time} \\
+\hline
+LN & 0.98 & $\left\{\begin{array}{ccc}
+80 & 80 & 80 \\
+0.014 & 0.449 & 0.537
+\end{array}\right\}$ &
+$\begin{array}{c}
+4.938 \times 10^{11}\\
+(-1.698\times 10^{-10})
+\end{array}$ & 
+$(-75.507, 2.289)$ & 
+\ref{fig:s=0.98,2,chi,ll} & $\times$ & 3394 \\
+\hline
+LN & 1.48 & $\left\{\begin{array}{ccc}
+41.953 & 46.694 & 47.929 \\
+0.000 & 0.000 & 1.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+726.370 \\
+(-9.216\times 10^{-6})
+\end{array}$ & 
+$(-65.563,1.983)$ & 
+\ref{fig:s=1.48,3,chi,ll} & $\times$ & 2277 \\
+\hline
+LN & 1.98 & $\left\{\begin{array}{ccc}
+22.557 & 28.732 & 34.66 \\
+0.000 & 1.000 & 0.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.0230 \\
+(0.0233)
+\end{array}$ & 
+$(-64.951, 1.967)$ & 
+\ref{fig:s=1.98,4,chi,ll} & $\triangle$ & 1353 \\
+\hline
+WB & 0.98 & $\left\{\begin{array}{ccc}
+11.049 & 16.362 & 34.388 \\
+0.000 & 0.000 & 1.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.0296 \\
+(-4.966\times 10^{-9})
+\end{array}$ & 
+$(-59.045, 1.819)$ & 
+\ref{fig:s=0.98,2,chi,ww} & $\triangle$ & 25836 \\
+\hline
+WB & 1.48 & $\left\{\begin{array}{ccc}
+29.181 & 46.269 & 61.937 \\
+0.999 & 0.000 & 0.001
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.0196 \\
+(-4.332\times 10^{-9})
+\end{array}$ & 
+$(-71.474, 2.151)$ & 
+\ref{fig:s=1.48,3,chi,ww} & $\times$ & 65818 \\
+\hline
+WB & 1.98 & $\left\{\begin{array}{ccc}
+12.069 & 23.116 & 31.719 \\
+0.000 & 1.000 & 0.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.0146 \\
+(-4.941\times 10^{-9})
+\end{array}$ & 
+$(-62.198, 1.919)$ & 
+\ref{fig:s=1.98,4,chi,ww} & $\times$ & 47360 \\
+\hline
+\end{tabular}
+}
+\end{adjustwidth}
+\end{table}
+
+\begin{table}[H]\scriptsize
+\caption{Summary of C$\chi^2$-optimal design results for cases of Quadratic vs. Linear means under with unequal variance}
+\label{tab:Cchi2-results-DeviceA-DiffV}
+\begin{adjustwidth}{-2.5cm}{-2.5cm} 
+\makebox[\linewidth][c]{%
+\renewcommand{\arraystretch}{1.402} % 調整行間距
+\setlength{\tabcolsep}{3pt} 
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+\hline
+Dis. & $\sigma_1$ & $\sigma_2$ & $\boldsymbol{\xi^*_{C\chi^2}}$ & $C^* (\hat{C})$ & $\boldsymbol{\hat{\theta}_2(\xi^*_{C\chi^2})}$ & \textbf{Eqv.} & \textbf{Opt?} & \textbf{Time} \\
+\hline
+LN & 1.98 & 0.98 & $\left\{\begin{array}{ccc}
+80 & 80 & 80 \\
+0.000 & 0.005 & 0.995
+\end{array}\right\}$ &
+$\begin{array}{c}
+457251.8 \\
+(-0.969)
+\end{array}$ & 
+$(-59.428, 1.893)$ & 
+\ref{fig:s1=1.98,s2=0.98,9,chi,ll} & $\times$ & 5395 \\
+\hline
+LN & 0.98 & 1.98 & $\left\{\begin{array}{ccc}
+45.597 & 61.641 & 64.68 \\
+0.000 & 1.000 & 0.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.532 \\
+(0.526)
+\end{array}$ & 
+$(-59.442, 1.804)$ & 
+\ref{fig:s1=0.98,s2=1.98,10,chi,ll} & $\triangle$ & 2931 \\
+\hline
+LN & 0.98 & 1.48 & $\left\{\begin{array}{ccc}
+30.879 & 61.575 & 69.17 \\
+0.000 & 1.000 & 0.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.219 \\
+(0.218)
+\end{array}$ & 
+$(-64.922, 1.967)$ & 
+\ref{fig:s1=0.98,s2=1.48,11,chi,ll} & $\triangle$ & 2413 \\
+\hline
+LN & 1.48 & 0.98 & $\left\{\begin{array}{ccc}
+43.696 & 45.881 & 66.72 \\
+0.000 & 0.000 & 1.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+13.689 \\
+(13.692)
+\end{array}$ & 
+$(-62.586, 1.890)$ & 
+\ref{fig:s1=1.48,s2=0.98,12,chi,ll} & $\triangle$ & 4297 \\
+\hline
+LN & 0.48 & 0.98 & $\left\{\begin{array}{ccc}
+54.039 & 80 & 80 \\
+0.000 & 0.004 & 0.996
+\end{array}\right\}$ &
+$\begin{array}{c}
+8.422\times 10^{11} \\
+(-1.000)
+\end{array}$ & 
+$(-69.759, 2.146)$ & 
+\ref{fig:s1=0.48,s2=0.98,13,chi,ll} & $\times$ & 3450 \\
+\hline
+LN & 0.98 & 0.48 & $\left\{\begin{array}{ccc}
+80 & 80 & 80 \\
+0.022 & 0.380 & 0.598
+\end{array}\right\}$ &
+$\begin{array}{c}
+4.938\times 10^{15} \\
+(167714.9)
+\end{array}$ & 
+$(-75.719, 2.287)$ & 
+\ref{fig:s1=0.98,s2=0.48,14,chi,ll} & $\times$ & 3560 \\
+\hline
+WB & 1.98 & 0.98 & $\left\{\begin{array}{ccc}
+10 & 34.502 & 53.741 \\
+1.000 & 0.000 & 0.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+-51105.61 \\
+(-163214.6)
+\end{array}$ & 
+$(-45.631, 2.366)$ & 
+\ref{fig:s1=1.98,s2=0.98,9,chi,ww} & $\times$ & 72416 \\
+\hline
+WB & 0.98 & 1.98 & $\left\{\begin{array}{ccc}
+56.336 & 58.701 & 76.992 \\
+0.000 & 1.000 & 0.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.494 \\
+(0.487)
+\end{array}$ & 
+$(-58.049, 1.761)$ & 
+\ref{fig:s1=0.98,s2=1.98,10,chi,ww} & $\times$ & 26184 \\
+\hline
+WB & 0.98 & 1.48 & $\left\{\begin{array}{ccc}
+30.746 & 61.381 & 80 \\
+0.000 & 0.361 & 0.639
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.192 \\
+(0.189)
+\end{array}$ & 
+$(-62.108, 1.878)$ & 
+\ref{fig:s1=0.98,s2=1.48,11,chi,ww} & $\times$ & 94295 \\
+\hline
+WB & 1.48 & 0.98 & $\left\{\begin{array}{ccc}
+80 & 80 & 80 \\
+0.002 & 0.005 & 0.993
+\end{array}\right\}$ &
+$\begin{array}{c}
+1.152 \\
+(1.152)
+\end{array}$ & 
+$(-56.581, 1.735)$ & 
+\ref{fig:s1=1.48,s2=0.98,12,chi,ww} & $\triangle$ & 154226 \\
+\hline
+WB & 0.48 & 0.98 & $\left\{\begin{array}{ccc}
+41.312 & 57.184 & 74.433 \\
+0.228 & 0.526 & 0.246
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.507 \\
+(0.507)
+\end{array}$ & 
+$(-66.715, 2.013)$ & 
+\ref{fig:s1=0.48,s2=0.98,13,chi,ww} & $\triangle$ & 92497 \\
+\hline
+WB & 0.98 & 0.48 & $\left\{\begin{array}{ccc}
+10 & 32.163 & 46.132 \\
+0.000 & 0.005 & 0.995
+\end{array}\right\}$ &
+$\begin{array}{c}
+4996.081 \\
+(-12323.91)
+\end{array}$ & 
+$(-55.175, 2.385)$ & 
+\ref{fig:s1=0.98,s2=0.48,14,chi,ww} & $\times$ & 5097 \\
+\hline
+\end{tabular}
+}
+\end{adjustwidth}
+\end{table}
+
+%\section{Optimal Design for Competing Model Discrimination Using the PSO-QN Algorithm under Unknown Variance}
+\section{Type I Censoring Model Discrimination Designs with Parameterized Variance for Rival Model}
+
+\hspace*{8mm} Based on the results from the previous section, only the CKL-optimal design exhibited stable performance under censoring. Therefore, in the following simulation study, we focus solely on the CKL-optimal design. Unlike the previous setting where variances of both models were fixed, we now incorporate variance as part of the parameter search to enable a more flexible and realistic analysis framework.
+
+%\subsection{Model Discrimination Designs with Estimated Constant Variance in the Rival Model}
+\subsection{Competing Mean Responses, Equal Distribution Assumption with  Parameterized Variance} \label{SEC:DeviceA estimate variance}
+
+\hspace*{8mm} To investigate the scenario where the variance of the rival model must also be included in parameter search, this section continues the previous experimental design setting. The true model parameters are specified as $\theta_{tr} = (\zeta_1, \zeta_2, \zeta_3) = (-5.0, -1.5, 0.05)$, with the variance fixed at the previously well-performing values (0.9780103 and 1.4780103). The rival model parameters are set as $(\delta_1, \delta_2) \in [-100, -10] \times [0.1, 5.0]$, with an additional unknown constant variance parameter $\sigma_2$ assumed to lie within the range $\sigma_2 \in [0.4780103, 4.9780103]$. The censoring time is 5000. The experimental design space is $x \in [10, 80]$. The PSO-QN settings are as follows: PSO uses 64 particles and 200 iterations, while L-BFGS is set to 50 iterations. 
+
+\hspace*{8mm} In this section, we investigate the CKL-optimal designs under two scenarios: when both models assume a Log-Normal distribution and when both assume a Weibull distribution.
+
+The current model settings are as follows:
+
+\begin{itemize}
+\item The true model $M_1$ is a quadratic form:
+\begin{equation}
+\eta_{tr}(x,\theta_1)=\zeta_1+\zeta_2x+\zeta_3x^2.
+\end{equation}
+
+\item The rival model $M_2$ is a linear form:
+\begin{equation}
+\eta_{2}(x,\theta_2)=\delta_1+\delta_2x.
+\end{equation}
+
+\end{itemize}
+
+\hspace*{8mm} The key difference from previous settings is that the parameter vectors are now defined as $\theta_{tr}=(\zeta_1,\zeta_2,\zeta_3)$ for the true model and $\theta_2=(\delta_1,\delta_2,\sigma_2)$ for the rival model, meaning that $M_2$ additionally includes an unknown variance parameter $\sigma_2$ that is treated as a search variable in the optimization process.
+
+\begin{itemize}
+\item Both models follow the Log-Normal distribution:
+
+\begin{enumerate}
+
+\item True model variance is 0.9780103：
+\begin{align*}
+\xi^*_{CKL} = \left\{\begin{array}{ccc}
+33.799 & 57.185 & 80 \\
+0.317 & 0.443 & 0.240
+\end{array}\right\}.
+\end{align*}
+
+The corresponding criterion value is $9.116\times 10^{-3}$, and the parameter combination is identified as $\hat{\theta}_2(\xi^*_{CKL})=(\hat{\delta_1},\hat{\delta_2},\hat{\sigma_2})=(-66.584, 2.013, 0.965)$. Furthermore, the equivalence theorem confirms the optimality of this design(Figure \ref{fig:estimate_variance_ex1}). The results confirm that it satisfies the optimality conditions. The total computation time is 144836 seconds.
+%0.009116113重新計算的標準值
+
+\item True model variance is 1.4780103：
+\begin{align*}
+\xi^*_{CKL} = \left\{\begin{array}{ccc}
+29.974 & 56.272 & 80 \\
+0.339 & 0.423 & 0.238
+\end{array}\right\}.
+\end{align*}
+
+The corresponding criterion value is 0.00501, and the parameter combination is identified as $\hat{\theta}_2(\xi^*_{CKL})=(\hat{\delta_1},\hat{\delta_2},\hat{\sigma_2})=(-66.986, 2.025, 1.457)$. Again, the optimality of this design is verified via the equivalence theorem (Figure \ref{fig:estimate_variance_ex2}). The results confirm that it satisfies the optimality conditions. The total computation time is 149893 seconds.
+%0.005005545重新計算的標準值
+
+\begin{figure}[H]
+\centering
+\subfloat[The case of $\sigma_1=0.9780103$\label{fig:estimate_variance_ex1}]{\includegraphics[width=0.45\linewidth]{\imgdir estimate_variance_ex1(0.97lnln).png}}
+\subfloat[The case of $\sigma_1=1.4780103$\label{fig:estimate_variance_ex2}]{\includegraphics[width=0.45\linewidth]{\imgdir estimate_variance_ex2(1.47lnln).png}} \\
+\caption{The directional derivative plots of the resulting designs $\xi^*_{CKL}$ discriminating for the cases of Quadratic vs. Linear means assuming Log-Normal response.}
+\label{fig:DeviceA_estimate_variance_lognormal}
+\end{figure}
+
+\end{enumerate}
+
+\item Both models follow the Weibull distribution:
+
+\begin{enumerate}
+
+\item True model variance is 0.9780103：
+\begin{align*}
+\xi^*_{CKL} = \left\{\begin{array}{ccc}
+33.531 & 58.185 & 80 \\
+0.340 & 0.434 & 0.226
+\end{array}\right\}.
+\end{align*}
+
+The corresponding criterion value is 0.00784, and the parameter combination is identified as $\hat{\theta}_2(\xi^*_{CKL})=(\hat{\delta_1},\hat{\delta_2},\hat{\sigma_2})=(-66.207, 2.002, 0.957)$. Furthermore, the equivalence theorem confirms the optimality of this design (Figure \ref{fig:estimate_variance_ex3}). The results confirm that it satisfies the optimality conditions. The total computation time is 134408 seconds.
+%0.007835339重新計算的標準值
+
+\item True model variance is 1.4780103：
+\begin{align*}
+\xi^*_{CKL} = \left\{\begin{array}{ccc}
+26.713 & 57.032 & 80 \\
+0.396 & 0.382 & 0.222
+\end{array}\right\}.
+\end{align*}
+
+The corresponding criterion value is $4.491\times 10^{-3}$, and the parameter combination is identified as $\hat{\theta}_2(\xi^*_{CKL})=(\hat{\delta_1},\hat{\delta_2},\hat{\sigma_2})=(-66.560, 2.013, 1.441)$. Furthermore, the equivalence theorem confirms the optimality of this design (Figure \ref{fig:estimate_variance_ex4}). The results confirm that it satisfies the optimality conditions. The total computation time is 85551 seconds.
+%0.004275654重新計算的標準值
+
+\begin{figure}[H]
+\centering
+\subfloat[The case of $\sigma_1=0.9780103$\label{fig:estimate_variance_ex3}]{\includegraphics[width=0.45\linewidth]{\imgdir estimate_variance_ex3(0.97wewe).png}}
+\subfloat[The case of $\sigma_1=1.4780103$\label{fig:estimate_variance_ex4}]{\includegraphics[width=0.45\linewidth]{\imgdir estimate_variance_ex4(1.47wewe).png}} \\
+\caption{The directional derivative plots of the resulting designs $\xi^*_{CKL}$ discriminating for the cases of Quadratic vs. Linear means assuming Weibull response.}
+\label{fig:DeviceA_estimate_variance_weibull}
+\end{figure}
+
+\end{enumerate}
+
+\end{itemize}
+
+\hspace*{8mm} In this extended design setting, the variance of the rival model is treated as an unknown parameter and jointly optimized alongside the location parameters. The directional derivative plots shown in Figures \ref{fig:DeviceA_estimate_variance_lognormal} and \ref{fig:DeviceA_estimate_variance_weibull} illustrate the results of the resulting designs. While not all designs fully satisfy the optimality conditions, they demonstrate strong potential. With additional algorithm iterations, these designs are expected to converge further and fully meet the theoretical criteria. Interestingly, the identified parameter combination's variance $\hat{\sigma}_2$ consistently converge to values close to the true model's variance $\sigma_1$ . Rather than suggesting that the rival model is recovering the true variance, this outcome reflects a deeper implication: to achieve maximal model separation under the CKL criterion, the rival model's variance tends to align with that of the true model. This alignment likely amplifies differences in the mean structure, which is where model discrimination power is most pronounced.
+
+\hspace*{8mm} To compare the design differences between fixed-variance and variance-search scenarios, the information from Table \ref{tab:CKL-results-DeviceA-sameV} has been consolidated into Tables \ref{tab:design_comparison0.98} and \ref{tab:design_comparison1.48}, showing support points, weights, and cumulative failure probabilities before the censoring time $C$. This facilitates both visual and numerical evaluation.
+
+\hspace*{8mm} Results from both distribution types indicate that once variance search is introduced, the first two support points tend to shift toward higher stress levels. The shift is moderate in Log-Normal cases but more pronounced in Weibull cases, suggesting greater sensitivity to tail behavior and censoring effects.
+
+\hspace*{8mm} To assess practical feasibility, we compute the cumulative failure probability before $C$ for each support point to ensure sufficient failure observations within the testing period. Low probabilities would result in excessive censoring, reducing the informativeness of the data.
+
+\hspace*{8mm} The outcomes show that cumulative failure probabilities mostly range from 5\% to 100\%, implying that all design points yield observable failures, helping avoid data loss due to censoring. These CKL-optimal designs thus demonstrate strong feasibility and discrimination capability under censoring scenarios.
+
+\begin{table}[H] \scriptsize
+\caption{Comparison of design points, weights, and cumulative failure probabilities under different model assumptions ($\sigma$ = 0.9780103)}
+\label{tab:design_comparison0.98}
+\centering
+\renewcommand{\arraystretch}{1.44}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Model} & \textbf{Point} & \textbf{Weight} & \textbf{Cumulative Probability} \\
+\midrule
+\textbf{Log-Normal (fixed $\theta_2$)} & & & \\
+\quad & 33.557 & 0.330 & 0.0902 \\
+\quad & 56.829 & 0.436 & 1.000 \\
+\quad & 80 & 0.234 & 1\\
+\addlinespace
+\textbf{Log-Normal (unknown $\theta_2$)} & & & \\
+\quad & 33.799 & 0.317 & 0.102 \\
+\quad & 57.185 & 0.443 & 1.000 \\
+\quad & 80 & 0.226 & 1 \\
+\addlinespace
+\textbf{Weibull (fixed $\theta_2$)} & & & \\
+\quad & 32.545 & 0.368 & 0.177 \\
+\quad & 57.686 & 0.415 & 1 \\
+\quad & 80 & 0.217 & 1 \\
+\addlinespace
+\textbf{Weibull (unknown $\theta_2$)} & & & \\
+\quad & 33.531 & 0.340 & 0.229 \\
+\quad & 58.185 & 0.434 & 1 \\
+\quad & 80 & 0.226 & 1 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H] \scriptsize
+\caption{Comparison of design points, weights, and cumulative failure probabilities under different model assumptions ($\sigma$ = 1.4780103)}
+\label{tab:design_comparison1.48}
+\centering
+\renewcommand{\arraystretch}{1.44}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Model} & \textbf{Point} & \textbf{Weight} & \textbf{Cumulative Probability} \\
+\midrule
+\textbf{Log-Normal (fixed $\theta_2$)} & & & \\
+\quad & 29.699 & 0.360 & 0.0506 \\
+\quad & 55.482 & 0.413 & 0.997 \\
+\quad & 80 & 0.227 & 1 \\
+\addlinespace
+\textbf{Log-Normal (unknown $\theta_2$)} & & & \\
+\quad & 29.974 & 0.339 & 0.0566 \\
+\quad & 56.272 & 0.423 & 0.998 \\
+\quad & 80 & 0.238 & 1 \\
+\addlinespace
+\textbf{Weibull (fixed $\theta_2$)} & & & \\
+\quad & 25.576 & 0.441 & 0.0801 \\
+\quad & 55.791 & 0.359 & 1 \\
+\quad & 80 & 0.200 & 1 \\
+\addlinespace
+\textbf{Weibull (unknown $\theta_2$)} & & & \\
+\quad & 26.713 & 0.396 & 0.100 \\
+\quad & 57.032 & 0.382 & 1 \\
+\quad & 80 & 0.222 & 1 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\newpage
+
+%\subsection{Model Discrimination Designs with Estimated Stress-Dependent Variance in the Rival Model} 
+\subsection{Equal Mean Response, Competing Distribution Assumptions with Stress-Dependent Variance}\label{SEC:Meeker}
+
+\hspace*{8mm} This section follows the fatigue life modeling framework proposed by \cite{pascual1997analysis}, which considers fatigue life data under the presence of a fatigue limit and allows the standard deviation to vary with stress levels. Traditional fatigue life models often assume the absence of a fatigue limit and a constant standard deviation; however, such assumptions frequently lead to modeling errors when applied to real-world data. Incorporating a stress-dependent standard deviation structure enables a more accurate representation of the curvature observed in S-N curves and better captures the dispersion characteristics of fatigue life data.
+
+\hspace*{8mm} To construct the life distribution more precisely, this study adopts the mean response model and stress-dependent variance structure suggested by \cite{pascual1997analysis}. The parameter settings are initially based on the estimates obtained through maximum likelihood estimation (MLE) and profile likelihood confidence intervals from their analysis. Additional simulation scenarios are independently defined but must satisfy two essential conditions: first, the mean response function $\eta(x,\theta)$  must be a decreasing function of stress, and it must remain strictly positive to ensure numerical stability; second, the variation of the standard deviation with stress must be controlled within reasonable bounds to prevent numerical overflow caused by excessively large exponential terms. Notably, their study estimated the parameter $\gamma=75.71$, which appears in both the mean response function and the variance structure, and this value is retained in the subsequent simulations.
+
+\hspace*{8mm} Based on these principles, a series of numerical simulations and model discrimination analyzes are conducted. The detailed simulation scenarios are summarized in Table \ref{tab:meekercase-situation}(with a censoring time of 1000), and the structures of the true model $M_1$ and the rival model $M_2$ are specified below, each comprising a mean response function and a stress-dependent standard deviation function.
+
+\begin{itemize}
+\item The true model $M_1$ is:
+\begin{equation}\label{meeker_truemodel}
+\eta_{tr}(x,\theta)=\zeta_1+\zeta_2\log(x-\gamma)
+\end{equation}
+\begin{equation}\label{meeker_truemodel_variance}
+\sigma_1=exp\left\{\phi_1+\phi_2\log(x-\gamma)\right\}
+\end{equation}
+
+\item The rival model $M_2$: 
+\begin{equation}\label{meeker_rivalmodel}
+\eta_2(x,\theta)=\delta_1+\delta_2\log(x-\gamma)
+\end{equation}
+\begin{equation}\label{meeker_truemodel_variance}
+\sigma_2=exp\left\{\kappa_1+\kappa_2\log(x-\gamma)\right\}
+\end{equation}
+
+\end{itemize}
+
+\hspace*{8mm} It is also noted that in the result tables, the searched parameter vector is expressed as $\hat{\theta}_2(\xi^*_{CKL})=(\hat{\delta_1},\hat{\delta_2},\hat{\kappa_1},\hat{\kappa_2})$, corresponding to the parameters in the mean response and stress-dependent variance models, respectively.
+
+\hspace*{8mm} In the final simulation scenarios of this study, although most results were numerically unstable or the directional derivative plots were difficult to interpret, some cases still demonstrated potential feasibility. Specifically, several designs—though degenerate in form with only a single support point—exhibited directional derivatives that remained strictly below zero across the entire design region, indicating stability under the equivalence theorem. Additionally, some non-degenerate designs showed directional derivative curves with slight local positivity; however, the magnitude of these positive values was extremely small (e.g., around $10^{-9}$ ), and the overall trend quickly returned below zero. These observations suggest that such designs have room for improvement and the potential to evolve into optimal solutions. A summary of the full simulation outcomes under different settings is provided in Table \ref{tab:meeker_tress-variance_result}.
+
+\hspace*{8mm} The numerical integration process may be another contributing factor to the observed instability. In particular, the log terms associated with the censoring component of the objective function can produce non-finite values under certain parameter and support point combinations, resulting in integration failure. These errors not only compromise the accuracy of the criterion function but may also cause the optimization process to terminate prematurely or converge to suboptimal regions. Future research could explore ways to improve the structure of the integrand, such as reformulating the log expressions via numerical approximation, refining the integration bounds, or incorporating error-handling mechanisms to recover from integration failures.
+
+\begin{table}[H] \footnotesize
+\caption{Simulation settings for Meeker cases including mean and dispersion parameters of the true and rival models}
+\label{tab:meekercase-situation}
+\centering
+\makebox[\linewidth][c]{%
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{cccccrrrrrrrrrr}
+  \toprule
+  &\multicolumn{2}{c}{Dis.} &&& \multicolumn{4}{c}{$M_1$} & & \multicolumn{4}{c}{$M_2$}\\
+  \cline{2-3} \cline{6-9} \cline{11-14}
+  Case & $M_1$ & $M_2$ && & $\zeta_1$ & $\zeta_2$ & $\phi_1$ & $\phi_2$ && $\delta_1$ & $\delta_2$ & $\kappa_1$ & $\kappa_2$ \\ 
+  \hline
+   (1) & \multirow{6}{*}{LN} & \multirow{6}{*}{WB} && & 14.75 & -1.39 & 10.97 & -2.5 && [12.06,17.44] & [-2.02,-0.76] & [10,20] & [-3,-0.01] \\ 
+   (2) &&&& & 14.75 & -1.39 & 10.97 & -2.5 && [15.9,21.45] & [-2.81,-0.92] & [10,20] & [-3,-0.01] \\ 
+   (3) &&&& & 10 & -2 & 0.63 & -0.91 && [9.5,15] & [-2.1,-1] & [0.5,1] & [-1,-0.81] \\ 
+   (4) &&&& & 43 & -0.63 & 4.32 & -0.88 && [5,50] & [-1,-0.05] & [3.12,5.32] & [-1,-0.5] \\ 
+   (5) &&&& & 458 & -53 & 4.32 & -0.88 && [432,480] & [-100,-1] & [3.12,5.32] & [-1,-0.5] \\ 
+   (6) &&&& & 53.39 & -7.81 & 4.32 & -0.88 && [50,60] & [-10,-5] & [3.12,5.32] & [-1,-0.5] \\ 
+   \toprule
+   (7) & \multirow{6}{*}{WB} & \multirow{6}{*}{LN} && & 14.75 & -1.39 & 10.97 & -2.5 && [12.06,17.44] & [-2.02,-0.76] & [10,20] & [-3,-0.01] \\ 
+   (8) &&&& & 14.75 & -1.39 & 10.97 & -2.5 && [15.9,21.45] & [-2.81,-0.92] & [10,20] & [-3,-0.01] \\ 
+   (9) &&&& & 10 & -2 & 0.63 & -0.91 && [9.5,15] & [-2.1,-1] & [0.5,1] & [-1,-0.81] \\ 
+   (10) &&&& & 43 & -0.63 & 4.32 & -0.88 && [5,50] & [-1,-0.05] & [3.12,5.32] & [-1,-0.5] \\ 
+   (11) &&&& & 458 & -53 & 4.32 & -0.88 && [432,480] & [-100,-1] & [3.12,5.32] & [-1,-0.5] \\ 
+   (12) &&&& & 53.39 & -7.81 & 4.32 & -0.88 && [50,60] & [-10,-5] & [3.12,5.32] & [-1,-0.5] \\ 
+  \toprule
+    \end{tabular}
+    }
+\end{table}
+
+\begin{table}[H]\scriptsize
+\caption{Summary of CKL-optimal design results for Meeker cases, under the same mean response structure but assuming the true model follows a Weibull distribution with variance depending on stress.}
+\label{tab:meeker_tress-variance_result}
+\begin{adjustwidth}{-2.5cm}{-2.5cm} 
+\makebox[\linewidth][c]{%
+\renewcommand{\arraystretch}{1.5} % 調整行間距
+\setlength{\tabcolsep}{3pt} 
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+Case & $\boldsymbol{\xi^*_{CKL}}$ & $C^* (\hat{C})$ & $\boldsymbol{\hat{\theta}_2(\xi^*_{CKL})}$ & \textbf{Eqv.} & \textbf{Opt?} & \textbf{Time} \\
+\hline
+(1) & $\left\{\begin{array}{cccc}
+88.245 & 115.191 & 122.132 & 123.571 \\
+1.000 & 0.000 & 0.000 & 0.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+2.023\times 10^{-8} \\
+(4.956\times 10^{-9})
+\end{array}$ & 
+$(14.918, -1.350, 11.824, -2.942)$ & 
+\ref{fig:meeker_lnIsTrue_1} & $\triangle$ & 4083 \\
+\hline
+(2) & $\left\{\begin{array}{cccc}
+76.389 & 86.024 & 94.240 & 112.132 \\
+0.000 & 1.000 & 0.000 & 0.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+6.725\times 10^{-8} \\
+(2.136\times 10^{-8})
+\end{array}$ & 
+$(20.968, -2.056, 10, -2.397)$ & 
+\ref{fig:meeker_lnIsTrue_2} & $\triangle$ & 5043 \\
+\hline
+(3) & $\left\{\begin{array}{cccc}
+111.009 & 112.296 & 113.75 & 150 \\
+0.000 & 0.000 & 1.000 & 0.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+27.167 \\
+(6.275\times 10^{-5})
+\end{array}$ & 
+$(10.597, -1.873, 0.723, -0.922)$ & 
+\ref{fig:meeker_lnIsTrue_3} & $\times$ & 4245 \\
+\hline
+(4) & $\left\{\begin{array}{cccc}
+77.297 & 78.038 & 109.932 & 132.334 \\
+1.000 & 0.000 & 0.000 & 0.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+2.449\times 10^{-12} \\
+(5.462\times 10^{-14})
+\end{array}$ & 
+$(36.931, -0.523, 3.791, -0.878)$ & 
+\ref{fig:meeker_lnIsTrue_4} & $\times$ & 3897 \\
+\hline
+(5) & $\left\{\begin{array}{cccc}
+90.99 & 98.775 & 108.941 & 116.822 \\
+0.464 & 0.231 & 0.271 & 0.035
+\end{array}\right\}$ &
+$\begin{array}{c}
+0 \\
+(0)
+\end{array}$ & 
+$(455.318, -49.116, 4.219, -0.533)$ & 
+\ref{fig:meeker_lnIsTrue_5} & $\triangle$ & 1376 \\
+\hline
+(6) & $\left\{\begin{array}{cccc}
+123.238 & 123.969 & 125.026 & 127.373 \\
+0.022 & 0.977 & 0.000 & 0.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+2.265\times 10^{-14} \\
+(-4.305\times 10^{-49})
+\end{array}$ & 
+$(55.951, -6.358, 3.846, -0.928)$ & 
+\ref{fig:meeker_lnIsTrue_6} & $\triangle$ & 7386 \\
+\hline
+(7) & $\left\{\begin{array}{cccc}
+76 & 86.748 & 126.815 & 150 \\
+0.476 & 0.247 & 0.000 & 0.277
+\end{array}\right\}$ &
+$\begin{array}{c}
+1.235\times 10^{-4} \\
+(1.208\times 10^{-4})
+\end{array}$ & 
+$(17.44, -1.638, 10, -2.028)$ & 
+\ref{fig:meeker_wbIsTrue_1} & $\triangle$ & 48506 \\
+\hline
+(8) & $\left\{\begin{array}{cccc}
+76 & 87.744 & 97.631 & 150 \\
+0.469 & 0.242 & 0.000 & 0.289
+\end{array}\right\}$ &
+$\begin{array}{c}
+1.173\times 10^{-4} \\
+(1.156\times 10^{-4})
+\end{array}$ & 
+$(18.350, -1.781, 10.011, -2.012)$ & 
+\ref{fig:meeker_wbIsTrue_2} & $\triangle$ & 54794 \\
+\hline
+(9) & $\left\{\begin{array}{cccc}
+80.622 & 94.153 & 94.67 & 127.625 \\
+0.259 & 0.519 & 0.000 & 0.221
+\end{array}\right\}$ &
+$\begin{array}{c}
+0.0907 \\
+(0.0872)
+\end{array}$ & 
+$(9.972, -1.995, 0.882, -0.839)$ & 
+\ref{fig:meeker_wbIsTrue_3} & $\times$ & 217023 \\
+\hline
+(10) & $\left\{\begin{array}{cccc}
+76 & 76.879 & 76.950 & 118.382 \\
+0.000 & 0.000 & 1.000 & 0.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+3.197\times 10^{-9} \\
+(3.808\times 10^{-10})
+\end{array}$ & 
+$(27.531, -0.658, 4.374, -0.728)$ & 
+\ref{fig:meeker_wbIsTrue_4} & $\triangle$ & 1487 \\
+\hline
+(11) & $\left\{\begin{array}{cccc}
+79.235 & 94.878 & 110.173 & 150 \\
+0.000 & 1.000 & 0.000 & 0.000
+\end{array}\right\}$ &
+$\begin{array}{c}
+1.808\times 10^{-91} \\
+(1.534\times 10^{-92})
+\end{array}$ & 
+$(473.842, -9.458, 4.621, -0.364)$ & 
+\ref{fig:meeker_wbIsTrue_5} & $\triangle$ & 1436 \\
+\hline
+(12) & $\left\{\begin{array}{cccc}
+104.273 & 113.865 & 130.105 & 150 \\
+0.982 & 0.000 & 0.000 & 0.018
+\end{array}\right\}$ &
+$\begin{array}{c}
+8.222\times 10^{-8} \\
+(4.220\times 10^{-8})
+\end{array}$ & 
+$(54.974, -7.423, 4.200, -0.586)$ & 
+\ref{fig:meeker_wbIsTrue_6} & $\triangle$ & 6743 \\
+\hline
+\end{tabular}
+}
+\end{adjustwidth}
+\end{table}
+
+\hspace*{8mm} Moreover, previous simulations using the CKL-, CLW-, CB-, and C$\chi^2$-optimal criteria revealed that the inner objective function, though theoretically differentiable, may lack sufficient smoothness in practice. When the function exhibits multiple local extrema or wave-like structures, solvers like L-BFGS, which rely on local curvature, may fail to converge and yield poor gradient searches. Given the increased complexity here, such issues are more likely, suggesting the need to revisit the function’s structure and consider alternative solvers.
+
+
+
+
+
+
+
+

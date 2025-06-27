@@ -1,0 +1,687 @@
+\documentclass[xcolor=dvipsnames,aspectratio=1610]{beamer}
+\usecolortheme[named=Blue]{structure}
+\input{preamble_GP_投影片.tex}  % 使用自己維護的定義檔
+\usetheme{Warsaw}
+\useoutertheme{miniframes}
+\title{Model Discrimination Design Generation for Accelerated Life Testing Experiments via Hybridized Optimization Algorithms}
+\author{Kuan-Yuan Lin}
+\institute[National Taipei University] % 簡短的學校名稱
+{
+  National Taipei University \\ % 學校名稱
+  \vspace{0.5cm}
+  \textbf{Advisor: Professor [Ping-Yang Chen]}  % 指導教授
+}
+\date{}
+
+\newcommand{\customtotalframes}{35}  % 自訂總頁數
+
+\setbeamertemplate{footline}{
+  \begin{beamercolorbox}[wd=\paperwidth,ht=2.5ex,dp=1.5ex,leftskip=0.3cm,rightskip=0.3cm]{section in head/foot}
+    \hspace*{0.3cm}\insertshortauthor \hfill \insertshorttitle \hfill  \insertframenumber / \customtotalframes
+  \end{beamercolorbox}
+}
+
+
+% 那今天我要介紹的論文主題是Model Discrimination Design Generation for Accelerated Life Testing Experiments via Hybridized Optimization Algorithms。
+
+\begin{document}
+
+\maketitle
+\begin{frame}{\textbf{Outline}}
+	\tableofcontents % 將所有節及子節的內容輸出成表
+\end{frame}
+
+% 那這是我的outline，首先第一部分會從模型辨識的角度出發，先講一下我們實驗設計採用的方式，接下來就是model discrimination用的criterion，然後舉一個簡單的例子後就進入到今天的主軸，就是加速壽命試驗是什麼，會對模型辨識造成什麼樣的影響，那第二部分就是進行一些數值研究，主要分成三個小部分，前面兩個是ALT Case，考慮的是不同的mean function一樣的模型分佈假設，第一個就是給定true model跟rival model的variance，但如果我不知道rival model的variance話怎麼辦，所以我們把變異參數化，最後進到Meeker case，在這個case中考慮的是相同的mean function但不一樣的模型分佈假設，而且剛剛講的變異參數化是指常數變異，現在這邊我們是考量variance depend on streess，最後就針對這些案例所發現到的事做一個簡單的總結。
+
+
+
+
+\section{Model Discrimination Design}
+\subsection{Approximation Design}
+\begin{frame}
+\frametitle{Approximation design}
+Two models:
+$$f_1(y\mid x,\theta_1,\sigma_1^2)=\beta_0+\beta_1 x$$
+$$f_2(y\mid x,\theta_2,\sigma_2^2)=\beta_0+\beta_1 x+\beta_2 x^2$$
+
+\begin{itemize}
+\item ex.Advertising expenses ($x$):\$10,000 $\sim$ \$500,000 VS. Sales volume ($y$)
+
+\item Approximation design:$\xi=\begin{bmatrix}x_1 & x_2 &\dots &x_n \\ w_1 & w_2 &\dots &w_n \end{bmatrix}$,\ $x_i$ are support point and $w_i\in[0,1],\sum_{i=1}^nw_i=1$ with $i=1,2,\dots,n$.
+\begin{itemize}
+\item If experimental budget allows for 100 runs.
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+% 首先我想先介紹什麼是approximation design，假設現在有兩個模型，但現在公司可能想看一下要花的廣告成本，跟銷售量之間到底是呈現線性成長還是二次成長，但在實務上當然不可能把每個費用點都做測試嘛，假設公司預算是一萬到五十萬好了，我不可能一萬塊做一次，兩萬塊做一次，一直做到五十萬吧，這樣實驗成本太高又會花太多時間，如果公司現在只允許你做三次測試，就得告訴他公司該用多少錢，那我怎麼知道到底是哪三個費用，這時就需要最佳化設計了，可以直接幫我們直接找到這三個費用，那如果是可以做五次呢，當然可以直接找出五個點，但如果是十次、一百次呢，當然就不可能一個一個找出來嘛，這時就有一種實驗設計叫approximation design，我們會傾向可能找出四個費用，再去看他們的比例要多少，這也是我們後續會採用的方式，所以這邊的w就是指權重，那他就得介在0跟1之間，加總起來得是1。
+
+
+\subsection{Optimal Design Criteria \& PSO-QN Algorithm}
+\begin{frame}
+\frametitle{KL-optimal design}
+
+\begin{itemize}
+\item Chen et al. (2020)
+\item When models do not have homoscedastic or normally distributed errors.
+\item KL divergence:
+$\mathcal{L}(f_{tr},f_2,x,\theta_2)=\int f_{tr}(y\mid x,\sigma_1^2)\log\left\{\frac{f_{tr}(y\mid x,\sigma_1^2)}{f_{2}(y\mid x,\theta_2,\sigma_2^2)}\right\} dy$
+\end{itemize}
+
+KL-optimal criterion:
+$$\max_{\xi\in \Xi} KL_{2,tr}(\xi)=\overbrace{\textcolor{blue}{\max_{\xi\in \Xi}} \overbrace{\textcolor{red}{\min_{\substack{\theta_2\in \Theta_2}}\mathcal{L}(f_{tr},f_2,x,\theta_2)}}^{\textcolor{red}{L-BFGS}}}^{\textcolor{blue}{PSO}}$$
+
+\begin{itemize}
+\item Equivalence theorem:
+$$\psi_{KL}(x,\xi_{KL}^\ast)=\mathcal{L}(f_{tr},f_2,x,\hat{\theta}_2(\xi_{KL}^\ast))-KL_{2,tr}(\xi_{KL}^\ast)\leq 0$$
+\end{itemize}
+\end{frame}
+% 剛剛講完我們後續會採用的設計方式，現在來講一下模型辨識會採用的criterion，我們想要去比兩個模型，那第一個會是已知的模型嘛，他可能是來自專家的意見，有可能是過去經驗看到的現狀，但我們現在認為接下來遇到的狀況可能跟原本的不太一樣，想要去稍微調整一下模型，就是我們假設的模型2，先不管模型的假設，想要比model mean 的話要怎麼去衡量他們的差異勒，比較經典的就是用KL-divergence，他是計算兩個機率分配的相似程度，所以我們想要去收集資料去看到底要使用新假設的模型，還是用原本的就好，最簡單的方法就是收集的資料能夠讓兩個模型的差異是很大的，大到足以讓我們分辨到底要選哪一個，前提是我們的theta_2要先估出來嘛，但我們還沒有資料要怎麼估，所以我們想要讓這兩個模型對於theta_2差異最小的那個theta_2差異要最大，那這樣我們以後不管資料來了估出來的theta是多少，他的差異就只會越大而已，所以現在的criterion有兩個Loop，本身要找到最佳解就不太容易了，而Chen在2020年提出的方法已經證明過使用PSO+LBFGS能有一定的成果，那一定會好奇為什麼不兩層都使用PSO呢，文獻上就有說明如果兩層都用PSO去找有時可能會花太久時間，那裡面這層會是convex的，通常對theta可微分，所以我們可以直接使用以微分為基礎的最佳化演算法去找，比如說用牛頓法去處理它，就會比PSO還快，但到外面這層就沒辦法這樣做了，所以我們就會用PSO去找最佳解。那我們要怎麼知道我們現在找到的approximation design是最好的，我們是有理論支持的，那在這個領域都稱為Equivalence theorem，那看向公式，第二項就是我們找出來的design，那第一項就是運用我們剛剛估出來的theta_2去對應到全部的x，計算他們的差值永遠都會比我們找到的design的值還要小，那就代表我們找到的是最好的。
+
+% log 概似函數比值的期望值，要比較兩個模型的話最簡單就是平均減平均，但這只有在常態假設底下才會有好的統計性質，所以如果不是常態的話就會想到可以用概似比值，取log就是因為可以變成相加相減，最後就是我不太可能逐點比較，所以就取期望值
+
+\begin{frame}
+\frametitle{T-optimal design}
+\begin{itemize}
+\item Atkinson and Fedorov(1975)
+\item Suppose we have 2 homoscedastic Gaussian models.
+
+\end{itemize}
+T-optimal criterion:
+$$\max_{\xi\in \Xi} T_{2,tr}(\xi)=\overbrace{\textcolor{blue}{\max_{\xi\in \Xi}} \overbrace{\textcolor{red}{\min_{\substack{\theta_2\in \Theta_2}}\int_{X}\left[\eta_{tr}(x)-\eta_2(x,\theta_2)\right]^2 \xi(dx)}}^{\textcolor{red}{Inner\ Loop}}}^{\textcolor{blue}{Outer\ Loop}}$$
+\begin{itemize}
+\item Equivalence theorem:
+$$\psi_T(x,\xi_T^\ast)=\Delta_{2,tr}(x,\hat{\theta}_2(\xi_T^\ast))-T_{2,tr}(\xi_T^\ast)\leq 0$$
+\end{itemize}
+\end{frame}
+% 那如果模型都剛好是iid normal的話，那KL optimal design就會回到比較簡單的版本，就是T optimal design，在Normal的假設底下，直接去看他們的差值就好，在1975年Fedorov就提出模型辨識設計這個問題，但這種optimal design是很難單純用理論的方式去著手的，當時他是使用exchange 演算法，這是實驗設計上最常用也最不好用的東西，遇到複雜一點的情況的話，會很難找到最佳解不然就是找出來的結果很醜，可能原本設定三個點，但找出來會是很多點然後散佈在三個區域，以剛剛的例子來說，他會先把他可能切個每一百元一個實驗點，然後找一個基準組別，比如說100,200,300好了，那再額外一一加點進去，看看加了之後會讓他的criterion進步還退步，那如果進步的話那那個點就加進去，所以如果加的點是一樣的，那他的weight就會比較高，不斷做這件事情直到他收斂了，但切這種網格點的話他是可能會有三個區間，可能99,100,101這邊都有一定的權重，這樣support point可能就會太多，所以才會有剛剛提到Chen提出的方式，他們希望能改善這個問題。
+
+\begin{frame}
+\frametitle{PSO(Particle Swarm Optimization)}
+\begin{figure}
+    \centering{
+        \includegraphics[scale=0.315]{\imgdir PSO介紹-1.png}}
+\label{fig:PSO介紹-1}
+\end{figure}
+\begin{figure}
+    \centering{
+        \includegraphics[scale=0.315]{\imgdir PSO介紹-2.png}}
+\label{fig:PSO介紹-2}
+\end{figure}
+\end{frame}
+% 所以接下來就來介紹一下Chen所使用的PSO，PSO就是粒子群優化演算法，他的想法是模擬鳥群跟魚群的活動方式，像鳥類出去找食物都會一群鳥一起行動嘛，假如說有隻鳥看到食物了，那其他隻鳥就會往他看到的食物飛過去，所以我們的式子v就是接下來要走的方向會分成三個面相，首先是綠色，我自己可能看到很多地方有食物，那我就會往最多食物的那邊前進，這就是Local Best，第二個是藍色，就是我原本走哪個方向，我也會參考一下繼續走，最後一個是紅色，因為我們出去都是集體嘛，那可能有人比我看到的食物還更多，所以這邊就會去看所有人當中，會往看到食物最多的那個方向前進，這就是Global Best，所以問用向量的概念組合這三個面向，我們就知道下一步要往哪裡走，下面是PSO的流程圖，先初始化粒子的位置，找到Local Best跟Global Best，知道要往哪走後重複這個流程直到找到最佳解。
+
+\subsection{Toy Example:Fidalgo Case}
+\begin{frame}
+\frametitle{Fidalgo Case}
+\begin{itemize}
+\item López-Fidalgo et al.(2007)
+\end{itemize}
+Pharmacokinetic models are often assumed to be \textcolor{red}{Log-Normally distributed}.
+
+\begin{itemize}
+\item Modified Michaelis–Menten (MMM) model.
+\item Michaelis–Menten (MM) model.
+\end{itemize}
+$\textsc{Pharmacokinetic model}\Rightarrow\begin{cases}\textsc{MMM：}y=\frac{x}{1+x}+x\\\textsc{MM：}\ \ \ y=\frac{Vx}{K+x}\end{cases},X=[0.1,5]$
+
+\begin{itemize}
+\item $x$ is the substrate concentration.
+\item $y$ is the velocity rate of product formation in a chemical reaction.
+\item $V$ is the maximum velocity rate.
+\item $K$ is the concentration at which half of the maximum velocity rate is reached.
+\end{itemize}
+\end{frame}
+% 接下來我舉一個簡單的例子，這邊是參考Fidalgo在2007年提出的KL-optimal design使用的範例，他是舉藥物動力學模型，通常會假設是log-normal distribution，為了簡化問題，所以就將真實模型的參數都設定成1就好，那當時他是採用跟Fedorov的一樣的方式，是用exchange algorithm，先來檢驗一下我們用Chen的PSO加上LBFGS的結果會不會一樣。
+
+% 經常用來預測化學反應中產物的形成速率，x是指反應物濃度，現在想要找到一個實驗設計能夠讓這兩個模型的差異會最大。
+
+\begin{frame}
+\frametitle{Fidalgo Case}
+Log-Normal
+\begin{figure}
+    \centering{
+        \includegraphics[scale=0.575]{\imgdir lognormal-closedform.png}}
+\end{figure}
+\end{frame}
+
+% 那首先就先計算我們的目標函數嘛，現在是使用KL divergence，所以計算過程就能長成這樣，看起來積分還可以算嘛，能推到有close form的結果，那如果你不想要做這個推導呢，從積分角度出發的話，就可以用數值積分去做，那我們就有兩種方案可以去使用，所以我們在這個案例除了要驗證我們使用的方式跟Fidalgo結果會不會一樣，還要確認這兩個方案做出來的結果穩不穩定。
+
+\begin{frame}
+\frametitle{Fidalgo Case}
+Assumption:
+\begin{itemize}
+\item homoscedasticity and models are assumed to be \textcolor{red}{Log-Normal distributed}.
+\end{itemize}
+\begin{figure}
+    \centering{
+        \includegraphics[scale=0.6]{\imgdir Fidalgo-LN.png}}
+\end{figure}
+\end{frame}
+
+% 那算出來確實跟Fidalgo的結果一樣，然後用剛剛講的兩個方案來比較的話，closed form算出來速度很快，直接使用數值積分的話也能保證一樣的結果，但就會發現算的時間會比較長一些。那下面就是我們使用等價定理去確認我們找出來的設計是最好的，那結果也是肯定的，先簡單說一下這個圖要怎麼判斷是不是最佳，就是要全部為在0以下，然後極值點也要剛好碰到我們的設計點。
+
+\begin{frame}
+\frametitle{Fidalgo Case}
+Weibull
+\begin{figure}
+    \centering{
+        \includegraphics[scale=0.65]{\imgdir weibull-closedform.png}}
+\end{figure}
+\end{frame}
+
+% 那如果現在將分佈改成Weibull呢，這個積分式看起來就又更不友善了，雖然我們還是可以推出一個closed form，但這種情況我們可能會更想放棄使用理論積分，所以我們一樣先來比比看使用closed form跟直接積分這個KL divergence的結果
+
+\begin{frame}
+\frametitle{Fidalgo Case}
+Assumption:
+\begin{itemize}
+\item homoscedasticity and models are assumed to be \textcolor{red}{Weibull distributed}.
+\end{itemize}
+\begin{figure}
+    \centering{
+        \includegraphics[scale=0.585]{\imgdir Fidalgo-WB.png}}
+\end{figure}
+\end{frame}
+
+
+% 可以看到兩個結果非常的相似，那為什麼我們需要來做這個比較，因為接下來後面會講可靠度的時候，在積分的處理上，尤其是有censored data，就不太容易獲得到closed form的結果，現在講的例子除了介紹model discrimination design之外，同時也驗證了稍後在做可靠度議題下運用數值積分的可行性
+
+\subsection{Model Discrimination Design for Accelerated Life Testing}
+\begin{frame}
+\frametitle{Accelerated Life Testing}
+\begin{itemize}
+\item Nasir and Pan(2014)
+\end{itemize}
+\begin{figure}
+    \centering{
+        \includegraphics[scale=0.5]{\imgdir ALT concept.png}}
+\end{figure}
+\end{frame}
+
+% 那model discrimination在可靠度上我們是從潘榮這篇paper來學習的，首先我想要先借用文獻中的圖來介紹一下ALT的概念，假設目前有兩個模型 M1 和 M2，目標是預測產品的壽命第 p 百分位數。但像燈泡好了，要等到它壞掉可能要好幾年，我們不可能等到他壞掉了才來做分析嘛，像這種沒辦法在短時間內獲得產品失效數據時，通常就會透過提高應力來加速產品故障，那在圖中我們就假設兩個應力，就低應力跟高應力，然後分別去看在這兩個應力底下，產品失效數據的分佈，再運用外推的方時去預測實際使用應立下的失效分佈來推估產品壽命，那考慮的模型會是什麼呢，一個在log lifetime 上能線性decay的模型，那比較常用到的就是Arrhenius model。
+
+% 此外，在高應力條件下，產品壽命的變異性較大，數據分佈可能呈現高度偏態（skewed），而對數變換後，壽命數據通常更接近常態分佈，有助於提高模型的適用性與參數估計的穩定性。因此，對 $M_1$ 和 $M_2$ 進行相同的實驗測試，觀察它們在不同應力條件下的壽命第 $p$ 百分位數（$\tau_p$），並分析兩者的對數變換後的壽命分佈變化 $\Delta\hat{\tau_p}$，使不同模型在不同應力條件下的行為變化更直觀，進而幫助進行模型辨識。
+
+\begin{frame}
+\frametitle{Accelerated Life Testing}
+\begin{itemize}
+\item Nasir and Pan(2014)
+\end{itemize}
+
+The Arrhenius life-temperature:
+$$t(T)=Aexp\left( \frac{E_a}{K \times Temp} \right)$$
+
+Type I censored data (time censoring):
+$$Pr(t>C)=1-F(C),C>0$$
+
+Disadvantages of using bayesian approach:
+\begin{itemize}
+\item Computation time is too long.
+
+\item Results are not reproducible.
+\end{itemize}
+
+% 
+
+
+% 那稍微介紹一下潘榮所做的研究，他們就使用可靠度領域下很常使用的 Arrhenius model，但還有一個問題，雖然說我們增加應力使產品趕快壞掉了，但還是有可能有部分產品在你想結束實驗的時候還沒壞，所以這時候我們就得設定一個censored time，所以文中還加入了censored data，這個模型辨識在可靠度上不好做就是因為像我們要算KL divergence，但我沒有他的model distribution，因為大部分資料censored掉了嘛，那後面這段要怎麼把他的機率分佈寫下來，沒辦法只能抽樣，就是使用bayesian approach去模擬，已經抽資料了，那任何的difference都可以拿來計算，因為抽完就知道experical distribution長什麼樣子了，但這樣當然就會有幾個缺點，第一個是計算耗時嘛，再來就是我們沒辦法復現上一次的結果。
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Accelerated Life Testing}
+\begin{itemize}
+\item Park and Shin(2012)
+\end{itemize}
+Consider the Type I censored variable $min(X,C)$, where $C$ is a fixed censoring point. The density function becomes:
+$$f_C(x)=\begin{cases}f(x) & if\ x < C,\\1-F(C) & if\  x = C,\\0 & if\ elsewhere.\end{cases}$$
+The Kullback–Leibler (KL) divergence between two censored densities $f_{tr}$ and $f_r$ is:
+$$D_{CKL}(f_{tr}, f_r) = \int_{-\infty}^C f_{tr} \log \left\{ \frac{f_{tr}}{f_r} \right\} dy + \bar{F}_{tr}(C) \log \left\{ \frac{\bar{F}_{tr}(C)}{\bar{F}_r(C)} \right\}$$
+\end{frame}
+
+% 所以我們就去找看看有沒有什麼paper是有針對這個部分去做研究的，就有發現到Park他們在2012年有提出在Type I censored底下KL divergence可以寫成這個樣子，後面censored的部分就直接用存活函數去計算。
+
+% 而現在如果我們沒有給一個prior去算model parameters去抽樣，沒做這件事的話，就只剩下最原始的model assumption加上censored data的要求，所以如果要拿KL divergence的話我們根本不知道那個model 的form是長怎樣，機率模型長怎樣是不知道的，你只知道likelihood長怎樣，雖然pdf跟likelihood的長相乍看之下是一樣的，但如果對likelihood積分的話他不會是1，他如果要變成pdf，還需要除上一個常數，但沒有人知道這個常數是多少，所以潘榮才會使用貝氏的方法，理論上做不了就用經驗去做，這個方法還不錯，但對我們來說是有一些缺點在的，所以想要看可不可以從過去已經累積一定經驗的KL optimal design的成果，繼續往下在這些成果之上去做可靠度的問題，現在問題就是當我們變數是censored的時候，我們的KL divergence不知道怎麼定義，所以我們找到了一篇文獻，KL divergence可以寫成這樣。
+
+
+\begin{frame}
+\frametitle{Divergence Measures}
+\begin{itemize}
+\item A.Pakgohar et al.(2019) proposed another three divergence measures under Type I censored data.
+\begin{itemize}
+\item Lin-Wong (LW) divergence:
+{\footnotesize
+$$D_{CLW}(f_{tr}, f_r) = \int_{-\infty}^C f_{tr} \log \left\{ \frac{2f_{tr}}{f_{tr} + f_r} \right\} dy + \bar{F}_{tr}(C) \log \left\{ \frac{2\bar{F}_{tr}(C)}{ \bar{F}_{tr}(C) + \bar{F}_r(C)} \right\}$$
+}
+\item Bhattacharyya (B) distance measure:
+{\footnotesize
+$$D_{CB}(f_{tr}, f_r) = \int_{-\infty}^C \sqrt{f_{tr} \cdot f_r} \, dy + \sqrt{\bar{F}_{tr}(C) \cdot \bar{F}_r(C)}$$
+}
+\item Chi-Square ($\chi^2$) distance measure:
+{\footnotesize
+$$D_{C\chi^2}(f_{tr}, f_r) = \int_{-\infty}^C \frac{(f_{tr})^2}{f_r} \, dy + \frac{\left(\bar{F}_{tr}(C)\right)^2}{\bar{F}_r(C)} - 1$$
+}
+\end{itemize}
+\item So we propose four optimal design:CKL-,CLW-,CB-,C$\chi^2$-optimal design
+\end{itemize}
+
+
+\end{frame}
+
+% 從剛剛那篇再往下去找，又有找到一篇paper是Pakgohar在2019年提出了另外三種在type I censored下的criterion，所以將這四個放進我們的模型辨識中，提出了這四個optimal design，分別是CKL,CLW,CB,C卡方
+
+
+
+
+\section{Numerical Results}
+\subsection{ALT Case-Fixed the Variance of True Model and Rival Model}
+\begin{frame}
+\frametitle{ALT Case}
+\begin{itemize}
+\item Arrhnius model
+\begin{align}
+&t(T)=Aexp\left( \frac{E_a}{K \times Temp} \right)\notag \\ 
+\Rightarrow&\log(t(T))=\log(A)+\frac{E_a}{K \times Temp}\notag \\ 
+\Rightarrow&\underbrace{\log(t(T))}_{\mu}=\underbrace{\log(A)}_{\beta_0}+\underbrace{\frac{E_a}{K}}_{\beta_1} \times \underbrace{\frac{1}{Temp}}_x. \notag \label{M2 linearized}
+\end{align}
+\item The true model $M_1$ is a quadratic form:
+\begin{equation} \notag 
+\eta_{tr}(x,\theta_1)=\zeta_1+\zeta_2x+\zeta_3x^2.
+\end{equation}
+
+\item The rival model $M_2$ is a linear form: 
+\begin{equation} \notag
+\eta_{2}(x,\theta_2)=\delta_1+\delta_2x.
+\end{equation}
+
+\end{itemize}
+
+\end{frame}
+
+% 好的，要正式進入數值結果的部分了，首先是ALT case，主要是參考潘榮那篇的架構，那上面這個是 Arrhenius model ，取log之後就可以變成線性的形式，所以就讓M2是Arrhenius model的原型，就是linear的而已，但也有人在考慮在這個架構下，M1的quadeatic那個樣子，所以我們就將這兩個模型來做模型辨識設計
+
+\begin{frame}
+\frametitle{ALT Case}
+\begin{itemize}
+\item 18 simulation cases were conducted (fixed the variance of true model and rival model)
+\item Setting:
+\begin{itemize}
+\item Censoring time:5000
+\item The true model parameters:$\theta_{tr} = (\zeta_1, \zeta_2, \zeta_3) = (-5.0, -1.5, 0.05)$
+\item The parameter space of the rival model:$\theta_2 = (\delta_1, \delta_2) \in [-100, -10] \times [0.1, 5.0]$
+\item The design space:$x \in [10, 80]$
+\end{itemize}
+\item CKL-optimal design: 12 $\surd$, 3 $\triangle$, 3 $\times$.
+\item CLW-optimal design: 4 $\surd$, 6 $\triangle$, 8 $\times$.
+\item CB-optimal design: 0 $\surd$, 14 $\triangle$, 4 $\times$.
+\item C$\chi^2$-optimal design: 2 $\surd$, 7 $\triangle$, 9 $\times$.
+
+\end{itemize}
+
+\end{frame}
+
+% 那在這部分做了18種數值實驗，那這18種都是給定兩個模型的變異，針對這個變異的程度去做調整，還有兩模型的分佈假設都是Log Normal或是都是Weibull，所以就有18種情境，那在這裡我們就有加入censored time，是設定5000，接著就對幾個參數做一些設定，設定好後就開始用剛剛提出的四個optimal design看看表現如何，那CKL表現是最好，那這個最好是怎麼定義的，approximation design在模型辨識設計上在過去也沒什麼人做過，然後又因為這四個criterion是新提出來的，所以想要看一下有沒有辦法真的拿來當optimal design的criterion，就設計了這些情境來看看哪一個criterion 是能讓我們比較能找到optimal design的，那照這個結果來看的話就發現CKL相對容易一點
+
+
+
+
+\begin{frame}
+\frametitle{ALT Case}
+The optimality check results are classified into three levels:
+
+\begin{itemize}
+\item $\surd$ indicates full satisfaction of the optimality conditions:
+
+each support point has a non-zero weight; the directional derivative function lies entirely below zero; the design points correspond to local maxima of the function with value exactly zero; and the curve is smooth and continuous in shape.
+
+\item $\triangle$ indicates partial satisfaction. Typically arising in the following scenarios:
+
+\begin{figure}
+    \centering{
+        \includegraphics[scale=0.5]{\imgdir ALT-case.png}}
+\end{figure}
+
+\item $\times$ indicates that the optimality conditions are not satisfied.
+\end{itemize}
+
+\end{frame}
+
+% 因為我們是提全新的criterion，所以從理論的角度我們還沒有認真的去探討等價定理行不行，在這邊我們是先做應用，來看看哪個criterion是比較有機會通過這個等價定理的，雖然前面有稍微提一下，但這裡就來認真介紹一下我們判斷的依據，首先要服從最佳性的幾個條件，就從圖上來看的話要全部位在0以下，每個設計點都得要有權重，然後極值要剛好碰到設計點，最後就是要是平滑的曲線，那中間這邊就是只有滿足幾項，但我們認為是有潛力達到optimal的，那就舉幾個在這個case裡常看到的現象，像第一個就是只有第一個點有權重，其他兩個權重都是0，第二個則是凸出去一點點但看到這個scale很小，所以感覺再多讓模擬或許就能找到最佳解，第三個是快碰到但都還沒碰到，最後則是他的震動幅度很小，小到圖畫不出來，但如果他沒有符合這幾個條件的話，應該會像第二個這樣差一點點，但無從得知，所以就放在三角形。
+
+
+
+
+\begin{frame}
+\frametitle{ALT Case}
+
+\begin{figure}
+    \centering{
+        \includegraphics[scale=0.6]{\imgdir ALT-CKL.png}}
+\end{figure}
+
+\end{frame}
+
+% 那這張表示我從論文上面直接截圖下來的CKL部分結果，那這邊是想強調一下當我們有找到optimal的時候，中間這邊這個C*跟C hat會有什麼樣的現象，首先就是C*是在不考慮任何假設底下所算出來的criterion value，那C hat則是在我給定這個design底下所算出來的criterion value，所以正常來說，如果我們找到的design是最好的，那找出來的criterion應該要一樣，那大家也能看一下這個表來驗證這個論點。
+
+\begin{frame}
+\frametitle{ALT Case}
+
+\begin{figure}
+    \centering{
+        \includegraphics[scale=0.9]{\imgdir ALT-Cchi.png}}
+\end{figure}
+
+\end{frame}
+
+% 那這張是CB的部分結果，這邊就能發現如果沒有optimal，那他的C*跟C hat是有可能會差距很大的，大家可以看向第二個，就是當我們不給任何條件帶進去算出來的最短距離是726，但在給定這個approximation design下帶進去算，竟然可以找到距離是極小值，這就代表原本演算法在找的時候，他就沒有往正確的地方去找，搞不好在inner loop的過程他就不知道誤會了什麼，就往錯的地方走了。
+
+% ??criterion value 負的
+
+\subsection{ALT Case-Parameterized Variance}
+\begin{frame}
+\frametitle{ALT Case}
+Parameterized Variance:
+\begin{itemize}
+\item The true model parameters:$\theta_{tr} = (\zeta_1, \zeta_2, \zeta_3) = (-5.0, -1.5, 0.05)$, with the variance fixed 0.9780103 and 1.4780103.
+\item The rival model parameters:$(\delta_1, \delta_2) \in [-100, -10] \times [0.1, 5.0]$, with an additional unknown constant variance parameter $\sigma_2 \in [0.4780103, 4.9780103]$.
+\item The design space is $x \in [10, 80]$.
+\item $\theta_2=(\delta_1,\delta_2,\sigma_2)$
+
+\item The true model $M_1$ is a quadratic form:
+\begin{equation} \notag 
+\eta_{tr}(x,\theta_1)=\zeta_1+\zeta_2x+\zeta_3x^2.
+\end{equation}
+
+\item The rival model $M_2$ is a linear form: 
+\begin{equation} \notag
+\eta_{2}(x,\theta_2)=\delta_1+\delta_2x.
+\end{equation}
+\end{itemize}
+
+\end{frame}
+
+% 那第二個小部分是延續剛剛的案例，但跟剛剛不一樣的是我們現在把條件放寬一條，就是如果我們不知道rival model的variance的話有沒有辦法，所以我們就把這個變異參數化，那這裡我們就不像剛剛一樣直接去做四個divergence的比較了，我們直接使用表現比較好的CKL，然後給定true model底下的variance，一樣設剛剛表現比較好的0.98,1.48，那因為我們現在把變異參數化了嘛，所以也要給他一個範圍，那我們就是設在0.48,4.98之間，好那這裡再強調一次這個部分跟剛剛有什麼差異，就是參數內多了一個rival model的variance。
+
+\begin{frame}
+\frametitle{ALT Case}
+\begin{itemize}
+\item Both models follow the Log-Normal distribution:
+\end{itemize}
+
+\begin{figure}
+    \centering{
+        \includegraphics[scale=0.6]{\imgdir ALT-estimate-var-ln.png}}
+\end{figure}
+
+\end{frame}
+
+% 那這邊是當兩個model都服從Log-normal分配的話之下，都能找到optimal design，然後看一下這邊，能發現找到的參數會跟true model的variance很像。
+
+
+\begin{frame}
+\frametitle{ALT Case}
+\begin{itemize}
+\item Both models follow the Weibull distribution:
+\end{itemize}
+
+\begin{figure}
+    \centering{
+        \includegraphics[scale=0.6]{\imgdir ALT-estimate-var-wb.png}}
+\end{figure}
+
+\end{frame}
+
+% 那如果把兩個分佈的假設改成Weibull的話呢，那大家先看到右邊雖然沒有達到optimal，但根據前面的介紹，我們能發現他其實有可能再多模擬幾次就能找到最佳解了，就是他是有那個potential的，然後一樣看向參數的地方，能發現跟剛剛有一樣的結果，就是找到的參數都會跟true model的variance很像，但這個現象我們不能說他是還原true model的variance喔，我們應該要想成，在只給定true model的variance下，如果要達到最好的模型辨識設計的話，那rival model的variance會在true model的variance附近讓他們模型差異最大。
+
+
+
+\begin{frame}
+\frametitle{ALT Case}
+
+\begin{figure}
+    \centering{
+        \includegraphics[scale=0.675]{\imgdir ALT-compare-0.98.png}}
+\end{figure}
+\footnotetext[1]{Cumulative Probability=$F(C;x)$}
+\end{frame}
+
+% 那如果把剛剛那兩個部分放在一起做比較呢，就是比較在給定rival model的variance底下跟不給定的結果，我們來看看會發現什麼，首先就是第三個點固定，但前面兩個點他會傾向往大的地方去找，而且在weibull的假設下，會比log normal找的幅度要更大一點，那右邊這裡是我想要去看一下我們找到的design是不是合理的，就是我想要每個設計點下都要有一定比例的真實資料，而不是全部的資料都censored掉，那這個模擬就沒什麼真實性了嘛，所以我們就來看看在censored time 底下他會失效的累積機率，那每個design都不是全部censored的，所以還算合理。
+
+
+\begin{frame}
+\frametitle{ALT Case}
+
+\begin{figure}
+    \centering{
+        \includegraphics[scale=0.675]{\imgdir ALT-compare-1.48.png}}
+\end{figure}
+\footnotetext[1]{Cumulative Probability=$F(C;x)$}
+\end{frame}
+
+% 那剛剛是給定true model的variacnce為0.98的情況，現在是1.48，那一樣有呈現剛剛的結論，就是第三個點不動，但前兩個點會往比較大的找，而且Weibull會找的比log normal還要更多，那看累積機率的話也發現每個design都有一定的真實資料。
+
+
+\subsection{Meeker Case-Variance Dependent on Stress}
+\begin{frame}
+\frametitle{Meeker Case}
+Stress-Dependent Variance
+\begin{itemize}
+\item Pascual and Meeker (1997)
+
+\item Their study estimated the parameter $\gamma=75.71$
+
+\item Censoring time:1000
+
+\item The true model $M_1$ is:
+\begin{equation}\notag
+\eta_{tr}(x,\theta)=\zeta_1+\zeta_2\log(x-\gamma)
+\end{equation}
+\begin{equation}\notag
+\sigma_1=exp\left\{\phi_1+\phi_2\log(x-\gamma)\right\}
+\end{equation}
+\item The rival model $M_2$: 
+\begin{equation}\notag
+\eta_2(x,\theta)=\delta_1+\delta_2\log(x-\gamma)
+\end{equation}
+\begin{equation}\notag
+\sigma_2=exp\left\{\kappa_1+\kappa_2\log(x-\gamma)\right\}
+\end{equation}
+\item $\theta_2(\xi^*_{CKL})=(\delta_1,\delta_2,\kappa_1,\kappa_2)$
+
+\end{itemize}
+
+
+\end{frame}
+
+% 那剛剛講的都是考慮mean function 不一樣，但現在是mean function一樣囉，這個概念是從meeker在1997年發表的paper來的，這樣模型辨識是在辨識什麼，辨識的是背後的模型假設是服從log normal 還是weibull，而且難度還提高了，現在的variance是depend on stress，所以這個case不是很好做，我們也不期望有太好的結果，就先來做嘗試看看這樣的研究有沒有繼續發展的潛力，至於設定的部分現在的censored time我們改設一千，然後meeker在paper中有把gamma估計出來，所以我們就直接設進去，好所以這個case跟前面最不一樣的地方就是我們現在參數還多了變異這邊的kappa1,kappa2。
+
+\begin{frame}
+\frametitle{Meeker Case}
+Stress-Dependent Variance
+
+\begin{figure}
+    \centering{
+        \includegraphics[scale=0.6]{\imgdir meeker-setting.png}}
+\end{figure}
+
+\end{frame}
+
+% 好，所以我們的案例就分成一個是log-normal另一個就是weibull，那後面的設定就是隨意亂試，但當然要服從幾個條件，像是要mean function要是遞減函數，然後剛剛看到的variance的結構是有exponencial的，所以裡面的數值也不能太大，就產生了這12種情境。
+
+
+\begin{frame}
+\frametitle{Meeker Case}
+
+\begin{figure}
+    \centering{
+        \includegraphics[scale=0.575]{\imgdir meeker-result.png}}
+\end{figure}
+
+\end{frame}
+
+% 那從結果來看的話確實沒有辦法這麼輕易的找到一個optimal design，但有其中幾個還是有一點potencial的，我抓其中兩個圖來看好了。
+
+\begin{frame}
+\frametitle{Meeker Case}
+\begin{figure}[H]
+\centering
+\subfloat[Meeker Case (2)]{\includegraphics[width=0.45\linewidth]{\imgdir meeker_lnIsTrue_2.png}}
+\subfloat[Meeker Case (8)]{\includegraphics[width=0.45\linewidth]{\imgdir meeker_wbIsTrue_2.png}}
+\end{figure}
+\end{frame}
+
+% 看兩張圖就能明顯發現像左邊這個，就是凸一點點，然後快碰到，函數也是平滑的，啊右邊的尾巴這也有往下降的趨勢，所以雖然結果都是degenerate design，但是有optimal的潛力的。
+
+\section{Conclusion}
+\begin{frame}
+\frametitle{Conclusion and Limitations}
+
+\begin{itemize}
+\item This study considers censored data, a common feature in the field of reliability and survival analysis.
+\item We propose four divergence measures-based model discrimination criteria:
+CKL-, CLW-, CB-,and C$\chi^2$-optimal designs.
+\item The numerical optimization was implemented using a hybrid method: PSO + L-BFGS.
+\item The algorithm is refined to accommodate both constant and stress-dependent variance estimation.
+\item In addition to models with different mean functions, we also explore cases with identical means but different distributional assumptions.
+\end{itemize}
+\end{frame}
+
+
+% 那來做個總結，針對ALT之下的模型辨識，過去沒有這種模型辨識設計的準則，潘榮是用另一種方式用抽樣做的，並不是真的考慮到censored data，是先抽了再決定哪些資料censored掉，所以他是造了一個經驗分佈來算距離，但從根本的model角度出發，目前還尚未發現一個準則，所以我們現在從文獻上整理出來，大概有這四個準則，那這裡面會遇到的幾個問題，像我們在做數值積分的時候，我們嘗試了不同的方式，也使用了不同的套件去對這四種optimal criterion做測試，而CKL相對穩定一些，LW勉強還行，但另外兩個就真的很烙賽。那criterion的制定從我們開始有了新的方向。那既然有criterion了那是不是就直接套上Chen2020那個package就好了，但在用的過程中又發現，在可靠度模型中，對variance的假設能不能放寬，就不要給定rival model的variance，但如果不固定的話，2020那個版本的套件就不能使用了，所以得先針對當時的套件做改良，而且我們看到Meeker case的那個variance的結構還跟stress有關係，所以一次把它都考慮進去去對套件升級，然後過去文獻考慮的都是model mean不一樣模型假設一樣，那現在我們也嘗試去做model mean 一樣但模型假設不一樣，當然這個結果還沒有到特別理想，原本預期要能找到optimal design，但最後結果出來都是degenerate，也不知道真實原因為何。
+
+
+
+\begin{frame}
+\frametitle{Conclusion and Limitations}
+
+\begin{itemize}
+\item Among the four criteria, the CKL-optimal design consistently outperformed the others.
+
+\item The Meeker case shows strong potential for CKL-optimal design.
+
+\item The inner objective function, may exhibit multiple local optima or strong non-convexity, limiting the effectiveness of L-BFGS.
+
+\item Numerical instability can occur during the integration process.
+\end{itemize}
+\end{frame}
+
+% 所以四個新提出的準則當中，是CKL表現最好，然後把他拿去做Meeker case的話，就是相同mean function，不同分佈假設的情況也表現得很有潛力，那為什麼前面會有很多個結果是沒辦法找到optimal design，我們猜測的原因是雖然目標函數是可微的，用 L-BFGS 本來是合理的，但實際上，函數可能表現出多個局部極值或劇烈震盪之類的特徵，這樣他很難找到真正的最佳解，那另一個原因就是數值計算非常的不穩定。
+
+\begin{frame}
+\frametitle{Future Works and R Implementation}
+
+\begin{itemize}
+\item Improved the integration implementation in the code.
+
+\item Revised mathematical form of the censoring term.
+
+\item Further investigate the landscape of the inner objective function and explore global or hybrid optimization strategies beyond traditional gradient-based methods.
+
+\item Explored a compound CKL + D-optimal design strategy.
+\end{itemize}
+\vspace{0.5cm}
+\begin{itemize}
+\item R Code: \href{https://github.com/GPLIN514/Master-Thesis-ALT-Model-Discrimination-Design/blob/main/Thesis-code/code/Appendix\%20B\%20example\%20code.R}{GitHub/GPLIN514}
+
+\item R shiny: \href{https://msgplin.shinyapps.io/Model-Discrimination-Design/}{shinyapps.io/MSGPLIN}
+
+\end{itemize}
+
+\end{frame}
+
+% 那我們未來可以怎麼做呢，首先就是可以針對程式寫法部分做調整看看怎麼樣才可讓積分穩定一點，雖然我們有使用不同套件試過，但就還可以再研究，那針對censored後面的那個form也可以看看怎麼寫會比較好，另外就是剛剛提到的如果LBFGS遇到多個極值的話可能沒辦法表現很好，或許可以看看有沒有其他演算法是比較好解決inner loop的問題，然後有在思考如果先針對參數做估計，找到最好的參數後再做模型辨識，所以或許可以嘗試看看用D-optimal+CKL-optimal，那我這個研究所使用的程式碼已經整理在github上了，那也有用shiny做了一個ui介面，所以我想花個一兩分鐘來demo一下
+
+
+
+
+\begin{frame}
+\frametitle{Reference}
+\begin{itemize}
+
+\item Atkinson AC, Fedorov VV(1975). The design of experiments for discriminating between two rival models. Biometrika.62(1):57–70.
+
+\item A. Pakgohar, A. Habibirad and F. Yousefzadeh(2019). Lin–Wong divergence and relations on type I censored data
+
+\item Ehab A. Nasir and Rong Pan(2014). Reliability Engineering and System Safety.Simulation-based Bayesian optimal ALT designs for model discrimination.
+
+\item J. López-Fidalgo, C. Tommasi and P. C. Trandafir(2007). An optimal experimental design criterion for discriminating between non-normal models. J. R. Statist. Soc. B, Part 2, pp. 231–242.
+
+\item Jiaheng Qiu, Ray-Bing Chen, Weichung Wang, Weng Kee Wong(2014).Swarm and Evolutionary Computation.
+
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Reference}
+\begin{itemize}
+\item Lo´pez-Fidalgo J, Tommasi C, Trandafir PC(2007). An optimal experimental design criterion for discriminating
+between non-normal models.69(2):231–242.
+
+\item Lindsey JK, Jones B, Jarvis P(2001). Some statistical issues in modelling pharmacokinetic data.
+
+\item Pascual, F. G. and Meeker, W. Q. (1997). Analysis of fatigue data with runouts based on a model with nonconstant standard deviation and a fatigue limit parameter. Journal of testing and evaluation, 25(3):292–301.
+
+\item Ray-Bing Chen, Ping-Yang Chen, Cheng-Lin Hsu, Weng Kee Wong(2020). Hybrid algorithms for generating optimal designs for discriminating multiple nonlinear models under various error distributional assumptions.
+
+\item Sangun Park and Minsuk Shin(2014).Kullback–Leibler information of a censored variable and its applications.
+
+\end{itemize}
+\end{frame}
+
+
+
+\begin{frame}[plain]
+\centering
+\vfill
+{\Huge \textbf{Thank You!} \par}
+{\large Questions and Discussion are welcome. \par}
+\includegraphics[width=0.3\linewidth]{\imgdir wall_paper.png}
+\vfill
+\end{frame}
+
+
+
+
+\begin{frame}
+\frametitle{Example}
+
+\begin{itemize}
+\item Suppose the true model is the quadratic model of the form
+$$\eta_{tr}(x)=x^2+2x+1$$
+\item The rival model is of linear form with unknown parameter $\theta_2=(\beta_0,\beta_1)$
+$$\eta_2(x,\theta_2)=\beta_1x+\beta_0$$
+\item Consider the exact design $\xi={x_1,x_2,x_3}$
+\item Find the best $\xi$ that discriminate $\eta_{tr}(x)$ and $\eta_2(x,\theta_2)$  the most.
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Example}
+
+\begin{figure}
+    \centering{
+        \includegraphics[scale=0.4]{\imgdir example-min.png}}
+\end{figure}
+
+\end{frame}
+
+
+
+\begin{frame}
+\frametitle{Example}
+
+\begin{figure}
+    \centering{
+        \includegraphics[scale=0.4]{\imgdir example-max.png}}
+\end{figure}
+
+\end{frame}
+
+\end{document}
+
+
+
+

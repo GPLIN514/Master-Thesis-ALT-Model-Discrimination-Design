@@ -1,0 +1,198 @@
+\chapter{方法論 \label{CH: method}}
+
+\hspace*{8mm} 本研究將著重在實驗設計中具有高度實用性的近似設計（Approximation Designs）。這是一種基於設計空間 $\mathcal{X}$ 上的機率測度方法，用於在特定設計點之間合理分配有限的觀測次數。假設反應變數為 $y$，其機率分佈由條件分佈 $f(y \mid x, \theta, \sigma^2)$ 給出，$x$ 為來自設計空間的設計點（Support Point），其中 $x \in \mathcal{X}$ ，$\theta$ 代表所有未知參數，$\sigma^2$ 是誤差的變異數，可視為干擾參數。
+
+\hspace*{8mm} 當設計點為 $x_1, x_2, \dots, x_n \in \mathcal{X}$ 時，近似設計 $\xi$ 可表示為：
+$$
+\xi = \left\{\begin{array}{cccc}
+x_1 & x_2 & \dots & x_n \\
+w_1 & w_2 & \dots & w_n
+\end{array}\right\}
+$$
+\hspace*{8mm} 其中，$w_i$ 是分配至設計點 $x_i$ 的權重，且滿足 $0 < w_i < 1$ 及 $\sum_{i=1}^n w_i = 1$，$i = 1, 2, \dots, n$。若總樣本數為 $N$，則分配到設計點 $x_i$ 的觀測次數約為 $N \cdot w_i$，在實務中通常會將此值四捨五入至整數。此外，近似設計的目標常基於凸函數或凹函數，可通過演算法高效尋找最佳化設計，記為 $\xi^*$。為了驗證所獲設計是否為最佳解，本研究將使用等價定理（Equivalence Theorem）進行檢驗。
+
+\section{KL-optimal 準則}
+
+\hspace*{8mm} 當兩個模型的變異不同或誤差項不符合常態分佈時，\cite{lopez2007optimal} 針對此類情況提出了 KL-optimal 設計，通過 Kullback-Leibler 散度（KL Divergence）來衡量模型之間的資訊損失，該散度也可稱為相對熵（Relative Entropy）、資訊散度（Information Divergence）或資訊增益（Information Gain），顧名思義會與熵有關係，以下會依序介紹不同的指標：
+
+\hspace*{8mm} \cite{shannon1948mathematical} 提出資訊熵（Information Entropy），用來衡量機率分佈的不確定性或所含的信息量。資訊量（Information Content, $I(x)$）可被視為驚訝指數：當事件發生的機率 $P(x)$ 很低時，事件的發生會讓我們感到驚訝（資訊量高）；相反地，當 $P(x)$ 很高，事件的發生在預期之中，因此資訊量較低。
+
+例如：
+\begin{itemize}
+\item 沙漠明天出大太陽 → 這是預期內的事情，因為機率很高（接近 1），所以資訊量很低。
+\item 沙漠裡明天下雨 → 這是罕見事件，機率很低（接近 0），所以資訊量很高。
+\end{itemize}
+
+\hspace*{8mm} 因此，當 $P(x)$ 接近 0 時，表示事件極不可能發生，驚訝程度大，則資訊量的數值必須要很大；當 $P(x)$ 接近 1 時，資訊量的數值必須要很小。
+
+資訊量的定義為：
+\begin{equation}\label{eq:information content}
+I(x)=-\log P(x)
+\end{equation}
+
+\hspace*{8mm} 而熵則代表的是平均資訊量，因為事件通常不會只有一件，所以需要綜合考量。假設我們考慮第一個模型（真實模型） $f_{tr}(y \mid x, \sigma^2_1)$，則其資訊熵定義為：
+\begin{equation}\label{eq:information entropy}
+H(f_{tr}) = -\int f_{tr}(y \mid x, \sigma^2_1) \log \left\{f_{tr}(y \mid x, \sigma^2_1)\right\} dy
+\end{equation}
+
+\hspace*{8mm} 當 $H(f_{tr})$ 值較大時，表示該機率分佈的變異性較高，對應的事件發生時，能夠獲得較多的信息。從直覺上來看，資訊熵可理解為事件發生後帶來的信息量。由於機率值介於 $0$ 到 $1$ 之間，對數運算後為負數，因此公式前加上負號，使得 $H(f_{tr})$ 仍為非負值。資訊熵數值越大，代表該機率分佈的變異性較大，事件發生後提供的資訊也越多，反之則資訊量較少。
+
+\hspace*{8mm} 交叉熵（Cross Entropy）用於衡量觀測到的預測機率分佈與真實機率分佈之間的差異。直觀來說，交叉熵評估的是當我們使用一個模型來描述真實分佈時，所承受的額外資訊損失。假設考慮第一個模型（真實模型）$f_{tr}(y \mid x, \sigma^2_1)$ 和第二個模型（對立模型） $f_r(y \mid x, \theta_2,\sigma^2_2)$，則交叉熵定義為：
+\begin{equation}\label{eq:cross entropy}
+H(f_{tr},f_r) = -\int f_{tr}(y \mid x, \sigma^2_1) \log \left\{f_r(y \mid x, \theta_2,\sigma^2_2)\right\} dy
+\end{equation}
+
+\hspace*{8mm} 交叉熵衡量當我們希望用 $f_r(y \mid x, \theta_2,\sigma^2_2)$ 來近似 $f_{tr}(y \mid x, \sigma^2_1)$ 時，所產生的平均資訊損失。當兩者的差異較大時，代表對立模型與真實分佈之間的不匹配程度較高，亦即不確定性更大，因此交叉熵的值也會較高，需要更多資訊量來描述 $f_{tr}(y \mid x, \sigma^2_1)$。反之，若兩個分佈相似，則交叉熵的值會較低，表示對立模型對真實分佈的描述較為準確，但要注意的是，交叉熵值最小值通常不為 $0$ ，當兩模型完全吻合，則交叉熵 $H(f_{tr},f_r)$ 等於熵 $H(f_{tr})$。
+
+\hspace*{8mm} KL 散度（Kullback-Leibler Divergence）用於衡量兩個機率分佈之間的相似程度。本質上，它可以透過資訊熵與交叉熵來推導，鑑於交叉熵的最小值會等於熵值，為了確保將測度最小值控制在 0，造就了KL散度，描述當我們使用對立模型 $f_r(y \mid x, \theta_2, \sigma^2_2)$ 來近似真實模型 $f_{tr}(y \mid x, \sigma^2_1)$ 時，與真實分佈相比，所損失的額外資訊量。KL 散度的推導過程如下：
+\begin{align}
+KL\ Divergence &= Cross\ Entropy - Information\ Entropy \notag \\
+D_{KL}(f_{tr},f_r,x,\theta_2) &= \eqref{eq:cross entropy} - \eqref{eq:information entropy} \notag \\
+&= H(f_{tr}, f_r) - H(f_{tr}) \notag \\
+&= \int f_{tr}(y \mid x, \sigma^2_1) \log \left\{ \frac{f_{tr}(y \mid x, \sigma^2_1)}{f_r(y \mid x, \theta_2, \sigma^2_2)} \right\} dy \label{eq:KL-optimal-1}
+\end{align}
+
+KL 散度的值反映了兩個機率分佈之間的差異：
+\begin{itemize}
+\item 當兩個模型的機率分佈越接近時， $D_{KL}(f_{tr},f_r,x,\theta_2)$  會越小。
+\item 若兩個模型完全相同，則$ D_{KL}(f_{tr},f_r,x,\theta_2) = 0$，表示沒有資訊損失。
+\end{itemize}
+
+\hspace*{8mm} 由於 KL 散度是不對稱的（即 $D_{KL}(f_{tr},f_r,x,\theta_2) \neq D_{KL}(f_r,f_{tr},x,\theta_2)$），它不能作為正式的距離度量，但仍然是機率分佈比較中常用的衡量標準。
+
+\hspace*{8mm} \cite{lopez2007optimal} 提出的 KL-optimal 設計準則基於公式 \eqref{eq:KL-optimal-1}，其目標函數定義如公式 \eqref{eq:KL-optimal-2} 所示：
+\begin{equation}\label{eq:KL-optimal-2}
+KL_{2,tr}(\xi)=\min_{\substack{\theta_2\in \Theta_2}}\int_{X}D_{KL}(f_{tr},f_r,x,\theta_2) \xi(dx)
+\end{equation}
+
+\hspace*{8mm} 與 T-optimal 設計不同，KL-optimal 設計標準不僅基於模型誤差來衡量區分能力，而是透過 KL 散度來評估兩個模型在機率分佈上的資訊差異。這種設計標準特別適用於當兩個模型具有不同變異數，或誤差分佈不符合常態假設的情況，能夠提供更靈活的實驗設計方法。
+
+\hspace*{8mm} 然而，KL-optimal 設計的目標是在所有可能的設計分佈 $\xi$ 中，選擇一個能夠最大化資訊區別能力的設計，使得即便在最不利的 $\theta_2$ 估計情境下，模型仍然能夠被有效區分。因此，我們對目標函數進行調整，如公式 \eqref{eq:KL-optimal-3} 所示：
+\begin{equation}\label{eq:KL-optimal-3}
+\max_{\xi\in \Xi} KL_{2,tr}(\xi)=\max_{\xi\in \Xi} \min_{\substack{\theta_2\in \Theta_2}}\int_{X}D_{KL}(f_{tr},f_r,x,\theta_2) \xi(dx)
+\end{equation}
+
+\hspace*{8mm} 這與 T-optimal 設計透過最大化最小誤差來選擇設計的原理類似，但 KL-optimal 設計是透過最大化 KL 散度來確保模型的可辨識性。
+
+\begin{theorem}
+為了驗證找到的設計 $\xi_{KL}^\ast$ 是否為最佳設計，我們使用等價定理（Equivalence Theorem, \citep{atkinson1975design,atkinson1975optimal}），如公式 \eqref{eq:KL-optimal-4} 所示：
+\begin{equation}\label{eq:KL-optimal-4}
+\psi_{KL}(x,\xi_{KL}^\ast)=D_{KL}(f_{tr},f_r,x,\hat{\theta}_2(\xi_{KL}^\ast))-KL_{2,tr}(\xi_{KL}^\ast)\leq 0
+\end{equation}
+
+其中：
+\begin{itemize}
+\item 第一項 $D_{KL}(f_{tr}, f_r, x, \hat{\theta}_2(\xi^*_{KL}))$ 表示在設計空間 $\mathcal{X}$ 中，針對所有可能的 $\theta_2 \in \Theta_2$ ，每個設計點 $x$ 處所計算的最小 KL 散度值。
+\item 第二項 $KL_{2,tr}(\xi^*_{KL})$ 則是針對所選設計 $\xi^*_{KL}$ 所獲得的最小 KL 散度值。
+\end{itemize}
+\end{theorem}
+
+\hspace*{8mm} 若對所有 $x \in \mathcal{X}$，不等式 $\psi_{KL}(x, \xi^*_{KL}) \leq 0$ 成立，則可證明 $\xi^*_{KL}$ 是 KL-optimal 設計，這表示在任何設計點上，局部的 KL 散度最大值不會超過全局的最小 KL 散度，確保所選設計能夠有效區分模型。
+
+\section{在 Type I 設限資料下模型辨識準則}
+
+\hspace*{8mm} 在可靠度與存活分析中，Type I 設限資料是一種常見情境，但原有的數學公式通常無法滿足這項限制。\cite{park2014kullback} 改良了 KL 散度的計算方法，提出了兩種適用於 Type I 設限資料的公式，並對其在不同情境下的性能進行了比較分析，證明這些公式保留了 KL 散度的非負性、單調性及其他核心性質。在此基礎上，\cite{pakgohar2019lin} 提出了額外的散度，包括 KL 散度、Lin-Wong（LW）散度、Bhattacharyya（B）距離測度以及卡方（$\chi^2$）距離測度，並系統性地比較了這些測度在 Type I 設限資料中的表現，證明其在實際應用中的一致性與可靠性。其中，KL 散度是一種基於信息理論的測度，與 Shannon 熵（Entropy）密切相關，用於量化兩個分佈之間的相對信息損失。其核心概念在於衡量一個分佈相對於另一個分佈所需的額外信息量，是模型辨識與信息理論中的重要工具。然而，KL 散度對偏態數據較為敏感，且在極端情況下可能產生無窮大值，這成為其在某些應用中的限制。為克服此問題， LW 散度因此而生，該測度通過改良對數函數的應用，整合 Type I 設限資料中的分佈差異和存活函數信息，以有限性和非負性為特點，能有效避免 KL 散度的無窮大問題，並展現出更高的穩健性。Bhattacharyya 距離則著眼於分佈間的重疊區域，適合衡量相似性，但對分佈細微變化的靈敏度不如 KL 散度和 LW 散度。卡方（$\chi^2$）測度則透過比值來衡量分佈差異，這使得卡方測度對於大樣本數據尤為適用，但在分佈差異極小時可能會低估其影響。本研究將採用 \cite{park2014kullback} 中表現較佳的 KL 散度公式，以及 \cite{pakgohar2019lin} 提出的三種散度，應用於模型辨識的實驗設計。
+
+\hspace*{8mm} 在下一節的結果分析中，$\text{Div}$ 代表散度標準。我們考慮四種不同的散度，並假設第一個模型（真實模型 $M_1$）的條件機率密度函數為 $f_{tr}(y \mid x, \sigma^2_1)$，第二個模型（對立模型 $M_2$）的條件機率密度函數為 $f_r(y \mid x, \theta_2, \sigma^2_2)$。對應的累積機率分佈函數分別為 $F_{tr}(C \mid x, \sigma^2_1)$ 和 $F_r(C \mid x, \theta_2, \sigma^2_2)$，其中 $C$ 表示設限點。此外，存活函數（Survival Function）定義為：
+$$
+\bar{F}_{tr}(C) = 1 - F_{tr}(C), \quad \bar{F}_r(C) = 1 - F_r(C).
+$$
+
+散度定義：
+
+\begin{itemize}
+\item Censored Kullback-Leibler (CKL) 散度:
+\begin{equation}\label{eq:CKL distance measure}
+D_{CKL}(f_{tr}, f_r) = \int_{-\infty}^C f_{tr} \log \left\{ \frac{f_{tr}}{f_r} \right\} dy + \bar{F}_{tr}(C) \log \left\{ \frac{\bar{F}_{tr}(C)}{\bar{F}_r(C)} \right\}.
+\end{equation}
+\item Censored Lin-Wong (CLW) 散度:
+\begin{equation}\label{eq:CLW distance measure}
+D_{CLW}(f_{tr}, f_r) = \int_{-\infty}^C f_{tr} \log \left\{ \frac{2f_{tr}}{f_{tr} + f_r} \right\} dy + \bar{F}_{tr}(C) \log \left\{ \frac{2\bar{F}_{tr}(C)}{ \bar{F}_{tr}(C) + \bar{F}_r(C)} \right\}.
+\end{equation}
+\item Censored Bhattacharyya (CB) 距離測度:
+\begin{equation}\label{eq:CB distance measure}
+D_{CB}(f_{tr}, f_r) = \int_{-\infty}^C \sqrt{f_{tr} \cdot f_r} \, dy + \sqrt{\bar{F}_{tr}(C) \cdot \bar{F}_r(C)}.
+\end{equation}
+\item Censored Chi-Square (C$\chi^2$) 距離測度:
+\begin{equation}\label{eq:Cchi2 distance measure}
+D_{C\chi^2}(f_{tr}, f_r) = \int_{-\infty}^C \frac{(f_{tr})^2}{f_r} \, dy + \frac{\left(\bar{F}_{tr}(C)\right)^2}{\bar{F}_r(C)} - 1.
+\end{equation}
+\end{itemize}
+
+\hspace*{8mm} 為了進一步擴展此框架，我們提出四種新的最佳化設計，將 Type I 設限時間 ($C$) 納入最佳化過程，分別為：CKL-、CLW-、CB- 和 C$\chi^2$-optimal 設計。這些設計對應於 KL 散度、Lin-Wong 散度、 Bhattacharyya (B) 距離測度與卡方 ($\chi^2$) 距離測度的 Type I 設限版本。透過將設限因素納入最佳化框架，這些新方法旨在提供更強大且更具實務意義的實驗設計，特別適用於設限數據影響顯著的情境。
+
+\hspace*{8mm} 定義 $C^*$ 是透過最佳化演算法（如 PSO、L-BFGS）所獲得的最佳準則值，用於衡量設計的有效性。而 $\hat{C}$ 則是基於最佳化後的設計 $\xi^*$ 和估計參數 $\hat{\theta}$ 重新計算後的準則值，用於檢驗最佳化過程的穩定性。最佳化準則值的數學定義如下：
+\begin{equation}\label{eq:criterion value}
+C^* = \max_{\xi \in \Xi} \min_{\theta_r \in \Theta_r} \left\{ \int_X \text{Div} \left( M_1(x, \theta_{tr}), M_2(x, \theta_r) \right) \xi(dx) \right\}.
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $\xi \in s$ 表示所有可能的實驗設計，我們希望在這個集合中尋找最佳化設計 $\xi^*$。
+\item $\min_{\theta_r \in \Theta_r}$ 表示最壞情境下的對立模型參數，即在所有可能的 $\theta_r$ 中，找到一個使得模型區別能力最弱的參數設定。
+\item $\text{Div}(M_1, M_2)$ 是散度，衡量真實模型 $M_1$ 與對立模型 $M_2$ 之間的區別能力，可以是 CKL 散度、CLW 散度、CB 距離測度或 C$\chi^2$ 距離測度。
+\end{itemize}
+
+\hspace*{8mm} 公式 \eqref{eq:criterion value} 採用「max-min」的策略，首先針對每個設計 $\xi$ 計算模型辨識能力的最小值（即在最不利的 $\theta_r$ 下的識別能力），然後選擇能最大化該最小值的 $\xi^*$。換句話說，這樣的設計確保即便在最壞情境下，我們仍能獲得最有區別性的實驗數據。
+
+\begin{conjecture}
+設 $\xi^* \in \Xi$ 為一個正規的散度最佳化設計（Divergence-optimal 設計）。
+
+\begin{enumerate}[(a)]
+\item 當且僅當對所有 $x \in \mathcal{X}$ 滿足 $\psi(x; \xi^*) \leq 0$，則設計 $\xi^*$ 為散度下的最佳化設計，其中
+\begin{equation}
+\psi(x; \xi) = \mathrm{Div}(M_1(x, \theta_{tr}), M_2(x, \hat{\theta}_r)) - \int_{\mathcal{X}} \mathrm{Div}(M_1(u, \theta_{tr}), M_2(u, \hat{\theta}_r)) \, \xi(du)
+\end{equation}
+
+且 $\hat{\theta}_r$ 為以下內層最佳化問題的唯一解：
+\begin{equation}
+\hat{\theta}_r = \arg\min_{\theta_r \in \Theta_r} \int_{\mathcal{X}} \mathrm{Div}(M_1(x, \theta_{tr}), M_2(x, \theta_r)) \, \xi(dx)
+\end{equation}
+
+\item 函數 $\psi(x; \xi^*)$ 的最大值會出現在最佳化設計 $\xi^*$ 的設計點上。
+\end{enumerate}
+\end{conjecture}
+
+\hspace*{8mm}此一猜想將 KL 最佳化設計下的等價定理（Equivalence Theorem）推廣至更廣泛的發散量度準則，包括 CKL、CLW、CB、C$\chi^2$ 等指標。
+
+\hspace*{8mm} 在實務應用中，此最佳化問題通常會透過粒子群優化（PSO）或 L-BFGS 等數值方法來求解，從而獲得最適合的 $\xi^*$。下一節將展示基於此設計準則所產生的數值模擬結果。
+
+\section{透過數值積分以計算準則值} \label{SEC: Numerical Integration}
+
+\hspace*{8mm} 在本研究中，數值積分為進行模型辨識準則計算之核心工具。由於推導出的積分式（如公式 \eqref{eq:CKL distance measure} 至 \eqref{eq:Cchi2 distance measure}）皆涉及設限修正項與對數運算，這類型積分在多數情況下難以取得封閉解（Closed-Form Solution），使得封閉解的推導不具實用性。因此，我們改採數值積分方法進行近似計算，本研究中使用的是 R 語言內建的 \verb|integrate()| 函數。
+
+\hspace*{8mm} 數值積分的基本思想來自黎曼和（Riemann Sum）的概念，即將積分區間切割為多個小區段，並以各區段內函數值乘以區間寬度進行近似。傳統方法如梯形法與辛普森法皆為此原理之延伸。不過，在實際應用中，固定切割區間往往無法應對被積函數出現快速變動、尖峰或設限特性等情形。為提升準確度與效率，\verb|integrate()| 採用的是自適應積分演算法（Adaptive Quadrature），可根據函數變化動態調整切割區間與評估點 \citep{davis2007methods}。
+
+\hspace*{8mm} 其原理為：初步對積分區間進行粗略評估後，根據誤差估計自動將誤差較大的區段進一步細分，形成不等寬的子區間。這種方法可大幅減少不必要的運算，並將計算資源集中於函數變動劇烈的區域。在 R 語言中， \verb|integrate()| 的實作融合了 Romberg 積分與遞迴式細分邏輯，在實務中能提供穩定而準確的近似值\citep{stoer1980introduction}。
+
+\hspace*{8mm} 本研究在推導模型辨識準則的積分表達式時，經適當轉換與設限處理後，可化為一維定積分問題，故可直接套用 \verb|integrate()| 處理。其在實作上不僅語法簡潔，且運算時間短，亦可設定誤差上限與積分上下界，在準確度與操作性之間取得良好平衡，成為本研究中進行積分運算的主要工具。
+
+\section{用於模型辨識設計生成的 PSO-QN 演算法}
+
+\hspace*{8mm} 在本研究中，我們採用結合粒子群優化（PSO） 與有限記憶 Broyden–Fletcher–Goldfarb–Shanno（L-BFGS）的 PSO-QN 演算法來解決嵌套的最佳化問題。該方法最早由 \cite{chen2020hybrid} 提出，旨在解決傳統 Nested-PSO 演算法\citep{chen2015minimax} 所面臨的高計算成本問題。
+
+\hspace*{8mm} 傳統的 Nested-PSO \citep{chen2015minimax} 同時使用 PSO 處理外層與內層的優化問題，雖然能有效搜尋全域最佳解，但在高維數據或大規模樣本的情境下，計算成本極為昂貴。為此，\cite{chen2020hybrid} 提出的 PSO-QN 演算法針對內層問題進行了改良，結合 PSO 進行外層全域搜尋，並使用 L-BFGS 來處理內層的可微分目標函數，使優化過程更高效且穩健。
+
+我們發現，本研究所探討的最佳化標準目標函數具備嵌套的數學結構：
+\begin{itemize}
+\item 內層問題：對參數 $\theta_2$ 可微，且內部函數為凸函數。
+\item 外層問題：目標函數可能具有多個局部極值點，甚至呈現非凸性。
+\end{itemize}
+
+由於內層函數的良好數學性質，我們可以使用基於梯度的數值最佳化方法來尋找最佳解。例如，L-BFGS 可利用一階與近似二階導數資訊，加速收斂，並在高維問題中具備較低的記憶體需求與較高的計算效率。因此，當 PSO 找到全域最佳解的候選解後，我們進一步使用 L-BFGS 進行局部精細優化，使收斂更快速且穩定。
+
+這類嵌套結構的最佳化問題，以有設限時間條件下的 KL-optimal 為範例，可表示為以下式 \eqref{PSO+L-BFGS}：
+\begin{equation} \label{PSO+L-BFGS}
+\max_{\xi\in \Xi} CKL_{2,tr}(\xi)=\overbrace{\textcolor{blue}{\max_{\xi\in \Xi}} \overbrace{\textcolor{red}{\min_{\substack{\theta_2\in \Theta_2}}\int_{X}D_{CKL}(f_{tr},f_r,x,\theta_2) \xi(dx)}}^{\textcolor{red}{L\text{-}BFGS}}}^{\textcolor{blue}{PSO}}
+\end{equation}
+
+在此公式中：
+
+\begin{itemize}
+\item 外層問題（由 PSO 負責）：$\max_{\xi\in \Xi} CKL_{2,tr}(\xi)$ 用於搜尋全域最佳設計 $\xi^*$。
+\item 內層問題（由 L-BFGS 處理）：$\min_{\theta_2\in \Theta_2}\int_{X}D_{CKL}(f_{tr},f_r,x,\theta_2) \xi(dx)$ 對內層可微分目標函數進行局部最小化，以計算外層問題的配適值。
+\end{itemize}
+
+換句話說，PSO 負責全域搜尋來處理外層最佳化，而 L-BFGS 則負責局部搜尋來精細調整內層可微分函數，這樣的組合能有效提升最佳化效率與結果的穩定性。
+
+此方法已被成功應用於模型辨識設計問題，特別是在區分兩個競爭模型的情境下展現出優異的性能。然而，針對不同的散度指標，仍需進一步模擬測試，以評估其適用性與穩健性。

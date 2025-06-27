@@ -1,0 +1,48 @@
+%\fancyhf{}
+\fancyfoot[C]{\thepage}
+\begin{center}
+{\large 國立臺北大學一一三學年度第二學期碩士學位論文提要}
+\fboxrule=1pt
+\fboxsep=20pt
+\fbox{\begin{minipage}{12cm}
+\noindent 論文題目:~\underline{~~以合成最佳化演算法生成加速壽命試驗之模型辨識設計~~}
+
+\noindent 論文頁數:~\underline{~~115~~}
+
+\noindent 所~組~別:~\underline{~~統計學系碩士班~~}~~系(所)~~\underline{~~~~~~~~}~組~(學號:~\underline{~711233119~}~~)
+
+\noindent 研~究~生:~\underline{~~~~林貫原~~~~}~~指導教授:~\underline{~~~~陳秉洋~~~~}
+
+%\bigskip
+\noindent 論文提要內容:
+本研究旨在探討加速壽命試驗中，當存在多個候選模型可描述產品失效機制時，如何建構最適模型辨識設計。在此，於實驗設計的考量上，相較於對各候選模型參數的精準估計，如何能夠有效區分模型，確保所選模型貼近產品真實的失效機制，應為首要目標。加速壽命試驗透過施加高於正常使用條件的應力，以加速產品失效並在有限時間內取得壽命資料。然而，儘管進行加速，試驗結束時仍可能有樣本未發生失效，導致資料中出現設限現象。此類設限資料的特性，在既有模型辨識實驗設計的文獻中尚缺乏系統性的探討。
+本研究首先探討在樣本可能為設限資料的情況下，如何建構最適模型辨識準則，基於改良後的 Kullback-Leibler 散度、Lin-Wong 散度、Chi-Square 距離與 Bhattacharyya 距離，提出 CKL-、CLW-、C$\chi^2$- 及 CB-最適模型辨識設計準則，以因應不同資料特性與應用需求。
+另外，由於設計準則之數學結構複雜且為最大最小化的巢狀優化問題，不易推導最適設計之封閉解，本研究結合粒子群優化與梯度下降優化方法，構建一套高效的數值搜尋演算法，以尋找具最大模型辨識效力的實驗配置。為驗證方法之穩定性與有效性，本研究舉可靠度研究中常用的失效模型為案例進行數值實驗，考慮不同情境的失效機制與機率分布假設之候選模型，比較所提出之各種設計準則之模型辨識設計結果及效果，期望為後續可靠度試驗的實驗設計提供理論依據與實務參考。
+
+
+
+%\vspace*{1.5cm}
+\noindent 關鍵詞: 模型辨識設計、加速壽命試驗模型、粒子群優化演算法
+\medskip
+\end{minipage}}
+\end{center}
+
+
+\newpage
+%\thispagestyle{empty}
+\fontsize{12}{18pt}\selectfont
+\begin{center}{\Large \bf ABSTRACT}\\[20pt]
+    {\large MODEL DISCRIMINATION DESIGN GENERATION FOR ACCELERATED LIFE TESTING EXPERIMENTS VIA HYBRIDIZED OPTIMIZATION ALGORITHMS}\\[10pt]
+    by\\[10pt] LIN,\,KUAN-YUAN\\[10pt] June 2025
+\end{center}
+{\small ADVISOR: Dr. CHEN, PING-YANG  \\[5pt]
+        DEPARTMENT: DEPARTMENT OF STATISTICS\\[5pt]
+        MAJOR: STATISTICS\\[5pt]
+        DEGREE: MASTER OF SCIENCE}\\[10pt]
+\noindent
+This study aims to investigate the construction of optimal model discrimination designs in Accelerated Life Testing (ALT) when multiple candidate models are available to describe the product's failure mechanism. In this context, rather than focusing on the precise estimation of parameters within each candidate model, the primary objective of experimental design should be to effectively distinguish between competing models and ensure that the selected model closely reflects the true underlying failure behavior of the product. Accelerated Life Testing accelerates product failure by applying stress levels beyond normal use conditions, thereby enabling lifespan data to be collected within a limited timeframe. However, even under such accelerated conditions, some units may not fail by the end of the test, resulting in Type I censored data. The presence of censoring introduces unique data characteristics that have not been systematically addressed in the existing literature on model discrimination design. To address this gap, the present study first explores how to construct optimal model discrimination criteria under the possibility of Type I censored observations. Based on modified forms of Kullback–Leibler divergence, Lin–Wong divergence, Chi-square distance, and Bhattacharyya distance, we propose four new design criteria tailored for model discrimination under censoring: the CKL-, CLW-, C$\chi^2$-, and CB-optimal criteria. These criteria are designed to accommodate varying data characteristics and practical application needs. Due to the mathematical complexity of the proposed design criteria, each involving a nested max–min optimization problem, deriving closed-form solutions is generally intractable. To this end, we develop a computationally efficient numerical algorithm that combines Particle Swarm Optimization with gradient-based optimization methods to search for the optimal model discrimination designs. To validate the effectiveness of the proposed approach, we conduct numerical studies using commonly adopted failure models in reliability research. Through various scenarios of failure behavior and underlying probability distribution assumption of the candidate models, we show for each proposed criterion the resulting model discrimination designs and discuss their performances. The results are intended to provide both theoretical guidance and practical reference for experimental planning in future reliability studies.
+
+\vspace*{2cm}
+\noindent {\scshape KEY WORDS}: Model Discrimination Design, Accelerated Life Testing Model, Particle Swarm Optimization
+
+

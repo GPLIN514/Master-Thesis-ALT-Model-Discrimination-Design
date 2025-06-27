@@ -1,0 +1,559 @@
+\chapter{模型辨識設計結果之方向導數圖}\label{appendixA}
+
+\hspace*{8mm} 本節展示了與 \ref{SEC:DeviceA-fixed variance} 和 \ref{SEC:Meeker} 中討論的模型辨識設計相對應的方向導數圖，這些圖用於驗證所提出的設計是否滿足等價定理的最佳性條件。根據理論準則，最佳化設計必須確保方向導數在整個設計區域中保持小於或等於零，並且支撐點與方向導數的局部最大值對齊，每個點的值都為零。
+
+\hspace*{8mm} 所呈現的圖可依情境分為兩類。第一個場景來自 \ref{SEC:DeviceA-fixed variance} 部分，假設兩個模型都有固定的標準差，並探索了四種散度（CKL、CLW、CB 和 C$\chi^2$），對應結果彙整於表 \ref{tab:CKL-results-DeviceA-sameV} 到 \ref{tab:Cchi2-results-DeviceA-DiffV} 中。第二種情況來自第 \ref{SEC:Meeker} 節，考慮了應力與變異相依的結構下之 CKL-optimal 設計，對應結果彙整於表 \ref{tab:meeker_tress-variance_result} 所示。
+
+\hspace*{8mm} 透過這些方向導數圖，可有效判別所提出設計在數值計算上是否穩定、在理論上是否符合最佳性條件，進而作為設計可行性與可信度的重要視覺佐證。這對於具設限資料與高維模型設定的實務應用而言，具有極高的參考價值與驗證意義。
+
+%\section*{CKL fixed both same variance}
+
+\begin{figure}[H]
+\centering
+\subfloat[$\sigma_1=\sigma_2=0.98$ (LN)\label{fig:s=0.98,2,kl,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ll_2.png}}
+\subfloat[$\sigma_1=\sigma_2=0.98$ (Weibull)\label{fig:s=0.98,2,kl,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ww_2.png}}\\
+\subfloat[$\sigma_1=\sigma_2=1.48$ (LN)\label{fig:s=1.48,3,kl,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ll_3.png}}
+\subfloat[$\sigma_1=\sigma_2=1.48$ (Weibull)\label{fig:s=1.48,3,kl,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ww_3.png}}\\
+\subfloat[$\sigma_1=\sigma_2=1.98$ (LN)\label{fig:s=1.98,4,kl,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ll_4.png}}
+\subfloat[$\sigma_1=\sigma_2=1.98$ (Weibull)\label{fig:s=1.98,4,kl,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ww_4.png}}
+\caption{針對平均反應函數為二次與線性模型且變異數相同之情境，所產生之 $\xi^*_{CKL}$ 設計的方向導數圖。相關結果列於表 \ref{tab:CKL-results-DeviceA-sameV}。}
+\label{fig:CKL-fixed-both-same-variance}
+\end{figure}
+
+%\section*{CKL fixed different same variance(Log-Normal)}
+
+\begin{figure}[H]
+\centering
+\subfloat[$\sigma_1=1.98,\sigma_2=0.98$\label{fig:s1=1.98,s2=0.98,9,kl,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ll_9.png}}
+\subfloat[$\sigma_1=0.98,\sigma_2=1.98$\label{fig:s1=0.98,s2=1.98,10,kl,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ll_10.png}} \\
+\subfloat[$\sigma_1=0.98,\sigma_2=1.48$\label{fig:s1=0.98,s2=1.48,11,kl,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ll_11.png}}
+\subfloat[$\sigma_1=1.48,\sigma_2=0.98$\label{fig:s1=1.48,s2=0.98,12,kl,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ll_12.png}} \\
+\subfloat[$\sigma_1=0.48,\sigma_2=0.98$\label{fig:s1=0.48,s2=0.98,13,kl,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ll_13.png}}
+\subfloat[$\sigma_1=0.98,\sigma_2=0.48$\label{fig:s1=0.98,s2=0.48,14,kl,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ll_14.png}}
+\caption{針對平均反應函數為二次與線性模型且變異數不同之對數常態分佈情境，所產生之 $\xi^*_{CKL}$ 設計的方向導數圖。相關結果列於表 \ref{tab:CKL-results-DeviceA-DiffV}。}
+\label{fig:CKL-fixed-both-same-variance-LN}
+\end{figure}
+
+%\section*{CKL fixed different same variance(Weibull)}
+
+\begin{figure}[H]
+\centering
+\subfloat[$\sigma_1=1.98,\sigma_2=0.98$\label{fig:s1=1.98,s2=0.98,9,kl,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ww_9.png}}
+\subfloat[$\sigma_1=0.98,\sigma_2=1.98$\label{fig:s1=0.98,s2=1.98,10,kl,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ww_10.png}} \\
+\subfloat[$\sigma_1=0.98,\sigma_2=1.48$\label{fig:s1=0.98,s2=1.48,11,kl,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ww_11.png}}
+\subfloat[$\sigma_1=1.48,\sigma_2=0.98$\label{fig:s1=1.48,s2=0.98,12,kl,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ww_12.png}} \\
+\subfloat[$\sigma_1=0.48,\sigma_2=0.98$\label{fig:s1=0.48,s2=0.98,13,kl,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ww_13.png}}
+\subfloat[$\sigma_1=0.98,\sigma_2=0.48$\label{fig:s1=0.98,s2=0.48,14,kl,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir KL_ww_14.png}}
+\caption{針對平均反應函數為二次與線性模型且變異數不同之韋伯分佈情境，所產生之 $\xi^*_{CKL}$ 設計的方向導數圖。相關結果列於表 \ref{tab:CKL-results-DeviceA-DiffV}。}
+\label{fig:CKL-fixed-both-same-variance-WB}
+\end{figure}
+
+%\section*{CLW fixed both same variance}
+
+\begin{figure}[H]
+\centering
+\subfloat[$\sigma_1=\sigma_2=0.98$(LN)\label{fig:s=0.98,2,lw,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ll_2.png}}
+\subfloat[$\sigma_1=\sigma_2=0.98$(Weibull)\label{fig:s=0.98,2,lw,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ww_2.png}}\\
+\subfloat[$\sigma_1=\sigma_2=1.48$(LN)\label{fig:s=1.48,3,lw,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ll_3.png}}
+\subfloat[$\sigma_1=\sigma_2=1.48$(Weibull)\label{fig:s=1.48,3,lw,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ww_3.png}}\\
+\subfloat[$\sigma_1=\sigma_2=1.98$(LN)\label{fig:s=1.98,4,lw,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ll_4.png}}
+\subfloat[$\sigma_1=\sigma_2=1.98$(Weibull)\label{fig:s=1.98,4,lw,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ww_4.png}}
+\caption{針對平均反應函數為二次與線性模型且變異數相同之情境，所產生之 $\xi^*_{CLW}$ 設計的方向導數圖。相關結果列於表 \ref{tab:CLW-results-DeviceA-sameV}。}
+\label{fig:CLW-fixed-both-same-variance}
+\end{figure}
+
+%\section*{CLW fixed different same variance(Log-Normal)}
+
+\begin{figure}[H]
+\centering
+\subfloat[$\sigma_1=1.98,\sigma_2=0.98$\label{fig:s1=1.98,s2=0.98,9,lw,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ll_9.png}}
+\subfloat[$\sigma_1=0.98,\sigma_2=1.98$\label{fig:s1=0.98,s2=1.98,10,lw,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ll_10.png}} \\
+\subfloat[$\sigma_1=0.98,\sigma_2=1.48$\label{fig:s1=0.98,s2=1.48,11,lw,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ll_11.png}}
+\subfloat[$\sigma_1=1.48,\sigma_2=0.98$\label{fig:s1=1.48,s2=0.98,12,lw,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ll_12.png}} \\
+\subfloat[$\sigma_1=0.48,\sigma_2=0.98$\label{fig:s1=0.48,s2=0.98,13,lw,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ll_13.png}}
+\subfloat[$\sigma_1=0.98,\sigma_2=0.48$\label{fig:s1=0.98,s2=0.48,14,lw,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ll_14.png}}
+\caption{針對平均反應函數為二次與線性模型且變異數不同之對數常態分佈情境，所產生之 $\xi^*_{CLW}$ 設計的方向導數圖。相關結果列於表 \ref{tab:CLW-results-DeviceA-DiffV}。}
+\label{fig:CLW-fixed-both-same-variance-LN}
+\end{figure}
+
+%\section*{CLW fixed different same variance(Weibull)}
+
+\begin{figure}[H]
+\centering
+\subfloat[$\sigma_1=1.98,\sigma_2=0.98$\label{fig:s1=1.98,s2=0.98,9,lw,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ww_9.png}}
+\subfloat[$\sigma_1=0.98,\sigma_2=1.98$\label{fig:s1=0.98,s2=1.98,10,lw,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ww_10.png}} \\
+\subfloat[$\sigma_1=0.98,\sigma_2=1.48$\label{fig:s1=0.98,s2=1.48,11,lw,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ww_11.png}}
+\subfloat[$\sigma_1=1.48,\sigma_2=0.98$\label{fig:s1=1.48,s2=0.98,12,lw,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ww_12.png}} \\
+\subfloat[$\sigma_1=0.48,\sigma_2=0.98$\label{fig:s1=0.48,s2=0.98,13,lw,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ww_13.png}}
+\subfloat[$\sigma_1=0.98,\sigma_2=0.48$\label{fig:s1=0.98,s2=0.48,14,lw,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir LW_ww_14.png}}
+\caption{針對平均反應函數為二次與線性模型且變異數不同之對數常態分佈情境，所產生之 $\xi^*_{CLW}$ 設計的方向導數圖。相關結果列於表 \ref{tab:CLW-results-DeviceA-DiffV}。}
+\label{fig:CLW-fixed-both-same-variance-WB}
+\end{figure}
+
+%\section*{CB fixed both same variance}
+
+\begin{figure}[H]
+\centering
+\subfloat[$\sigma_1=\sigma_2=0.98$(LN)\label{fig:s=0.98,2,B,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ll_2.png}}
+\subfloat[$\sigma_1=\sigma_2=0.98$(Weibull)\label{fig:s=0.98,2,B,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ww_2.png}}\\
+\subfloat[$\sigma_1=\sigma_2=1.48$(LN)\label{fig:s=1.48,3,B,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ll_3.png}}
+\subfloat[$\sigma_1=\sigma_2=1.48$(Weibull)\label{fig:s=1.48,3,B,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ww_3.png}}\\
+\subfloat[$\sigma_1=\sigma_2=1.98$(LN)\label{fig:s=1.98,4,B,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ll_4.png}}
+\subfloat[$\sigma_1=\sigma_2=1.98$(Weibull)\label{fig:s=1.98,4,B,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ww_4.png}}
+\caption{針對平均反應函數為二次與線性模型且變異數相同之情境，所產生之 $\xi^*_{CB}$ 設計的方向導數圖。相關結果列於表 \ref{tab:CB-results-DeviceA-sameV}。}
+\label{fig:CB-fixed-both-same-variance}
+\end{figure}
+
+%\section*{CB fixed different same variance(Log-Normal)}
+
+\begin{figure}[H]
+\centering
+\subfloat[$\sigma_1=1.98,\sigma_2=0.98$\label{fig:s1=1.98,s2=0.98,9,B,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ll_9.png}}
+\subfloat[$\sigma_1=0.98,\sigma_2=1.98$\label{fig:s1=0.98,s2=1.98,10,B,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ll_10.png}} \\
+\subfloat[$\sigma_1=0.98,\sigma_2=1.48$\label{fig:s1=0.98,s2=1.48,11,B,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ll_11.png}}
+\subfloat[$\sigma_1=1.48,\sigma_2=0.98$\label{fig:s1=1.48,s2=0.98,12,B,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ll_12.png}} \\
+\subfloat[$\sigma_1=0.48,\sigma_2=0.98$\label{fig:s1=0.48,s2=0.98,13,B,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ll_13.png}}
+\subfloat[$\sigma_1=0.98,\sigma_2=0.48$\label{fig:s1=0.98,s2=0.48,14,B,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ll_14.png}}
+\caption{針對平均反應函數為二次與線性模型且變異數不同之對數常態分佈情境，所產生之 $\xi^*_{CB}$ 設計的方向導數圖。相關結果列於表 \ref{tab:CB-results-DeviceA-DiffV}。}
+\label{fig:CB-fixed-both-same-variance-LN}
+\end{figure}
+
+%\section*{CB fixed different same variance(Weibull)}
+
+\begin{figure}[H]
+\centering
+\subfloat[$\sigma_1=1.98,\sigma_2=0.98$\label{fig:s1=1.98,s2=0.98,9,B,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ww_9.png}}
+\subfloat[$\sigma_1=0.98,\sigma_2=1.98$\label{fig:s1=0.98,s2=1.98,10,B,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ww_10.png}} \\
+\subfloat[$\sigma_1=0.98,\sigma_2=1.48$\label{fig:s1=0.98,s2=1.48,11,B,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ww_11.png}}
+\subfloat[$\sigma_1=1.48,\sigma_2=0.98$\label{fig:s1=1.48,s2=0.98,12,B,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ww_12.png}} \\
+\subfloat[$\sigma_1=0.48,\sigma_2=0.98$\label{fig:s1=0.48,s2=0.98,13,B,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ww_13.png}}
+\subfloat[$\sigma_1=0.98,\sigma_2=0.48$\label{fig:s1=0.98,s2=0.48,14,B,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir B_ww_14.png}}
+\caption{針對平均反應函數為二次與線性模型且變異數不同之對數韋伯分佈情境，所產生之 $\xi^*_{CB}$ 設計的方向導數圖。相關結果列於表 \ref{tab:CB-results-DeviceA-DiffV}。}
+\label{fig:CB-fixed-both-same-variance-WB}
+\end{figure}
+
+%\section*{C$\chi^2$ fixed both same variance}
+
+\begin{figure}[H]
+\centering
+\subfloat[$\sigma_1=\sigma_2=0.98$(LN)\label{fig:s=0.98,2,chi,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ll_2.png}}
+\subfloat[$\sigma_1=\sigma_2=0.98$(Weibull)\label{fig:s=0.98,2,chi,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ww_2.png}}\\
+\subfloat[$\sigma_1=\sigma_2=1.48$(LN)\label{fig:s=1.48,3,chi,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ll_3.png}}
+\subfloat[$\sigma_1=\sigma_2=1.48$(Weibull)\label{fig:s=1.48,3,chi,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ww_3.png}}\\
+\subfloat[$\sigma_1=\sigma_2=1.98$(LN)\label{fig:s=1.98,4,chi,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ll_4.png}}
+\subfloat[$\sigma_1=\sigma_2=1.98$(Weibull)\label{fig:s=1.98,4,chi,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ww_4.png}}
+\caption{針對平均反應函數為二次與線性模型且變異數相同之情境，所產生之 $\xi^*_{C\chi^2}$ 設計的方向導數圖。相關結果列於表 \ref{tab:Cchi2-results-DeviceA-sameV}。}
+\label{fig:Cchi-fixed-both-same-variance}
+\end{figure}
+
+%\section*{C$\chi^2$ fixed different same variance(Log-Normal)}
+
+\begin{figure}[H]
+\centering
+\subfloat[$\sigma_1=1.98,\sigma_2=0.98$\label{fig:s1=1.98,s2=0.98,9,chi,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ll_9.png}}
+\subfloat[$\sigma_1=0.98,\sigma_2=1.98$\label{fig:s1=0.98,s2=1.98,10,chi,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ll_10.png}} \\
+\subfloat[$\sigma_1=0.98,\sigma_2=1.48$\label{fig:s1=0.98,s2=1.48,11,chi,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ll_11.png}}
+\subfloat[$\sigma_1=1.48,\sigma_2=0.98$\label{fig:s1=1.48,s2=0.98,12,chi,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ll_12.png}} \\
+\subfloat[$\sigma_1=0.48,\sigma_2=0.98$\label{fig:s1=0.48,s2=0.98,13,chi,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ll_13.png}}
+\subfloat[$\sigma_1=0.98,\sigma_2=0.48$\label{fig:s1=0.98,s2=0.48,14,chi,ll}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ll_14.png}}
+\caption{針對平均反應函數為二次與線性模型且變異數不同之對數常態分佈情境，所產生之 $\xi^*_{C\chi^2}$ 設計的方向導數圖。相關結果列於表 \ref{tab:Cchi2-results-DeviceA-DiffV}。}
+\label{fig:Cchi-fixed-both-same-variance-LN}
+\end{figure}
+
+%\section*{C$\chi^2$ fixed different same variance(Weibull)}
+
+\begin{figure}[H]
+\centering
+\subfloat[$\sigma_1=1.98,\sigma_2=0.98$\label{fig:s1=1.98,s2=0.98,9,chi,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ww_9.png}}
+\subfloat[$\sigma_1=0.98,\sigma_2=1.98$\label{fig:s1=0.98,s2=1.98,10,chi,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ww_10.png}} \\
+\subfloat[$\sigma_1=0.98,\sigma_2=1.48$\label{fig:s1=0.98,s2=1.48,11,chi,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ww_11.png}}
+\subfloat[$\sigma_1=1.48,\sigma_2=0.98$\label{fig:s1=1.48,s2=0.98,12,chi,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ww_12.png}} \\
+\subfloat[$\sigma_1=0.48,\sigma_2=0.98$\label{fig:s1=0.48,s2=0.98,13,chi,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ww_13.png}}
+\subfloat[$\sigma_1=0.98,\sigma_2=0.48$\label{fig:s1=0.98,s2=0.48,14,chi,ww}]{\includegraphics[width=0.45\linewidth]{\imgdir chi_ww_14.png}}
+\caption{針對平均反應函數為二次與線性模型且變異數不同之韋伯分佈情境，所產生之 $\xi^*_{C\chi^2}$ 設計的方向導數圖。相關結果列於表 \ref{tab:Cchi2-results-DeviceA-DiffV}。}
+\label{fig:Cchi-fixed-both-same-variance-WB}
+\end{figure}
+
+%\section*{CKL Stree depend on variance(Log-Normal)}
+
+\begin{figure}[H]
+\centering
+\subfloat[Meeker Case (1)\label{fig:meeker_lnIsTrue_1}]{\includegraphics[width=0.45\linewidth]{\imgdir meeker_lnIsTrue_1.png}}
+\subfloat[Meeker Case (2)\label{fig:meeker_lnIsTrue_2}]{\includegraphics[width=0.45\linewidth]{\imgdir meeker_lnIsTrue_2.png}} \\
+\subfloat[Meeker Case (3)\label{fig:meeker_lnIsTrue_3}]{\includegraphics[width=0.45\linewidth]{\imgdir meeker_lnIsTrue_3.png}}
+\subfloat[Meeker Case (4)\label{fig:meeker_lnIsTrue_4}]{\includegraphics[width=0.45\linewidth]{\imgdir meeker_lnIsTrue_4.png}} \\
+\subfloat[Meeker Case (5)\label{fig:meeker_lnIsTrue_5}]{\includegraphics[width=0.45\linewidth]{\imgdir meeker_lnIsTrue_5.png}}
+\subfloat[Meeker Case (6)\label{fig:meeker_lnIsTrue_6}]{\includegraphics[width=0.45\linewidth]{\imgdir meeker_lnIsTrue_6.png}}
+\caption{針對 Meeker 案例中平均反應函數相同且變異數與應力相依、假設真實模型為對數常態分佈之情境，所產生之 $\xi^*_{CKL}$ 設計的方向導數圖。相關結果列於表 \ref{tab:meeker_tress-variance_result}。}
+\label{fig:meeker_tress-variance_result_ln}
+\end{figure}
+
+%\section*{CKL Stree depend on variance(Weibull)}
+
+\begin{figure}[H]
+\centering
+\subfloat[Meeker Case (7)\label{fig:meeker_wbIsTrue_1}]{\includegraphics[width=0.45\linewidth]{\imgdir meeker_wbIsTrue_1.png}}
+\subfloat[Meeker Case (8)\label{fig:meeker_wbIsTrue_2}]{\includegraphics[width=0.45\linewidth]{\imgdir meeker_wbIsTrue_2.png}} \\
+\subfloat[Meeker Case (9)\label{fig:meeker_wbIsTrue_3}]{\includegraphics[width=0.45\linewidth]{\imgdir meeker_wbIsTrue_3.png}}
+\subfloat[Meeker Case (10)\label{fig:meeker_wbIsTrue_4}]{\includegraphics[width=0.45\linewidth]{\imgdir meeker_wbIsTrue_4.png}} \\
+\subfloat[Meeker Case (11)\label{fig:meeker_wbIsTrue_5}]{\includegraphics[width=0.45\linewidth]{\imgdir meeker_wbIsTrue_5.png}}
+\subfloat[Meeker Case (12)\label{fig:meeker_wbIsTrue_6}]{\includegraphics[width=0.45\linewidth]{\imgdir meeker_wbIsTrue_6.png}}
+\caption{針對 Meeker 案例中平均反應函數相同且變異數與應力相依、假設真實模型為韋伯分佈之情境，所產生之 $\xi^*_{CKL}$ 設計的方向導數圖。相關結果列於表 \ref{tab:meeker_tress-variance_result}。}
+\label{fig:meeker_tress-variance_result_wb}
+\end{figure}
+
+\chapter{R 實作範例說明}\label{appendixB}
+
+\hspace*{8mm} 本研究所使用的程式碼已上傳至 \href{https://github.com/GPLIN514/Master-Thesis-ALT-Model-Discrimination-Design/blob/main/Thesis-code/code/Appendix%20B%20example%20code.R}{GitHub/GPLIN514}，供讀者查閱與重現。本節附錄將說明其中一組範例程式碼的架構與使用方式，該範例用於模擬並搜尋 Arrhenius 模型下的 CKL-optimal 設計。
+
+\hspace*{8mm} 下方程式碼定義了真實模型與競爭模型在 Arrhenius 假設下的平均反應函數（Mean Response Function）與變異結構（Dispersion Function）：
+
+\begin{lstlisting}[language=R, caption={模型結構設定}]
+af1_mean <- function(x, p) p[1] + p[2] * (11605/(x+273.15)) + p[3] * (11605/(x+273.15))^2
+af2_mean <- function(x, p) p[1] + p[2] * (11605/(x+273.15))
+af1_disp <- function(x, p) rep(p[1], length(x))
+af2_disp <- function(x, p) rep(p[1], length(x))
+\end{lstlisting}
+
+在此設計架構中：
+\begin{itemize}
+\item 真實模型 $M_1$ 採用二次形式之 Arrhenius 模型，其對應之平均反應函數為：
+$$\eta_{tr}(x,\theta_1)=\zeta_1+\zeta_2x+\zeta_3x^2$$
+\item 競爭模型 $M_2$ 採用簡化線性形式，其平均反應函數為：
+$$\eta_2(x,\theta_2)=\delta_1+\delta_2x$$
+\end{itemize}
+
+\hspace*{8mm} 兩個模型皆假設變異數為常數，且不隨應力水準改變，這樣的設定體現在 \verb|af1_disp_Arrhenius| 與 \verb|af2_disp_Arrhenius|函數中，並作為後續 KL 散度計算與最佳化設計的基礎架構。
+
+\hspace*{8mm} 在搜尋 CKL 最小最大（max-min）最佳設計之前，須先建立真實模型 $\eta_{tr}(x,\theta_1)$ 與競爭模型 $\eta_2(x,\theta_2)$ 的結構，並指定競爭模型參數的搜尋空間。需特別注意，競爭模型的參數空間必須為有限範圍，使用者可根據先驗知識，或根據預期 KL 散度最小值可能出現的區域進行設置。若希望競爭模型的變異數為固定值，則可將其上下界設定為相同，即可達到不進行搜尋的效果。以下程式碼展示了相關設定方式。
+
+\begin{lstlisting}[language=R, caption={設定模型參數}]
+# Set the nominal values for the true model
+af1_para <- c(-5, -1.5, 0.05)
+model_info <- list(
+  # The first list should be the true model and the specified nominal values
+  list(mean = af1_mean, disp = af1_disp, meanPara = af1_para, dispPara = 0.9780103),
+  # Then the rival models are listed accordingly. We also need to specify the model space.
+  list(mean = af2_mean, disp = af2_disp,
+       meanParaLower = c(-100, 0.1), meanParaUpper = c(-10, 5),
+       dispParaLower = c(0.9780103), dispParaUpper = c(0.9780103) )
+)
+\end{lstlisting}
+
+\hspace*{8mm} 在進行 CKL-optimal 設計時，需明確定義散度的計算方式。本範例中使用的距離測度係根據公式 \eqref{eq:CKL distance measure} 所定義的 Kullback-Leibler 散度，其計算可分為兩個部分：一為針對未設限資料（Observed Data）的積分計算；另一則為針對在設限時間 $t_c=5000$ 下的 Type I 設限資料所做之補充調整。
+
+\hspace*{8mm} 於實作上，我們透過 R 語言定義以下三個函數：\verb|kl_lnln_observed| 負責計算觀測資料下的積分項，\verb|kl_lnln_censored| 處理 Type I 設限情況下的調整項，而 \verb|kldiv_lnln_censored5000| 則整合上述兩部分，計算整體的 KL 散度。此架構能兼顧設限與未設限資料的貢獻，使散度評估更為全面。相關程式碼如下所示。
+
+\begin{lstlisting}[language=R, caption={定義KL散度函數}]
+# xt is the mean values of the true model
+# xr is the mean values of the rival model
+
+kl_lnln_observed <- function(y, m1, m2, s1, s2) {
+  lpdf1 <- dlnorm(y, m1, s1, log = TRUE)
+  lpdf2 <- dlnorm(y, m2, s2, log = TRUE)
+  pdf1 <- exp(lpdf1)
+  val <- pdf1*(lpdf1 - lpdf2)
+  return(val)
+}
+
+kl_lnln_censored <- function(y, m1, m2, s1, s2) {
+  lcdf1 <- log(1 - plnorm(y, m1, s1) + 1e-12)
+  lcdf2 <- log(1 - plnorm(y, m2, s2) + 1e-12)
+  cdf1 <- exp(lcdf1)
+  val <- cdf1*(lcdf1 - lcdf2)
+  return(val)
+}
+
+kldiv_lnln_censored5000 <- function(xt, xr, st, sr) {
+  tc <- 5000
+  intVec <- rep(0, length(xt))
+  for (i in 1:length(xt)) {
+    intg_part <- integrate(kl_lnln_observed, 0, tc,
+                           m1 = xt[i], m2 = xr[i], 
+                           s1 = st[i], s2 = sr[i],
+                           subdivisions = 100,
+                           stop.on.error = FALSE)$value
+    cens_part <- kl_lnln_censored(tc, m1 = xt[i], m2 = xr[i],
+                                  s1 = st[i], s2 = sr[i])
+    intVec[i] <- intg_part + cens_part
+  }
+  return(intVec)
+}
+\end{lstlisting}
+
+在本範例中，我們使用 \verb|DiscrimOD| 軟體套件來進行最佳化實驗設計之搜尋。由於 \verb|DiscrimOD| 套件目前仍處於 alpha 測試階段，僅開放給開發團隊使用，因此需採用特定安裝方式。在安裝 \verb|DiscrimOD| 之前，請確保使用 R 軟體版本為 3.4.0，並先安裝 \verb|devtools| 套件。此外，\verb|DiscrimOD| 亦仰賴 \verb|Rcpp| 與 \verb|RcppArmadillo| 等套件，請一併安裝。完成上述步驟後，即可透過 \verb|devtools::install_github()| 指令，從 Ping-Yang Chen 的 GitHub 倉庫安裝 \verb|DiscrimOD| 套件。R 程式碼如下所示：
+
+\begin{lstlisting}[language=R, caption={安裝 DiscrimOD 套件}]
+install.packages(c("devtools", "Rcpp", "RcppArmadillo"))
+devtools::install_github("PingYangChen/DiscrimOD")
+\end{lstlisting}
+
+套件安裝完成後，請使用 \verb|library()| 指令載入 \verb|DiscrimOD| 以便後續使用：
+
+\begin{lstlisting}[language=R, caption={載入 DiscrimOD 套件}]
+library(DiscrimOD)
+\end{lstlisting}
+
+\verb|DiscrimOD| 包中的搜索最佳辨識設計演算法涉及兩種類型的演算法，PSO 和 L-BFGS。PSO 及 L-BFGS 設定是通過 \verb|getPSOInfo()| 函數定義的。我們在下面列出了 PSO 最有影響力的調整參數：
+
+\begin{itemize}
+\item \verb|nSupp|：粒子群的大小。通常我們會設置 32 或 64 個粒子。
+
+\item \verb|dsRange|：最大反覆運算次數。
+
+\item \verb|IF_INNER_LBFGS|: 布林值參數（\verb|TRUE/FALSE|），用來開啟或關閉內部最佳化問題中使用 L-BFGS 演算法的選項（即在參數空間中進行距離最小化）。若設定為 \verb|IF_INNER_LBFGS = FALSE|，則 \verb|DiscrimOD| 套件將改為使用 \cite{chen2015minimax} 提出的 NestedPSO 演算法進行求解。
+
+\item \verb|LBFGS_RETRY|: L-BFGS 演算法的最大迭代次數。為避免因初始向量不佳而導致演算法失敗，通常建議可設定為重複執行 2 至 3 次。然而，在本研究的模擬過程中，觀察到標準值 $C^*$ 與將該設計與參數重新代入計算所得的 $\hat{C}$ 出現不一致的情況，推測可能是內部 L-BFGS 計算不穩定所致。因此，為提升穩定性與可信度，本研究統一將重試次數設定為 50 次。
+
+\end{itemize}
+
+以下程式碼為本範例中所使用之演算法設定：對於進行兩模型辨識設計的 PSO-QN 演算法，我們設定使用 64 個粒子與 200 次疊代；而內部迴圈中每次執行則重複使用 L-BFGS 演算法 50 次。其餘所有參數則皆採用預設值。
+
+\begin{lstlisting}[language=R, caption={設定演算法參數（PSO 與 L-BFGS）}]
+PSO_INFO <- getPSOInfo(nSwarm = 64, maxIter = 200)
+LBFGS_INFO <- getLBFGSInfo(LBFGS_RETRY = 50)
+\end{lstlisting}
+
+補充說明：雖然本研究範例主要採用 L-BFGS 作為內部最佳化方法，但 \verb|DiscrimOD| 套件亦提供以 PSO（粒子群演算法）處理內層最佳化問題的選項，稱為 NestedPSO 演算法（Chen et al., 2015）。設定 NestedPSO 時，使用者需在 \verb|getPSOInfo()| 函數中，對每個參數提供長度為 2 的向量，第一個數值代表外層 PSO 迴圈的設定，第二個則為內層 PSO 的設定。例如，以下程式碼即表示外層使用 64 個粒子、迭代 200 次，內層則為 32 粒子、迭代 100 次。此外，使用 NestedPSO 時必須關閉內部 L-BFGS 演算法，可透過將 \verb|IF_INNER_LBFGS = FALSE| 設定於 \verb|getLBFGSInfo()| 函數中達成。以下為完整設定範例（本範例未實際使用，僅供展示）：
+
+\begin{lstlisting}[language=R, caption={NestedPSO 的替代設定}]
+# Set NestedPSO options. The length of setting indicates the number of loops
+NESTEDPSO_INFO <- getPSOInfo(nSwarm = c(64, 32), maxIter = c(200, 100))
+# Turn off L-BFGS implementation for the inner optimization loop
+LBFGS_NOTRUN <- getLBFGSInfo(IF_INNER_LBFGS = FALSE)
+\end{lstlisting}
+
+接下來，我們使用 \verb|DiscrimOD()| 函數並呼叫 PSO-QN 演算法來尋找 CKL-最佳化設計，以進行兩模型間的成對模型辨識。在本範例中，以真實模型 $\eta_{tr}(x, \theta_1)$ 與競爭模型 $\eta_2(x, \theta_2)$ 作為說明。
+
+除了指定模型清單（Model List）、散度函數（Divergence Function）以及演算法設定之外，還需額外指定成對辨識的準則類型，可透過參數 \verb|crit_type = "pair_fixed_true"| 設定。另外，我們也需設定支持點的數量（本例中設為 \verb|nSupp = 3|），以及設計空間的上下界，分別為 \verb|dsLower = 10| 與 \verb|dsUpper = 80|。
+
+\begin{lstlisting}[language=R, caption={執行 DiscrimOD 以獲得最佳設計}]
+nSupp <- 3
+dsRange <- c(10, 80)
+res <- DiscrimOD(MODEL_INFO = model_info, DISTANCE = kldiv_lnln_censored5000,
+                 nSupp = nSupp, dsLower = dsRange[1], dsUpper = dsRange[2],
+                 crit_type = "pair_fixed_true",
+                 PSO_INFO = PSO_INFO, LBFGS_INFO = LBFGS_INFO,
+                 seed = 100, verbose = TRUE)
+\end{lstlisting}
+
+完成最佳化設計的搜尋後，\verb|DiscrimOD()| 函數會輸出一個包含四個欄位的清單，其中最主要的三個欄位分別為：
+
+\begin{itemize}
+\item 最佳設計點與權重（\$BESTDESIGN）：
+
+該欄位儲存粒子群最佳化演算法（PSO-QN）所找到的最終設計，其為一個矩陣，第一欄為設計點（Support Points），第二欄為各點對應的權重。以下為查詢指令：
+
+\begin{lstlisting}[language=R, caption={最佳設計點與對應權重}]
+round(res$BESTDESIGN, 3)
+\end{lstlisting}
+
+輸出結果如：
+
+\begin{lstlisting}[language=R, caption={最佳設計點與對應權重的結果}]
+       dim_1 weight
+obs_1 29.367  0.393
+obs_2 62.788  0.359
+obs_3 80.000  0.249
+\end{lstlisting}
+
+\item 最佳設計之準則值（\$BESTVAL）：
+
+該值代表在此設計下所對應的 KL 散度準則值，亦即最小散度值，通常用於評估設計之優劣。查詢指令如下：
+
+\begin{lstlisting}[language=R, caption={最佳設計之 KL 散度標準值}]
+res$BESTVAL
+\end{lstlisting}
+
+輸出結果如：
+
+\begin{lstlisting}[language=R, caption={最佳設計之 KL 散度標準值的結果}]
+[1] 0.002786092
+\end{lstlisting}
+
+\item 計算時間（\$CPUTIME）：
+
+此欄位回傳整體計算過程所花費的秒數，方便後續效率分析與演算法比較：
+
+\begin{lstlisting}[language=R, caption={演算法總運行時間}]
+res$CPUTIME
+\end{lstlisting}
+
+輸出結果如：
+
+\begin{lstlisting}[language=R, caption={演算法總運行時間的結果}]
+elapsed
+67920.7 
+\end{lstlisting}
+
+\end{itemize}
+
+為了進一步檢視所求得之設計的準確性與穩定性，本研究亦使用 \verb|designCriterion()| 函數重新計算該設計在指定模型與參數條件下的準則值，並同時取得對立模型參數的搜尋結果。
+
+此函數可輸入設計結果（如 \verb|res$BESTDESIGN|）、模型設定（\verb|MODEL_INFO|）、散度函數（如本例中的 \verb|kldiv_lnln_censored5000|），並指定設計空間範圍、準則型態（例如 \verb|"pair_fixed_true"|），以及最佳化演算法的設定資訊（\verb|PSO_INFO| 與 \verb|LBFGS_INFO|）。
+
+函數輸出包含兩部分：
+
+\begin{itemize}
+\item \verb|$cri_val|：代表以所選設計與模型參數重新計算所得的準則值 $\hat{C}$，可用來與原本最佳化過程所得之 $C^*$ 作比較，檢驗是否一致。
+
+\item \verb|$theta2|：表示在此設計下，由演算法所搜尋的對立模型參數值，包含兩組模型的參數向量（其中真實模型通常為固定值）。
+
+\end{itemize}
+
+此步驟能有效驗證數值最佳化過程的穩定性，特別是內部參數搜尋是否產生誤差，進而導致準則值不一致的情況。查詢指令如下：
+
+\begin{lstlisting}[language=R, caption={驗證設計的穩定性與參數搜尋}]
+designCriterion(res$BESTDESIGN, MODEL_INFO = model_info,
+                DISTANCE = kldiv_lnln_censored5000,
+                dsLower = dsRange[1], dsUpper = dsRange[2],
+                crit_type = "pair_fixed_true", MaxMinStdVals = NULL,
+                PSO_INFO = PSO_INFO, LBFGS_INFO = LBFGS_INFO)
+\end{lstlisting}
+
+輸出結果如：
+
+\begin{lstlisting}[language=R, caption={驗證設計穩定性與參數搜尋的結果}]
+$cri_val
+[1] 0.009265599
+
+$theta2
+             [,1]      [,2]      [,3]      [,4]
+model_1  -5.00000 -1.500000 0.0500000 0.9780103
+model_2 -66.71046  2.016919 0.9780103 0.0000000
+\end{lstlisting}
+
+為驗證所得到的設計是否為最佳設計，可透過等價定理（equivalence theorem）進行檢查。在 \verb|DiscrimOD| 套件中，我們可使用 \verb|equivalence| 函數來執行此驗證程序。該函數需輸入由 \verb|DiscrimOD| 函數所產生的數值結果物件 \verb|res|。根據該數值結果，\verb|equivalence| 函數會計算方向導數函數（directional derivative function）在一組長度為 \verb|ngrid| 的設計空間網格點上的值。使用 R 的內建繪圖函數 \verb|plot|，即可繪製該函數的變化曲線。其中，$x$ 軸為設計空間的網格點向量，對應儲存在 \verb|$Grid_1| 欄位中；$y$ 軸則為方向導數函數的值，儲存在 \verb|$DirDeriv| 欄位中。
+
+我們亦可透過 \verb|points| 函數，將設計中的支持點（support points）標示於曲線上。為增進視覺效果，圖中常會繪製一條 $y = 0$ 的水平線，藉此檢視方向導數是否滿足 CKL-最佳設計的條件。具體而言：若方向導數在整個設計空間上皆小於零，且在支持點位置等於（或極接近）零，則可視為該設計符合 CKL-最佳化的充分條件。
+
+\begin{lstlisting}[language=R, caption={等價定理與圖形驗證最佳性}]
+eqv <- equivalence(ngrid = 100, PSO_RESULT = res,
+                   MODEL_INFO = model_info,
+                   DISTANCE = kldiv_lnln_censored5000,
+                   dsLower = dsRange[1], dsUpper = dsRange[2],
+                   crit_type = "pair_fixed_true",
+                   PSO_INFO = PSO_INFO, LBFGS_INFO = LBFGS_INFO)
+# Draw the directional derivative curve
+plot(eqv$Grid_1, eqv_Arrhenius$DirDeriv, type = "l",
+     col = "blue", main = "",
+     xlab = "x", ylab = "Directional Derivative"); abline(h = 0)
+points(res$BESTDESIGN[,1], rep(0, nrow(res$BESTDESIGN)), pch = 16)
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering{
+        \includegraphics[scale=0.3]{\imgdir KL_ll_3.png}}
+    \caption{由程式碼範例產生的方向導數圖以驗證設計最佳性}
+\end{figure}
+
+透過上述程式碼與圖形，我們不僅可視化確認所獲得的設計是否為最佳設計，亦可觀察支持點是否對應於導數為零的位置。此等程序對於驗證設計正確性與數值穩定性具有關鍵作用，進而提升模型辨識之可靠性。
+
+\chapter{Shiny 介面展示與功能說明}\label{appendixC}
+
+本附錄介紹本研究所開發之 R Shiny 使用者介面，該介面旨在提供一個互動式的平台，使使用者能夠依據不同的模型辨識情境進行設計條件設定、演算法執行與結果解析。介面的設計邏輯與前文各章節所討論之模擬情境相互對應，使用者可根據需求靈活調整各項設定參數，以進行多樣化的模型辨識設計分析。
+
+該介面提供直覺式操作流程，支援多種核心功能設定，包括散度衡量方法、模型分佈假設、參數設定範圍與演算法細節等，協助使用者有效地建構與評估實驗設計。此外，介面亦整合近似設計輸出、準則值、運算時間、參數搜尋與方向導數圖等資訊，方便進一步判斷所產生設計的最佳性。
+
+本研究所使用之 Shiny 應用程式的完整原始碼已公開於 GitHub：
+\href{https://github.com/GPLIN514/Master-Thesis-ALT-Model-Discrimination-Design/tree/main/Thesis-code/shiny-demo}{GitHub/GPLIN514}.
+此外，亦提供線上版本，無需安裝即可直接體驗互動介面，網址如下：
+\href{https://msgplin.shinyapps.io/Model-Discrimination-Design/}{shinyapps.io/MSGPLIN}.
+
+以下將逐一介紹介面中各主要功能模組，並輔以實際操作畫面，協助讀者理解本系統如何協助進行與評估模型辨識設計。
+
+\begin{figure}[H]
+    \centering{
+        \includegraphics[scale=0.3]{\imgdir Fidalgo-shiny1.pdf}}
+    \caption{主介面總覽圖}
+    \label{fig:Fidalgo-shiny1}
+\end{figure}
+
+圖 \ref{fig:Fidalgo-shiny1} 為根據第 \ref{SEC:Fidalgo} 節所設定的模擬情境所建構之 Shiny UI 操作介面，以下將依序說明各個設定欄位的功能與目的。首先，\textcolor{red}{紅色框框}所標示的區域為使用者需進行參數設定的部分：
+
+\begin{enumerate}
+\item 模型架構（預設展示）：此處顯示兩個候選模型的數學結構，方便使用者比對下方需設定的參數項目。
+\item 測度計算方法：此欄位可選擇目標函數的處理方式，如圖 \ref{fig:Fidalgo-shiny3} 所示，選單中提供封閉解（Closed-Form）與數值積分（Numerical Integration）兩種方式。
+
+\begin{figure}[H]
+    \centering{
+        \includegraphics[scale=0.5]{\imgdir Fidalgo-shiny3.png}}
+    \caption{選擇散度計算方法}
+    \label{fig:Fidalgo-shiny3}
+\end{figure}
+
+\item 模型假設：如圖 \ref{fig:Fidalgo-shiny4} 所示，使用者可選擇兩模型皆服從對數常態（Log-Normal）或韋伯（Weibull）分佈，以符合實際應用的資料特性。
+
+\begin{figure}[H]
+    \centering{
+        \includegraphics[scale=0.5]{\imgdir Fidalgo-shiny4.png}}
+    \caption{選擇模型分配假設}
+    \label{fig:Fidalgo-shiny4}
+\end{figure}
+
+\item 設計空間設定：可設定近似設計中欲使用的支撐點數量（support points），並調整設計變數的上下界範圍。
+\item 參數設定：真實模型的參數為使用者直接輸入，可依據過往經驗值或專家判斷；對立模型則需給定其參數範圍。此處假設兩模型的變異數一致，但仍允許使用者調整設定值。
+\item 演算法設定：外層使用粒子群演算法（PSO），需輸入粒子數與迭代次數；內層預設使用 L-BFGS 方法，並需設定其迭代次數。若使用者勾選「Use Inner PSO」，則如圖 \ref{fig:Fidalgo-shiny5} 所示，內層將改以 PSO 進行，此時亦需額外設定一組粒子數與迭代次數。
+
+\begin{figure}[H]
+    \centering{
+        \includegraphics[scale=0.5]{\imgdir Fidalgo-shiny5.png}}
+    \caption{演算法設定選項}
+    \label{fig:Fidalgo-shiny5}
+\end{figure}
+
+\end{enumerate}
+
+至於\textcolor{blue}{藍色框框}所標示的區域，則為演算法執行後的輸出結果，以下依序說明各個區塊的功能與意義：
+
+\begin{enumerate}
+\item 近似設計：此區塊列出所尋得的最終設計配置，包括各支撐點位置（support point）及其對應的權重（weight），即為所建構之近似設計 $\xi^*$。
+
+\item 準則值與運算時間：此區塊呈現該設計對應的準則值 $C^*$ ，以及完成此設計所耗費的總運算時間（單位：秒），用以評估演算法的效率與準則表現。
+
+\item 參數搜尋值：本研究所使用的模型辨識設計為最大最小化架構，即在對立模型的參數空間中尋找準則值最小的設定，再根據該設定尋找準則值最大的設計。因此，搜尋出的參數組合在設計過程中具有重要參考意義。
+
+\item 方向導數圖：為了確認所尋得之近似設計是否滿足最佳性條件，會繪製該設計下的方向導數函數圖。此圖可用來檢查設計點是否為函數的局部最大值，並確認函數是否全數位於 0 以下，以驗證是否滿足等價定理。
+\end{enumerate}
+
+此外，若點選 Setting 選單，如圖 \ref{fig:Fidalgo-shiny2} 所示，可查看使用者於本次分析中自行設定的項目內容，包括模型假設、參數範圍與演算法相關設定等。需注意的是，系統預設的參數值並不會在此頁面顯示。
+
+\begin{figure}[H]
+    \centering{
+        \includegraphics[scale=0.5]{\imgdir Fidalgo-shiny2.png}}
+    \caption{使用者設定參數的摘要表}
+    \label{fig:Fidalgo-shiny2}
+\end{figure}
+
+最後，圖中展示了 Arrhenius 與 Meeker 頁面中與 Fidalgo 頁面略有不同的特殊設定說明：
+\begin{itemize}
+
+\item 設限時間（兩者皆有）：此為 Type I 設限時間，此設定對應於 Type I 設限情境，主要處理可靠度試驗中產品尚未發生失效的情形。用戶可於此處指定合理的設限門檻值，如圖 \ref{fig:Arrhenius-shiny2} 所示。
+
+\begin{figure}[H]
+    \centering{
+        \includegraphics[scale=0.5]{\imgdir Arrhenius-shiny2.png}}
+    \caption{設定設限時間}
+    \label{fig:Arrhenius-shiny2}
+\end{figure}
+
+\item 散度計算方法（僅 Arrhenius 頁面）：在此選單中，使用者可選擇四種散度，包括 KL 散度、LW 散度、Bhattacharyya 距離與 $\chi^2$距離，以因應不同應用需求。圖 \ref{fig:Arrhenius-shiny1} 顯示此下拉選單的內容。至於 Meeker 頁面，系統預設為使用 KL 散度，不可修改。
+
+\begin{figure}[H]
+    \centering{
+        \includegraphics[scale=0.5]{\imgdir Arrhenius-shiny1.png}}
+    \caption{Arrhenius 分頁下之選擇散度衡量方法}
+    \label{fig:Arrhenius-shiny1}
+\end{figure}
+
+\item 模型假設選擇（僅 Meeker 頁面）： 由於此案例的研究目標為探討相同的模型結構在不同分佈假設下的識別能力，因此僅能指定真實模型的分佈類型（Log-Normal 或 Weibull）。對立模型的分佈將由系統自動設定為另一種分佈，以構成具挑戰性的模型辨識情境，如圖 \ref{fig:Meeker-shiny} 所示。
+
+\begin{figure}[H]
+\centering
+\subfloat[True model follow Log-Normal distribution\label{fig:Meeker-shiny1}]{\includegraphics[width=0.45\linewidth]{\imgdir Meeker-shiny1.png}}\\
+\subfloat[True model follow Weibull distribution\label{fig:Meeker-shiny2}]{\includegraphics[width=0.45\linewidth]{\imgdir Meeker-shiny2.png}} 
+\caption{Meeker 分頁下之模型分配選項}
+\label{fig:Meeker-shiny}
+\end{figure}
+
+\end{itemize}
